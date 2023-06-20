@@ -24,5 +24,34 @@ namespace TMSpeech.GUI
         {
             InitializeComponent();
         }
+
+        private Point _mouseLocation;
+        private bool _isDrag = false;
+
+        private void gridContainer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _mouseLocation = e.GetPosition(gridContainer);
+
+        }
+
+        private void gridContainer_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton== MouseButtonState.Pressed && _mouseLocation != e.GetPosition(this))
+            {
+                _isDrag = true;
+                DragMove();
+            }
+
+        }
+
+        private void gridContainer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if(_isDrag)
+            {
+                _isDrag = false;
+                e.Handled = true;
+            }
+
+        }
     }
 }

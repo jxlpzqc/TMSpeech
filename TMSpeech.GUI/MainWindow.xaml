@@ -8,12 +8,28 @@
         AllowsTransparency="True"
         Topmost="True"
         WindowStyle="None" 
-        Background="Transparent"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <local:OutlinedTextBlock  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="36" FontFamily="黑体" >
-            测试文本测试文本测试文本测试文本测试文本测试文本测试文本
-        </local:OutlinedTextBlock>
+        Background="#01FFFFFF"
+        Title="MainWindow" Height="100" Width="800">
+    <Grid x:Name="gridContainer" PreviewMouseLeftButtonDown="gridContainer_PreviewMouseLeftButtonDown"
+          PreviewMouseMove="gridContainer_PreviewMouseMove"
+          PreviewMouseLeftButtonUp="gridContainer_PreviewMouseLeftButtonUp">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="Transparent"></Setter>
+                <Setter Property="Opacity" Value="1"></Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#66A9CEFF"></Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+        <Grid IsHitTestVisible="True">
+
+            <local:OutlinedTextBlock IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="36" FontFamily="黑体" >
+                测试文本测试文本测试文本测试文本测试文本测试文本测试文本
+            </local:OutlinedTextBlock>
+        </Grid>
 
     </Grid>
 </Window>
