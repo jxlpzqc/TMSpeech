@@ -1,0 +1,19 @@
+﻿<Window x:Class="TMSpeech.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TMSpeech.GUI"
+        mc:Ignorable="d"
+        AllowsTransparency="True"
+        Topmost="True"
+        WindowStyle="None" 
+        Background="Transparent"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <local:OutlinedTextBlock  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="36" FontFamily="黑体" >
+            测试文本测试文本测试文本测试文本测试文本测试文本测试文本
+        </local:OutlinedTextBlock>
+
+    </Grid>
+</Window>

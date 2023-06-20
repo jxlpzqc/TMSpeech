@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMSpeech.GUI", "TMSpeech.GUI\TMSpeech.GUI.csproj", "{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4F0F1C03-F420-4F93-919B-49FFB10ED58F}
+	EndGlobalSection
+EndGlobal
