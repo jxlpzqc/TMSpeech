@@ -9,7 +9,7 @@
         Topmost="True"
         WindowStyle="None" 
         Background="#01FFFFFF"
-        Title="MainWindow" Height="100" Width="800">
+        Title="TMSpeech" Height="100" Width="800">
     <Grid x:Name="gridContainer" PreviewMouseLeftButtonDown="gridContainer_PreviewMouseLeftButtonDown"
           PreviewMouseMove="gridContainer_PreviewMouseMove"
           PreviewMouseLeftButtonUp="gridContainer_PreviewMouseLeftButtonUp">
@@ -20,7 +20,9 @@
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Background" Value="#66A9CEFF"></Setter>
+                        <Setter Property="Visibility" Value="Visible"></Setter>
                     </Trigger>
+
                 </Style.Triggers>
             </Style>
         </Grid.Style>
@@ -29,6 +31,21 @@
             <local:OutlinedTextBlock IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="36" FontFamily="黑体" >
                 测试文本测试文本测试文本测试文本测试文本测试文本测试文本
             </local:OutlinedTextBlock>
+
+            <StackPanel Name="spToolbar" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Hidden"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=gridContainer,Path=IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <Button Margin="8">Show History</Button>
+                <Button Margin="8">Preferences</Button>
+            </StackPanel>
         </Grid>
 
     </Grid>
