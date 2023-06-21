@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -84,6 +85,13 @@ namespace TMSpeech.GUI
 
             var settings = SettingsManager.Read();
 
+            var logpath = GetRealPath(settings.LogSave);
+
+            Directory.CreateDirectory(logpath);
+
+            var logfile = System.IO.Path.Combine(GetRealPath(settings.LogSave),
+                string.Format("{0:MM-dd-yy-HH-mm-ss}.txt", DateTime.Now));
+
             _thread = new Thread(() =>
             {
                 try
@@ -93,7 +101,7 @@ namespace TMSpeech.GUI
                         decoder: GetRealPath(settings.ModelDecoder),
                         joiner: GetRealPath(settings.ModelJoiner),
                         tokens: GetRealPath(settings.ModelTokens),
-                        savefile: GetRealPath(settings.LogSave)
+                        savefile: GetRealPath(logfile)
                     );
 
                 }

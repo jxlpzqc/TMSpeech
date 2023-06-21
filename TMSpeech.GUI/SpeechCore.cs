@@ -111,7 +111,7 @@ namespace TMSpeech.GUI
                             {
                                 try
                                 {
-                                    File.AppendAllText(savefile, string.Format("{0:T}: {1}", item.Time, item.Text));
+                                    File.AppendAllText(savefile, string.Format("{0:T}: {1}\n", item.Time, item.Text));
                                 }
                                 catch { }
                             } 
