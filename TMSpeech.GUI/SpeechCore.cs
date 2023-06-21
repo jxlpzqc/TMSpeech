@@ -3,6 +3,7 @@ using SherpaOnnx;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,15 +46,15 @@ namespace TMSpeech.GUI
 
         private WasapiLoopbackCapture capture;
 
-        public void Init()
+        public void Init(string encoder, string decoder, string joiner, string tokens, string savefile)
         {
             OnlineRecognizerConfig config = new OnlineRecognizerConfig();
             config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
-            config.TransducerModelConfig.Encoder = @"D:\models\encoder-epoch-99-avg-1.onnx";
-            config.TransducerModelConfig.Decoder = @"D:\models\decoder-epoch-99-avg-1.onnx";
-            config.TransducerModelConfig.Joiner = @"D:\models\joiner-epoch-99-avg-1.onnx";
-            config.TransducerModelConfig.Tokens = @"D:\models\tokens.txt";
+            config.TransducerModelConfig.Encoder = encoder;
+            config.TransducerModelConfig.Decoder = decoder;
+            config.TransducerModelConfig.Joiner = joiner;
+            config.TransducerModelConfig.Tokens = tokens;
             config.TransducerModelConfig.NumThreads = 1;
             config.TransducerModelConfig.Debug = 1;
 
@@ -106,6 +107,15 @@ namespace TMSpeech.GUI
                         if (is_endpoint || text.Length >= 80)
                         {
                             AllText.Add(item);
+                            if (!string.IsNullOrEmpty(savefile))
+                            {
+                                try
+                                {
+                                    File.AppendAllText(savefile, string.Format("{0:T}: {1}", item.Time, item.Text));
+                                }
+                                catch { }
+                            } 
+
                             recognizer.Reset(s);
                             UpdateList?.Invoke(this, EventArgs.Empty);
                         }

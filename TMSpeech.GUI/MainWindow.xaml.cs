@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +60,21 @@ namespace TMSpeech.GUI
         private SpeechCore _core;
         private Thread _thread;
 
+        private string GetRealPath(string path)
+        {
+            if (System.IO.Path.IsPathRooted(path))
+            {
+                return path;
+            }
+            else
+            {
+                return System.IO.Path.Combine(
+                    System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    path);
+            }
+
+        }
+
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -66,9 +82,28 @@ namespace TMSpeech.GUI
             _core.TextChanged += _core_TextChanged;
             _core.UpdateList += _core_UpdateList;
 
+            var settings = SettingsManager.Read();
+
             _thread = new Thread(() =>
             {
-                _core.Init();
+                try
+                {
+                    _core.Init(
+                        encoder: GetRealPath(settings.ModelEncoder),
+                        decoder: GetRealPath(settings.ModelDecoder),
+                        joiner: GetRealPath(settings.ModelJoiner),
+                        tokens: GetRealPath(settings.ModelTokens),
+                        savefile: GetRealPath(settings.LogSave)
+                    );
+
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("Recognizer launch error: " + ex.Message); 
+                    });
+                }
             });
             _thread.Start();
         }
@@ -81,7 +116,7 @@ namespace TMSpeech.GUI
                 listHistory.Items.Refresh();
                 listHistory.SelectedIndex = listHistory.Items.Count - 1;
                 listHistory.ScrollIntoView(listHistory.SelectedItem);
-                
+
             });
         }
 
@@ -98,7 +133,7 @@ namespace TMSpeech.GUI
 
         private void btnShowHistory_Click(object sender, RoutedEventArgs e)
         {
-            if(_historyShown)
+            if (_historyShown)
             {
                 listHistory.Visibility = Visibility.Collapsed;
                 this.Height -= 100;
@@ -115,7 +150,7 @@ namespace TMSpeech.GUI
         private void btnPreference_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ConfigWindow();
-            dialog.Show(); 
+            dialog.Show();
         }
 
         private void Window_Closed(object sender, EventArgs e)

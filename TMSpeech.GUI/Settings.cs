@@ -183,13 +183,18 @@ namespace TMSpeech.GUI
 
         public static Settings Default => new Settings()
         {
-            FontColor = Colors.Black,
+            FontColor = Colors.Red,
             StrokeColor = Colors.White,
             HoverBgColor = Color.FromArgb(0x66, 0xA9, 0xCE, 0xFF),
             ListBgColor = Color.FromArgb(0x88, 0xA9, 0xCE, 0xFF),
             FontSize = 32,
             StrokeSize = 1,
-            FontFamilyStr = "黑体"
+            FontFamilyStr = "黑体",
+            ModelDecoder = "models\\decoder.onnx",
+            ModelEncoder = "models\\encoder.onnx",
+            ModelJoiner = "models\\joiner.onnx",
+            ModelTokens = "models\\tokens.txt",
+            LogSave = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TMSpeechLogs"),
         };
 
         public event PropertyChangedEventHandler PropertyChanged;
