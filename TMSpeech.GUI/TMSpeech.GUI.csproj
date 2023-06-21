@@ -2,13 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFrameworks>net6.0-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="2.1.0" />
     <PackageReference Include="org.k2fsa.sherpa.onnx">
-      <Version>1.4.4</Version>
+      <Version>1.4.3</Version>
     </PackageReference>
   </ItemGroup>
 

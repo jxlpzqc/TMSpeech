@@ -6,10 +6,12 @@
         xmlns:local="clr-namespace:TMSpeech.GUI"
         mc:Ignorable="d"
         AllowsTransparency="True"
+        Loaded="Window_Loaded"
         Topmost="True"
         WindowStyle="None" 
         Background="#01FFFFFF"
-        Title="TMSpeech" Height="100" Width="800">
+        ResizeMode="CanResizeWithGrip"
+        Title="TMSpeech" Height="180" Width="800">
     <Grid x:Name="gridContainer" PreviewMouseLeftButtonDown="gridContainer_PreviewMouseLeftButtonDown"
           PreviewMouseMove="gridContainer_PreviewMouseMove"
           PreviewMouseLeftButtonUp="gridContainer_PreviewMouseLeftButtonUp">
@@ -22,15 +24,31 @@
                         <Setter Property="Background" Value="#66A9CEFF"></Setter>
                         <Setter Property="Visibility" Value="Visible"></Setter>
                     </Trigger>
-
                 </Style.Triggers>
             </Style>
         </Grid.Style>
-        <Grid IsHitTestVisible="True">
 
-            <local:OutlinedTextBlock IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="36" FontFamily="黑体" >
-                测试文本测试文本测试文本测试文本测试文本测试文本测试文本
-            </local:OutlinedTextBlock>
+        <Grid IsHitTestVisible="True">
+            <DockPanel>
+
+                <local:OutlinedTextBlock DockPanel.Dock="Bottom" x:Name="txtMain" IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="32" FontFamily="黑体">
+                    Wait for audio input...
+                </local:OutlinedTextBlock>
+
+                <ListBox Name="listHistory" Visibility="Collapsed" Background="#88A9CEFF" HorizontalContentAlignment="Stretch"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:TextInfo}">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Left" Margin="0,0,8,0" Text="{Binding TimeStr}"></TextBlock>
+                                <TextBlock Text="{Binding Text}" TextWrapping="WrapWithOverflow"></TextBlock>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                </ListBox>
+            </DockPanel>
+
 
             <StackPanel Name="spToolbar" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <StackPanel.Style>
@@ -43,8 +61,8 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <Button Margin="8">Show History</Button>
-                <Button Margin="8">Preferences</Button>
+                <Button Margin="8" Name="btnShowHistory" Click="btnShowHistory_Click">Show History</Button>
+                <Button Margin="8" Name="btnPreference" Click="btnPreference_Click">Preferences</Button>
             </StackPanel>
         </Grid>
 
