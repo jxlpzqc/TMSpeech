@@ -28,7 +28,7 @@ namespace TMSpeech.GUI
     }
 
 
-    class SpeechCore
+    class SpeechCore : IDisposable
     {
         public IList<TextInfo> AllText { get; set; } = new List<TextInfo>();
         public string CurrentText { get; set; }
@@ -41,10 +41,14 @@ namespace TMSpeech.GUI
             CurrentText = "";
         }
 
+        private OnlineRecognizer recognizer;
+
+        private WasapiLoopbackCapture capture;
+
         public void Init()
         {
             OnlineRecognizerConfig config = new OnlineRecognizerConfig();
-            config.FeatConfig.SampleRate = 48000;
+            config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
             config.TransducerModelConfig.Encoder = @"D:\models\encoder-epoch-99-avg-1.onnx";
             config.TransducerModelConfig.Decoder = @"D:\models\decoder-epoch-99-avg-1.onnx";
@@ -60,12 +64,12 @@ namespace TMSpeech.GUI
             config.Rule2MinTrailingSilence = 1.2f;
             config.Rule3MinUtteranceLength = 300;
 
-            OnlineRecognizer recognizer = new OnlineRecognizer(config);
+            recognizer = new OnlineRecognizer(config);
 
             OnlineStream s = recognizer.CreateStream();
 
             int inputSampleRate = config.FeatConfig.SampleRate;
-            var capture = new WasapiLoopbackCapture();
+            capture = new WasapiLoopbackCapture();
             capture.WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(inputSampleRate, 1);
             capture.DataAvailable += (_, a) =>
             {
@@ -75,40 +79,60 @@ namespace TMSpeech.GUI
             };
             capture.RecordingStopped += (_, a) =>
             {
-                // TODO: dispose resources.
+                s.InputFinished();
+                capture.Dispose();
             };
 
             capture.StartRecording();
 
-            while (true)
+            while (!disposed)
             {
-                if (recognizer.IsReady(s))
-                    recognizer.Decode(s);
-                var is_endpoint = recognizer.IsEndpoint(s);
-                var text = recognizer.GetResult(s).Text;
-                System.Diagnostics.Trace.WriteLine(text);
-
-                if (!string.IsNullOrEmpty(text))
+                try
                 {
-                    var item = new TextInfo(text);
-                    TextChanged?.Invoke(this, new SpeechEventArgs()
-                    {
-                        Text = item,
-                    });
-                    CurrentText = text;
+                    if (recognizer.IsReady(s))
+                        recognizer.Decode(s);
+                    var is_endpoint = recognizer.IsEndpoint(s);
+                    var text = recognizer.GetResult(s).Text;
 
-                    if (is_endpoint || text.Length >= 80)
+                    if (!string.IsNullOrEmpty(text))
                     {
-                        AllText.Add(item);
-                        recognizer.Reset(s);
-                        UpdateList?.Invoke(this, EventArgs.Empty);
+                        var item = new TextInfo(text);
+                        TextChanged?.Invoke(this, new SpeechEventArgs()
+                        {
+                            Text = item,
+                        });
+                        CurrentText = text;
+
+                        if (is_endpoint || text.Length >= 80)
+                        {
+                            AllText.Add(item);
+                            recognizer.Reset(s);
+                            UpdateList?.Invoke(this, EventArgs.Empty);
+                        }
                     }
-
                 }
-
-
+                catch
+                {
+                    break;
+                }
             }
         }
 
+        private bool disposed = false;
+
+        public void Dispose()
+        {
+            if (capture != null)
+            {
+                capture.StopRecording();
+                capture.Dispose();
+            }
+            if (recognizer != null)
+                recognizer.Dispose();
+            capture = null;
+            recognizer = null;
+
+            disposed = true;
+        }
     }
 }

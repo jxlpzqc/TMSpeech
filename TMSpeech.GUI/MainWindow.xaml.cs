@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -56,6 +57,8 @@ namespace TMSpeech.GUI
         }
 
         private SpeechCore _core;
+        private Thread _thread;
+
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -63,10 +66,11 @@ namespace TMSpeech.GUI
             _core.TextChanged += _core_TextChanged;
             _core.UpdateList += _core_UpdateList;
 
-            new Thread(() =>
+            _thread = new Thread(() =>
             {
                 _core.Init();
-            }).Start();
+            });
+            _thread.Start();
         }
 
         private void _core_UpdateList(object sender, EventArgs e)
@@ -112,6 +116,12 @@ namespace TMSpeech.GUI
         {
             var dialog = new ConfigWindow();
             dialog.Show(); 
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            _core.Dispose();
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

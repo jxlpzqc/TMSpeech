@@ -4,9 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TMSpeech.GUI"
+        xmlns:p="http://propertytools.org/wpf"
         mc:Ignorable="d"
         Title="Preferences" Height="450" Width="400">
-    <Grid>
+    <d:Window.DataContext>
+        <local:Settings/>
+    </d:Window.DataContext>
+    <DockPanel>
+        <StackPanel Margin="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <Button Name="btnSave" Margin="4,0,4,0" Click="btnSave_Click">Save</Button>
+            <Button Name="btnCancel" Margin="4,0,4,0" Click="btnCancel_Click">Cancel</Button>
+            <Button Name="btnApply" Margin="4,0,0,0" Click="btnApply_Click">Apply</Button>
+
+        </StackPanel>
         <TabControl TabStripPlacement="Left">
             <TabItem Header="General">
                 <Grid>
@@ -15,6 +25,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -37,19 +53,99 @@
                         </Style>
                     </Grid.Resources>
                     <Label Grid.Row="0" Grid.Column="0">Application</Label>
-                    <ComboBox Grid.Row="0" Grid.Column="1"></ComboBox>
+                    <ComboBox Grid.Row="0" Grid.Column="1" SelectedIndex="0">
+                        <ComboBoxItem>System Internal Voice</ComboBoxItem>
+                    </ComboBox>
                     <Label Grid.Row="1" Grid.Column="0">Text Stroke</Label>
-                    <TextBox Grid.Row="1" Grid.Column="1"></TextBox>
-                    <Label Grid.Row="2" Grid.Column="0">Font</Label>
-                    <Button Grid.Row="2" Grid.Column="1">Settings...</Button>
+                    <p:ColorPicker Grid.Row="1" Grid.Column="1" Margin="4" SelectedColor="{Binding StrokeColor,Mode=TwoWay}"/>
+
+                    <Label Grid.Row="2" Grid.Column="0">Stroke Size</Label>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding StrokeSize}"></TextBox>
+
+                    <Label Grid.Row="3" Grid.Column="0">Font Family</Label>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding FontFamilyStr}"></TextBox>
+
+                    <Label Grid.Row="4" Grid.Column="0">Font Size</Label>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FontSize}"></TextBox>
+
+                    <Label Grid.Row="5" Grid.Column="0">Font Color</Label>
+                    <p:ColorPicker Margin="4" Grid.Row="5" Grid.Column="1" SelectedColor="{Binding FontColor}"/> 
+
+                    <Label Grid.Row="6" Grid.Column="0">Mouse Hover</Label>
+                    <p:ColorPicker Margin="4" Grid.Row="6" Grid.Column="1" SelectedColor="{Binding HoverBgColor}"/> 
+
+                    <Label Grid.Row="7" Grid.Column="0">History Bg</Label>
+                    <p:ColorPicker Margin="4" Grid.Row="7" Grid.Column="1" SelectedColor="{Binding ListBgColor}"/> 
+
+                    <Label Grid.Row="8" Grid.Column="0">Log Save</Label>
+                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding LogSave}"></TextBox>
+
+                    
                 </Grid>
             </TabItem>
 
+            <TabItem Header="Model">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="Label">
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Label Grid.Row="0" Grid.Column="0">Decoder Model</Label>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ModelDecoder}"></TextBox>
+                    <Label Grid.Row="1" Grid.Column="0">Encoder Model</Label>
+
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ModelEncoder}"></TextBox>
+
+                    <Label Grid.Row="2" Grid.Column="0">Joiner Model</Label>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ModelJoiner}"></TextBox>
+
+                    <Label Grid.Row="3" Grid.Column="0">tokens</Label>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ModelTokens}"></TextBox>
+
+                    <Label Grid.Row="6" FontStyle="Italic" Grid.ColumnSpan="2">Model settings will take effect when next startup.</Label>
+
+                </Grid>
+
+            </TabItem>
+
             <TabItem Header="About">
-                <TextBlock TextWrapping="Wrap" xml:space="preserve" Margin="8">This tool is made possible by the following open source projects:
+
+                <TextBlock TextWrapping="Wrap" xml:space="preserve" Margin="8">TMSpeech - Tencent meeting Speech tool.
+A simple tool for recognize system audio.
+
+Used in slacking off when meeting on tencent meeting.
+
+This tool is made possible by the following open source projects:
 
 sherpa-onnx: Real-time speech recognition
-Please refer to <Hyperlink NavigateUri="https://k2-fsa.github.io/sherpa/">https://k2-fsa.github.io/sherpa/</Hyperlink>
+Reference: <Hyperlink NavigateUri="https://k2-fsa.github.io/sherpa/">https://k2-fsa.github.io/sherpa/</Hyperlink>
+
+NAudio: an open source .NET audio library written by Mark Heath
+Reference: <Hyperlink NavigateUri="https://github.com/naudio/NAudio">https://github.com/naudio/NAudio</Hyperlink>
 
                 </TextBlock>
 
@@ -58,5 +154,5 @@ Please refer to <Hyperlink NavigateUri="https://k2-fsa.github.io/sherpa/">https:
         </TabControl>
 
 
-    </Grid>
+    </DockPanel>
 </Window>

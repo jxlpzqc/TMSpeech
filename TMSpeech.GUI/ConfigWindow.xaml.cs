@@ -22,6 +22,28 @@ namespace TMSpeech.GUI
         public ConfigWindow()
         {
             InitializeComponent();
+            this.DataContext = SettingsManager.Read();
+        }
+
+        private Settings Settings => (Settings)this.DataContext;
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Write(Settings);
+            SettingsManager.Apply(Settings);
+            this.Close();
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Apply(SettingsManager.Read());
+            this.Close();
+        }
+
+        private void btnApply_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Apply(Settings);
         }
     }
+
 }

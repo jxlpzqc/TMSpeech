@@ -10,6 +10,7 @@
         Topmost="True"
         WindowStyle="None" 
         Background="#01FFFFFF"
+        Closed="Window_Closed"
         ResizeMode="CanResizeWithGrip"
         Title="TMSpeech" Height="180" Width="800">
     <Grid x:Name="gridContainer" PreviewMouseLeftButtonDown="gridContainer_PreviewMouseLeftButtonDown"
@@ -21,7 +22,7 @@
                 <Setter Property="Opacity" Value="1"></Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#66A9CEFF"></Setter>
+                        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}"></Setter>
                         <Setter Property="Visibility" Value="Visible"></Setter>
                     </Trigger>
                 </Style.Triggers>
@@ -31,11 +32,11 @@
         <Grid IsHitTestVisible="True">
             <DockPanel>
 
-                <local:OutlinedTextBlock DockPanel.Dock="Bottom" x:Name="txtMain" IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="White" FontSize="32" FontFamily="黑体">
+                <local:OutlinedTextBlock DockPanel.Dock="Bottom" x:Name="txtMain" IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="1" Stroke="{DynamicResource StrokeBrush}" FontSize="32" Fill="{DynamicResource FontBrush}" FontFamily="{DynamicResource FontFamily}">
                     Wait for audio input...
                 </local:OutlinedTextBlock>
 
-                <ListBox Name="listHistory" Visibility="Collapsed" Background="#88A9CEFF" HorizontalContentAlignment="Stretch"
+                <ListBox Name="listHistory" Visibility="Collapsed" Background="{DynamicResource ListBgBrush}" HorizontalContentAlignment="Stretch"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type local:TextInfo}">
