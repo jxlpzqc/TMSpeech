@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TMSpeech.GUI
@@ -88,50 +89,41 @@ namespace TMSpeech.GUI
 
             while (!disposed)
             {
-                try
+                while (recognizer.IsReady(s))
                 {
-                    if (recognizer.IsReady(s))
-                        recognizer.Decode(s);
-                    var is_endpoint = recognizer.IsEndpoint(s);
-                    var text = recognizer.GetResult(s).Text;
+                    recognizer.Decode(s);
+                }
+                var is_endpoint = recognizer.IsEndpoint(s);
+                var text = recognizer.GetResult(s).Text;
 
-                    if (!string.IsNullOrEmpty(text))
+                if (!string.IsNullOrEmpty(text))
+                {
+                    var item = new TextInfo(text);
+                    TextChanged?.Invoke(this, new SpeechEventArgs()
                     {
-                        var item = new TextInfo(text);
-                        TextChanged?.Invoke(this, new SpeechEventArgs()
-                        {
-                            Text = item,
-                        });
-                        CurrentText = text;
+                        Text = item,
+                    });
+                    CurrentText = text;
 
-                        if (is_endpoint || text.Length >= 80)
+                    if (is_endpoint || text.Length >= 80)
+                    {
+                        AllText.Add(item);
+                        if (!string.IsNullOrEmpty(savefile))
                         {
-                            AllText.Add(item);
-                            if (!string.IsNullOrEmpty(savefile))
+                            try
                             {
-                                try
-                                {
-                                    File.AppendAllText(savefile, string.Format("{0:T}: {1}\n", item.Time, item.Text));
-                                }
-                                catch { }
-                            } 
-
-                            recognizer.Reset(s);
-                            UpdateList?.Invoke(this, EventArgs.Empty);
+                                File.AppendAllText(savefile, string.Format("{0:T}: {1}\n", item.Time, item.Text));
+                            }
+                            catch { }
                         }
+
+                        recognizer.Reset(s);
+                        UpdateList?.Invoke(this, EventArgs.Empty);
                     }
                 }
-                catch
-                {
-                    break;
-                }
+                Thread.Sleep(20);
             }
-        }
 
-        private bool disposed = false;
-
-        public void Dispose()
-        {
             if (capture != null)
             {
                 capture.StopRecording();
@@ -141,7 +133,12 @@ namespace TMSpeech.GUI
                 recognizer.Dispose();
             capture = null;
             recognizer = null;
+        }
 
+        private bool disposed = false;
+
+        public void Dispose()
+        {
             disposed = true;
         }
     }
