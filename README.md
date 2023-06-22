@@ -12,6 +12,10 @@
 
 再次感谢[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目的语音识别框架和模型。
 
+## 使用
+
+在[Release](https://github.com/jxlpzqc/TMSpeech/releases)页面中下载最新的release解压，运行`TMSpeech.GUI.exe`即可。在桌面创建快捷方式，使用起来更加方便。
+
 ## 我们需要你的贡献
 
 觉得很有用？但是还有不完美的地方？欢迎点击这里[创建Discussion](TODO)、提出反馈！
