@@ -18,7 +18,7 @@
 
 ## 我们需要你的贡献
 
-觉得很有用？但是还有不完美的地方？欢迎点击这里[创建Discussion](TODO)、提出反馈！
+觉得很有用？但是还有不完美的地方？欢迎点击这里[创建Discussion](https://github.com/jxlpzqc/TMSpeech/discussions/new)、提出反馈！
 
 - 识别准确率不高？
     - 这可能需要更好的模型。如果你发现了效果更好的开源模型，欢迎推荐给我们！
