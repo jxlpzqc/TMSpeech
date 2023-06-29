@@ -6,11 +6,19 @@
 
 你可以：
 - 开会时更放心地走神，突然被喊到的时候不会那么不知所措，只需要看一看识别的历史记录。（本项目的名字来源于此）
-- 会议实时转录，自动生成会议纪要，并保存到文件
+- 会议实时转录，自动生成会议纪要，并保存到文件。默认会将识别结果按日期保存到“我的文档”的`TMSpeechLogs`文件夹中
 
-基于[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目二次开发。实测在我的AMD 5800u的笔记本上平均CPU只用了大概5%。
+基于[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目二次开发。实测在我的AMD 5800u的笔记本上CPU占用不到5%。
 
 再次感谢[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目的语音识别框架和模型。
+
+## 展示
+
+无边框窗口，可任意拖动和调整大小
+
+![正常识别窗口](imgs/normal.PNG)
+
+![鼠标悬浮时的窗口](imgs/hover.PNG)
 
 ## 使用
 
