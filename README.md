@@ -1,5 +1,7 @@
 # TMSpeech
 
+视频演示：https://www.bilibili.com/video/BV1rX4y1p7Nx/
+
 关键词：语音转文字，实时字幕，会议语音识别，歌词字幕展示，识别历史记录查看
 
 `TMSpeech` 是一个Windows下的中文实时语音字幕，通过WASAPI的CaptureLoopback捕获电脑声音（录内音），将语音实时转文字，并以歌词字幕的形式展示。即使完全关闭电脑声音也能使用。
