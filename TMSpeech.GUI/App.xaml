@@ -8,12 +8,12 @@
     <Application.Resources>
         <ResourceDictionary>
             <SolidColorBrush x:Key="FontBrush" Color="Red"/>
-            <SolidColorBrush x:Key="StrokeBrush" Color="Black"/>
+            <SolidColorBrush x:Key="StrokeBrush" Color="White"/>
             <SolidColorBrush x:Key="HoverBgBrush" Color="#66A9CEFF"></SolidColorBrush>
             <SolidColorBrush x:Key="ListBgBrush" Color="#88A9CEFF"></SolidColorBrush>
             <FontFamily x:Key="FontFamily">黑体</FontFamily>
-            <sys:Int32 x:Key="StrokeSize">1</sys:Int32>
-            <sys:Int32 x:Key="FontSize">32</sys:Int32>
+            <sys:Double x:Key="StrokeSize">1.0</sys:Double>
+            <sys:Double x:Key="FontSize">32.0</sys:Double>
         </ResourceDictionary>
 
 

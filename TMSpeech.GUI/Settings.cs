@@ -132,10 +132,10 @@ namespace TMSpeech.GUI
         }
 
 
-        private int _fontSize;
+        private double _fontSize;
 
         [ApplyToResource]
-        public int FontSize
+        public double FontSize
         {
             get => _fontSize;
             set
@@ -145,10 +145,10 @@ namespace TMSpeech.GUI
             }
         }
 
-        private int _strokeSize;
+        private double _strokeSize;
 
         [ApplyToResource]
-        public int StrokeSize
+        public double StrokeSize
         {
             get => _strokeSize;
             set

@@ -126,7 +126,7 @@
                     <Label Grid.Row="3" Grid.Column="0">tokens</Label>
                     <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ModelTokens}"></TextBox>
 
-                    <Label Grid.Row="6" FontStyle="Italic" Grid.ColumnSpan="2">Model settings will take effect when next startup.</Label>
+                    <Label Grid.Row="6" FontStyle="Italic" Grid.ColumnSpan="2">Model settings will take effect at next startup.</Label>
 
                 </Grid>
 
