@@ -214,19 +214,23 @@ namespace TMSpeech.GUI
 
         private static string GetPath()
         {
-            var dataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = Path.Combine(dataPath, "TMSpeech");
+            // var dataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            // var path = Path.Combine(dataPath, "TMSpeech");
+            var path = System.Reflection.Assembly.GetEntryAssembly().Location;
+            path = new FileInfo(path).Directory.FullName; // get parent dir
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
 
-            return Path.Combine(path, "preference.json");
+            return Path.Combine(path, "settings.json");
         }
 
         public static void Write(Settings settings)
         {
-            var output = JsonSerializer.Serialize(settings);
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            var output = JsonSerializer.Serialize(settings, options);
             var path = GetPath();
             File.WriteAllText(path, output);
         }
