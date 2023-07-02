@@ -11,35 +11,32 @@ using System.Threading.Tasks;
 
 namespace TMSpeech.GUI
 {
-
-    public class SpeechEventArgs
+    class SpeechCore : ISpecchRecognition
     {
-        public TextInfo Text { get; set; }
-    }
-
-    public class TextInfo
-    {
-        public DateTime Time { get; set; }
-        public string TimeStr => Time.ToString("T");
-        public string Text { get; set; }
-        public TextInfo(string text)
-        {
-            Time = DateTime.Now;
-            Text = text;
-        }
-    }
-
-
-    class SpeechCore : IDisposable
-    {
-        public IList<TextInfo> AllText { get; set; } = new List<TextInfo>();
+        public IList<TextInfo> AllTexts { get; set; } = new List<TextInfo>();
         public string CurrentText { get; set; }
         public event EventHandler<SpeechEventArgs> TextChanged;
         public event EventHandler<EventArgs> UpdateList;
 
+        string Encoder;
+        string Decoder;
+        string Joiner;
+        string Tokens;
+        string Savefile;
+
+        // 如果saveFile为空或null，则表示不保存到文件。
+        public SpeechCore(string encoder, string decoder, string joiner, string tokens, string savefile)
+        {
+            this.Encoder = encoder;
+            this.Decoder = decoder;
+            this.Joiner = joiner;
+            this.Tokens = tokens;
+            this.Savefile = savefile;
+        }
+
         public void Clear()
         {
-            AllText.Clear();
+            AllTexts.Clear();
             CurrentText = "";
         }
 
@@ -47,8 +44,10 @@ namespace TMSpeech.GUI
 
         private WasapiLoopbackCapture capture;
 
-        public void Init(string encoder, string decoder, string joiner, string tokens, string savefile)
+        // 如果saveFile为空或null，则表示不保存到文件。
+        public void Run(string encoder, string decoder, string joiner, string tokens, string savefile)
         {
+            disposed = false;
             OnlineRecognizerConfig config = new OnlineRecognizerConfig();
             config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
@@ -105,9 +104,9 @@ namespace TMSpeech.GUI
                     });
                     CurrentText = text;
 
-                    if (is_endpoint || text.Length >= 80)
+                    if (is_endpoint)
                     {
-                        AllText.Add(item);
+                        AllTexts.Add(item);
                         if (!string.IsNullOrEmpty(savefile))
                         {
                             try
@@ -140,6 +139,26 @@ namespace TMSpeech.GUI
         public void Dispose()
         {
             disposed = true;
+        }
+
+        public void SetTextChangedHandler(EventHandler<SpeechEventArgs> handler)
+        {
+            this.TextChanged += handler;
+        }
+
+        public void SetUpdateListHandler(EventHandler<EventArgs> handler)
+        {
+            this.UpdateList += handler;
+        }
+
+        public void Run()
+        {
+            Run(Encoder, Decoder, Joiner, Tokens, Savefile);
+        }
+
+        public IList<TextInfo> GetAllTexts()
+        {
+            return AllTexts;
         }
     }
 }

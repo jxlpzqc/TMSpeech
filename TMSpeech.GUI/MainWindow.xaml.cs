@@ -19,6 +19,32 @@ using System.Windows.Shapes;
 
 namespace TMSpeech.GUI
 {
+    public class TextInfo
+    {
+        public DateTime Time { get; set; }
+        public string TimeStr => Time.ToString("T");
+        public string Text { get; set; }
+        public TextInfo(string text)
+        {
+            Time = DateTime.Now;
+            Text = text;
+        }
+    }
+
+    public class SpeechEventArgs
+    {
+        public TextInfo Text { get; set; }
+    }
+
+    interface ISpecchRecognition: IDisposable
+    {
+        IList<TextInfo> GetAllTexts();
+        void SetTextChangedHandler(EventHandler<SpeechEventArgs> handler);
+        void SetUpdateListHandler(EventHandler<EventArgs> handler);
+        void Run();
+        void Clear();
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -58,7 +84,7 @@ namespace TMSpeech.GUI
 
         }
 
-        private SpeechCore _core;
+        private ISpecchRecognition _core;
         private Thread _thread;
 
         private string GetRealPath(string path)
@@ -79,10 +105,6 @@ namespace TMSpeech.GUI
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _core = new SpeechCore();
-            _core.TextChanged += _core_TextChanged;
-            _core.UpdateList += _core_UpdateList;
-
             var settings = SettingsManager.Read();
 
             var logpath = GetRealPath(settings.LogSave);
@@ -92,18 +114,19 @@ namespace TMSpeech.GUI
             var logfile = System.IO.Path.Combine(GetRealPath(settings.LogSave),
                 string.Format("{0:MM-dd-yy-HH-mm-ss}.txt", DateTime.Now));
 
+            _core = new SpeechCore(encoder: GetRealPath(settings.ModelEncoder),
+                       decoder: GetRealPath(settings.ModelDecoder),
+                       joiner: GetRealPath(settings.ModelJoiner),
+                       tokens: GetRealPath(settings.ModelTokens),
+                       savefile: GetRealPath(logfile));
+            _core.SetTextChangedHandler(_core_TextChanged);
+            _core.SetUpdateListHandler(_core_UpdateList);
+
             _thread = new Thread(() =>
             {
                 try
                 {
-                    _core.Init(
-                        encoder: GetRealPath(settings.ModelEncoder),
-                        decoder: GetRealPath(settings.ModelDecoder),
-                        joiner: GetRealPath(settings.ModelJoiner),
-                        tokens: GetRealPath(settings.ModelTokens),
-                        savefile: GetRealPath(logfile)
-                    );
-
+                    _core.Run();
                 }
                 catch (Exception ex)
                 {
@@ -120,7 +143,7 @@ namespace TMSpeech.GUI
         {
             Dispatcher.Invoke(() =>
             {
-                listHistory.ItemsSource = _core.AllText;
+                listHistory.ItemsSource = _core.GetAllTexts();
                 listHistory.Items.Refresh();
                 listHistory.SelectedIndex = listHistory.Items.Count - 1;
                 listHistory.ScrollIntoView(listHistory.SelectedItem);
