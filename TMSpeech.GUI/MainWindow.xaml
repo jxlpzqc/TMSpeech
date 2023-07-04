@@ -32,9 +32,11 @@
         <Grid IsHitTestVisible="True">
             <DockPanel>
 
-                <local:OutlinedTextBlock DockPanel.Dock="Bottom" x:Name="txtMain" IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="{DynamicResource StrokeSize}" Stroke="{DynamicResource StrokeBrush}" FontSize="{DynamicResource FontSize}" Fill="{DynamicResource FontBrush}" FontFamily="{DynamicResource FontFamily}">
-                    Wait for audio input...
-                </local:OutlinedTextBlock>
+                <ScrollViewer DockPanel.Dock="Bottom" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <local:OutlinedTextBlock DockPanel.Dock="Bottom" x:Name="txtMain" IsHitTestVisible="True"  FontWeight="ExtraBold" TextWrapping="Wrap" StrokeThickness="{DynamicResource StrokeSize}" Stroke="{DynamicResource StrokeBrush}" FontSize="{DynamicResource FontSize}" Fill="{DynamicResource FontBrush}" FontFamily="{DynamicResource FontFamily}">
+                        Wait for audio input...
+                    </local:OutlinedTextBlock>
+                </ScrollViewer>
 
                 <ListBox Name="listHistory" Visibility="Collapsed" Background="{DynamicResource ListBgBrush}" HorizontalContentAlignment="Stretch"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">

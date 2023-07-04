@@ -107,7 +107,7 @@ namespace TMSpeech.GUI
                     });
                 }
             }
-            catch (EndOfStreamException e) { }
+            catch (EndOfStreamException) { }
             
 
         }

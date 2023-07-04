@@ -104,7 +104,7 @@ namespace TMSpeech.GUI
                     });
                     CurrentText = text;
 
-                    if (is_endpoint)
+                    if (is_endpoint || text.Length >= 80)
                     {
                         AllTexts.Add(item);
                         if (!string.IsNullOrEmpty(savefile))

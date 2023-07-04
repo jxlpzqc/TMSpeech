@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="NAudio.Wasapi" Version="2.1.0" />
     <PackageReference Include="org.k2fsa.sherpa.onnx">
-      <Version>1.4.3</Version>
+      <Version>1.4.8</Version>
     </PackageReference>
     <PackageReference Include="PropertyTools.Wpf" Version="3.1.0" />
   </ItemGroup>

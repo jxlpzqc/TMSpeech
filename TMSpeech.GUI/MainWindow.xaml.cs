@@ -167,7 +167,10 @@ namespace TMSpeech.GUI
             if (_historyShown)
             {
                 listHistory.Visibility = Visibility.Collapsed;
-                this.Height -= 100;
+                if (this.Height - 100 > 30)
+                {
+                    this.Height -= 100;
+                }
             }
             else
             {

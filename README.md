@@ -26,14 +26,13 @@
 
 在[Release](https://github.com/jxlpzqc/TMSpeech/releases)页面中下载最新的release解压，运行`TMSpeech.GUI.exe`即可。在桌面创建快捷方式，使用起来更加方便。
 
-## 我们需要你的贡献
+## 我们需要你的反馈
 
 觉得很有用？但是还有不完美的地方？欢迎点击这里[创建Discussion](https://github.com/jxlpzqc/TMSpeech/discussions/new)、提出反馈！
 
 - 识别准确率不高？
-    - 这可能需要更好的模型。如果你发现了效果更好的开源模型，欢迎推荐给我们！
-    - 想要用自己的模型？
+    - 这可能需要更好的模型。当前我们支持sherpa-onnx的流式模型，可以在设置中修改模型路径。
+    - [想要用自己的模型？](https://github.com/jxlpzqc/TMSpeech/issues/6) 如果你发现了效果更好的开源模型，也欢迎推荐给我们！
 - 还需要更多功能？
     - 请点击这里[创建issue](https://github.com/jxlpzqc/TMSpeech/issues/new)告诉我们！
     - 如果你懂Windows/C#开发，欢迎提交pull request，开发的过程中遇到任何问题可以创建issue和我们讨论。
-
