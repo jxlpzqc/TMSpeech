@@ -130,10 +130,7 @@ namespace TMSpeech.GUI
                 }
                 catch (Exception ex)
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        MessageBox.Show("Recognizer launch error: " + ex.Message); 
-                    });
+                    MessageBox.Show($"Recognizer launch error: \n{ex}");
                 }
             });
             _thread.Start();
