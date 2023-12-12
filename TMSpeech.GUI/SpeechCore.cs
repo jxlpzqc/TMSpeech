@@ -13,10 +13,10 @@ namespace TMSpeech.GUI
 {
     class SpeechCore : ISpecchRecognition
     {
-        public IList<TextInfo> AllTexts { get; set; } = new List<TextInfo>();
+        public List<TextInfo> AllTexts { get; set; } = new List<TextInfo>();
         public string CurrentText { get; set; }
         public event EventHandler<SpeechEventArgs> TextChanged;
-        public event EventHandler<EventArgs> UpdateList;
+        public event EventHandler<SpeechEventArgs> UpdateList;
 
         string Encoder;
         string Decoder;
@@ -117,7 +117,10 @@ namespace TMSpeech.GUI
                         }
 
                         recognizer.Reset(s);
-                        UpdateList?.Invoke(this, EventArgs.Empty);
+                        UpdateList?.Invoke(this, new SpeechEventArgs()
+                        {
+                            Text = item,
+                        });
                     }
                 }
                 Thread.Sleep(20);
@@ -146,7 +149,7 @@ namespace TMSpeech.GUI
             this.TextChanged += handler;
         }
 
-        public void SetUpdateListHandler(EventHandler<EventArgs> handler)
+        public void SetUpdateListHandler(EventHandler<SpeechEventArgs> handler)
         {
             this.UpdateList += handler;
         }
@@ -158,7 +161,7 @@ namespace TMSpeech.GUI
 
         public IList<TextInfo> GetAllTexts()
         {
-            return AllTexts;
+            return new List<TextInfo>(AllTexts);
         }
     }
 }

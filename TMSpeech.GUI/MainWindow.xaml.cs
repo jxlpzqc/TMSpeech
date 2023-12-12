@@ -40,7 +40,7 @@ namespace TMSpeech.GUI
     {
         IList<TextInfo> GetAllTexts();
         void SetTextChangedHandler(EventHandler<SpeechEventArgs> handler);
-        void SetUpdateListHandler(EventHandler<EventArgs> handler);
+        void SetUpdateListHandler(EventHandler<SpeechEventArgs> handler);
         void Run();
         void Clear();
     }
@@ -136,11 +136,11 @@ namespace TMSpeech.GUI
             _thread.Start();
         }
 
-        private void _core_UpdateList(object sender, EventArgs e)
+        private void _core_UpdateList(object sender, SpeechEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
-                listHistory.ItemsSource = _core.GetAllTexts();
+                listHistory.Items.Add(e.Text);
                 listHistory.Items.Refresh();
                 listHistory.SelectedIndex = listHistory.Items.Count - 1;
                 listHistory.ScrollIntoView(listHistory.SelectedItem);

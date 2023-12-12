@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace TMSpeech.GUI
@@ -155,6 +156,19 @@ namespace TMSpeech.GUI
             {
                 _strokeSize = value;
                 NotifyChange(x => x.StrokeSize);
+            }
+        }
+
+        private TextAlignment _textAlign;
+
+        [ApplyToResource]
+        public TextAlignment TextAlign
+        {
+            get => _textAlign;
+            set
+            {
+                _textAlign = value;
+                NotifyChange(x => x._textAlign);
             }
         }
 

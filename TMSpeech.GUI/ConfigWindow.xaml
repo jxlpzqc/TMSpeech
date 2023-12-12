@@ -10,6 +10,9 @@
     <d:Window.DataContext>
         <local:Settings/>
     </d:Window.DataContext>
+    <Window.Resources>
+        <local:EnumConverter x:Key="enumConverter"/>
+    </Window.Resources>
     <DockPanel>
         <StackPanel Margin="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Name="btnSave" Margin="4,0,4,0" Click="btnSave_Click">Save</Button>
@@ -52,7 +55,7 @@
                             <Setter Property="Margin" Value="5"/>
                         </Style>
                     </Grid.Resources>
-                    <Label Grid.Row="0" Grid.Column="0">Application</Label>
+                    <Label Grid.Row="0" Grid.Column="0">Audio Source</Label>
                     <ComboBox Grid.Row="0" Grid.Column="1" SelectedIndex="0">
                         <ComboBoxItem>System Internal Voice</ComboBoxItem>
                     </ComboBox>
@@ -69,16 +72,24 @@
                     <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FontSize}"></TextBox>
 
                     <Label Grid.Row="5" Grid.Column="0">Font Color</Label>
-                    <p:ColorPicker Margin="4" Grid.Row="5" Grid.Column="1" SelectedColor="{Binding FontColor}"/> 
+                    <p:ColorPicker Margin="4" Grid.Row="5" Grid.Column="1" SelectedColor="{Binding FontColor}"/>
 
                     <Label Grid.Row="6" Grid.Column="0">Mouse Hover</Label>
-                    <p:ColorPicker Margin="4" Grid.Row="6" Grid.Column="1" SelectedColor="{Binding HoverBgColor}"/> 
+                    <p:ColorPicker Margin="4" Grid.Row="6" Grid.Column="1" SelectedColor="{Binding HoverBgColor}"/>
 
                     <Label Grid.Row="7" Grid.Column="0">History Bg</Label>
-                    <p:ColorPicker Margin="4" Grid.Row="7" Grid.Column="1" SelectedColor="{Binding ListBgColor}"/> 
+                    <p:ColorPicker Margin="4" Grid.Row="7" Grid.Column="1" SelectedColor="{Binding ListBgColor}"/>
 
-                    <Label Grid.Row="8" Grid.Column="0">Log Save</Label>
-                    <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding LogSave}"></TextBox>
+                    <Label Grid.Row="8" Grid.Column="0">Text Alignment</Label>
+                    <ComboBox Margin="4" Grid.Row="8" Grid.Column="1" SelectedIndex="{Binding TextAlign,Converter={StaticResource enumConverter}}">
+                        <ComboBoxItem Content="Left"/>
+                        <ComboBoxItem Content="Right"/>
+                        <ComboBoxItem Content="Center"/>
+                        <ComboBoxItem Content="Justify"/>
+                    </ComboBox>
+
+                    <Label Grid.Row="9" Grid.Column="0">Log Save</Label>
+                    <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding LogSave}"></TextBox>
 
                     
                 </Grid>

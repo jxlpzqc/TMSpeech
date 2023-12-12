@@ -11,10 +11,10 @@ namespace TMSpeech.GUI
 {
     class CmdSpeech : ISpecchRecognition
     {
-        public IList<TextInfo> AllTexts { get; set; } = new List<TextInfo>();
+        public List<TextInfo> AllTexts { get; set; } = new List<TextInfo>();
         public string CurrentText { get; set; }
         public event EventHandler<SpeechEventArgs> TextChanged;
-        public event EventHandler<EventArgs> UpdateList;
+        public event EventHandler<SpeechEventArgs> UpdateList;
 
         string ExecutablePath;
         string Arguments;
@@ -36,7 +36,7 @@ namespace TMSpeech.GUI
 
         public IList<TextInfo> GetAllTexts()
         {
-            return AllTexts;
+            return new List<TextInfo>(AllTexts);
         }
 
         public void SetTextChangedHandler(EventHandler<SpeechEventArgs> handler)
@@ -44,7 +44,7 @@ namespace TMSpeech.GUI
             this.TextChanged += handler;
         }
 
-        public void SetUpdateListHandler(EventHandler<EventArgs> handler)
+        public void SetUpdateListHandler(EventHandler<SpeechEventArgs> handler)
         {
             this.UpdateList += handler;
         }
@@ -98,7 +98,10 @@ namespace TMSpeech.GUI
                             }
                             catch { }
                         }
-                        UpdateList?.Invoke(this, EventArgs.Empty);
+                        UpdateList?.Invoke(this, new SpeechEventArgs()
+                        {
+                            Text = item,
+                        });
                         buffer.Clear();
                     }
                     TextChanged?.Invoke(this, new SpeechEventArgs()

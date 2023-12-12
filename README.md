@@ -36,3 +36,13 @@
 - 还需要更多功能？
     - 请点击这里[创建issue](https://github.com/jxlpzqc/TMSpeech/issues/new)告诉我们！
     - 如果你懂Windows/C#开发，欢迎提交pull request，开发的过程中遇到任何问题可以创建issue和我们讨论。
+
+## Release 流程
+
+- VisualStudio中右键项目，选择Publish，增加publish到文件夹的配置。
+- 点击`Show all settings`修改Publish配置，
+    - `Configuration`为Release，
+    - 选择`Deployment mode`为`self-contained`，
+    - 设置`target runtime`为`win-x64`。
+- 将模型文件夹复制到publish的文件夹内，重命名为models，打包为zip文件。
+- 在开发电脑，和另外一台电脑上测试各种功能。
