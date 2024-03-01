@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
+    One for Windows with net7.0-windows TFM, one for MacOS with net7.0-macos and one with net7.0 TFM for Linux.-->
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="nulastudio.NetBeauty" Version="2.1.4.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TMSpeech.GUI\TMSpeech.GUI.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
+    <!-- beauty into sub-directory, default is libs, quote with "" if contains space  -->
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../lib</BeautyLibsDir>
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./lib</BeautyLibsDir>
+    <!-- dlls that you don't want to be moved or can not be moved -->
+    <!-- <BeautyExcludes>dll1.dll;lib*;...</BeautyExcludes> -->
+    <!-- dlls that end users never needed, so hide them -->
+    <BeautyHiddens>hostfxr;hostpolicy;*.deps.json;*.runtimeconfig*.json</BeautyHiddens>
+    <!-- set to True if you want to disable -->
+    <DisableBeauty>False</DisableBeauty>
+    <!-- set to False if you want to beauty on build -->
+    <BeautyOnPublishOnly>True</BeautyOnPublishOnly>
+    <!-- set to True if you want to allow 3rd debuggers(like dnSpy) debugs the app -->
+    <BeautyEnableDebugging>True</BeautyEnableDebugging>
+    <!-- the patch can reduce the file count -->
+    <!-- set to False if you want to disable -->
+    <!-- SCD Mode Feature Only -->
+    <BeautyUsePatch>True</BeautyUsePatch>
+    <!-- App Entry Dll = BeautyDir + BeautyAppHostDir + BeautyAppHostEntry -->
+    <!-- see https://github.com/nulastudio/NetBeauty2#customize-apphost for more details -->
+    <!-- relative path based on AppHostDir -->
+    <!-- .NET Core Non Single-File Only -->
+    <!-- <BeautyAppHostEntry>bin/MyApp.dll</BeautyAppHostEntry> -->
+    <!-- relative path based on BeautyDir -->
+    <!-- .NET Core Non Single-File Only -->
+    <!-- <BeautyAppHostDir>..</BeautyAppHostDir> -->
+    <!-- <BeautyAfterTasks></BeautyAfterTasks> -->
+    <!-- valid values: Error|Detail|Info -->
+    <BeautyLogLevel>Info</BeautyLogLevel>
+    <!-- set to a repo mirror if you have troble in connecting github -->
+    <BeautyGitCDN>https://gitee.com/liesauer/HostFXRPatcher</BeautyGitCDN>
+    <BeautyGitTree>master</BeautyGitTree>
+  </PropertyGroup>
+
+
+  <PropertyGroup>
+    <BuildPlugins>true</BuildPlugins>
+    <PluginsOutputDir>plugins\</PluginsOutputDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PluginProjects Include="..\Plugins\*\*.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <UpToDateCheckInput Include="..\Plugins\**\*.cs;..\Plugins\**\*.csproj" Set="Plugins"/>
+    <UpToDateCheckInput Remove="..\Plugins\*\obj\**;..\Plugins\*\bin\**" Set="Plugins"/>
+    <UpToDateCheckOutput Include="$(OutDir)$(PluginsOutputDir)" Set="Plugins"/>
+  </ItemGroup>
+
+  <Target Name="BuildPlugins" AfterTargets="Build" Condition="'$(BuildPlugins)'=='true'">
+    <ConvertToAbsolutePath Paths="$(OutDir)$(PluginsOutputDir)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PluginsOutputDirAbs" />
+    </ConvertToAbsolutePath>
+    <Message Importance="high" Text="Found built-in plugins: @(PluginProjects, ', ')" />
+    <Message Importance="high" Text="Building plugins to $(PluginsOutputDirAbs)" />
+    <MSBuild Projects="@(PluginProjects)" Targets="Build" Properties="OutDir=$(PluginsOutputDirAbs)" />
+    <ItemGroup>
+      <FilesToDelete Include="$(PluginsOutputDirAbs)\TMSpeech.Core.*" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)"></Delete>
+  </Target>
+</Project>

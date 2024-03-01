@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:TMSpeech.GUI.ViewModels"
+             xmlns:controls="clr-namespace:TMSpeech.GUI.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="TMSpeech.GUI.Views.MainView"
+             x:DataType="vm:MainViewModel">
+  <Canvas>
+    <StackPanel VerticalAlignment="Bottom" Canvas.Bottom="0" Width="{Binding $parent.Bounds.Width}">
+      <StackPanel.Styles>
+        <Style Selector="TextBlock">
+          <Setter Property="FontSize" Value="40" />
+          <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="StackPanel">
+          <Setter Property="Effect">
+            <Setter.Value>
+              <DropShadowDirectionEffect
+                Direction="0,0"
+                BlurRadius="8"
+                Color="Black" />
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </StackPanel.Styles>
+      <TextBlock FontWeight="Bold" Foreground="White" Text="{Binding $parent[UserControl].Text}">
+      </TextBlock>
+    </StackPanel>
+  </Canvas>
+</UserControl>

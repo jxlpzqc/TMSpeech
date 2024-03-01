@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!--    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\TMSpeech.Core\TMSpeech.Core.csproj">
+            <Private>false</Private>
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </ProjectReference>
+
+        <PackageReference Include="org.k2fsa.sherpa.onnx">
+            <Version>1.4.8</Version>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

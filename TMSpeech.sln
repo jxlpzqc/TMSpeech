@@ -3,7 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMSpeech.GUI", "TMSpeech.GUI\TMSpeech.GUI.csproj", "{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.Core", "src\TMSpeech.Core\TMSpeech.Core.csproj", "{1C40A8DF-8A44-40A7-B4E0-845C57B219E5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{067D976B-853C-432D-B522-9DA758808BCD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.GUI", "src\TMSpeech.GUI\TMSpeech.GUI.csproj", "{A02E230A-80DC-4DF7-95AD-FFCCB5579F9E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1C40A8DF-8A44-40A7-B4E0-845C57B219E5} = {1C40A8DF-8A44-40A7-B4E0-845C57B219E5}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech", "src\TMSpeech\TMSpeech.csproj", "{7114317F-856F-494E-B281-056514B011DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.Recognizer.SherpaOnnx", "src\Plugins\TMSpeech.Recognizer.SherpaOnnx\TMSpeech.Recognizer.SherpaOnnx.csproj", "{1FE33713-1560-4CD5-8CB0-FA7181D3559C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.AudioSource.Windows", "src\Plugins\TMSpeech.AudioSource.Windows\TMSpeech.AudioSource.Windows.csproj", "{8BD17489-0EFE-4FF2-B9A0-829C9F047825}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +24,31 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33C2A5F8-3E97-4C91-9FBF-092D0D1A5A99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C40A8DF-8A44-40A7-B4E0-845C57B219E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C40A8DF-8A44-40A7-B4E0-845C57B219E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C40A8DF-8A44-40A7-B4E0-845C57B219E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C40A8DF-8A44-40A7-B4E0-845C57B219E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A02E230A-80DC-4DF7-95AD-FFCCB5579F9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A02E230A-80DC-4DF7-95AD-FFCCB5579F9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A02E230A-80DC-4DF7-95AD-FFCCB5579F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A02E230A-80DC-4DF7-95AD-FFCCB5579F9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7114317F-856F-494E-B281-056514B011DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7114317F-856F-494E-B281-056514B011DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7114317F-856F-494E-B281-056514B011DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7114317F-856F-494E-B281-056514B011DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FE33713-1560-4CD5-8CB0-FA7181D3559C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FE33713-1560-4CD5-8CB0-FA7181D3559C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FE33713-1560-4CD5-8CB0-FA7181D3559C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1FE33713-1560-4CD5-8CB0-FA7181D3559C} = {067D976B-853C-432D-B522-9DA758808BCD}
+		{8BD17489-0EFE-4FF2-B9A0-829C9F047825} = {067D976B-853C-432D-B522-9DA758808BCD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F0F1C03-F420-4F93-919B-49FFB10ED58F}

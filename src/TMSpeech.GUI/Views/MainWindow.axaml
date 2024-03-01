@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TMSpeech.GUI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:TMSpeech.GUI.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="TMSpeech.GUI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        ShowInTaskbar="False"
+        SystemDecorations="None"
+        Topmost="True"
+        Background="Transparent"
+        Title="TMSpeech"
+        CanResize="True"
+        Height="180"
+        Width="800"
+        PointerPressed="Window_PointerPressed"
+        PointerMoved="Window_PointerMoved">
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <Window.Styles>
+    <Style Selector="Grid">
+      <Setter Property="Background" Value="#01FFFFFF" />
+    </Style>
+    <Style Selector="Grid:pointerover">
+      <Setter Property="Background" Value="#AAA9CEFF" />
+    </Style>
+    <Style Selector="Grid StackPanel#controls">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Grid:pointerover StackPanel#controls">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </Window.Styles>
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/IconResources.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+
+  </Window.Resources>
+  <Grid Name="mainGrid">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Name="controls" HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="0" Margin="8">
+      <StackPanel.Styles>
+        <Style Selector="PathIcon">
+          <Setter Property="Height" Value="16" />
+          <Setter Property="Width" Value="16" />
+        </Style>
+        <Style Selector="Button">
+          <Setter Property="Height" Value="32" />
+        </Style>
+      </StackPanel.Styles>
+      <Button IsVisible="{Binding PlayButtonVisible}" Command="{Binding PlayCommand}">
+        <PathIcon Data="{StaticResource play_regular}"></PathIcon>
+      </Button>
+      <Button IsVisible="{Binding PauseButtonVisible}" Command="{Binding PauseCommand}">
+        <PathIcon Data="{StaticResource pause_regular}"></PathIcon>
+      </Button>
+      <Button IsVisible="{Binding StopButtonVisible}" Command="{Binding StopCommand}">
+        <PathIcon Data="{StaticResource stop_regular}"></PathIcon>
+      </Button>
+      <Button IsVisible="{Binding StopButtonVisible}">
+        <StackPanel Orientation="Horizontal">
+          <PathIcon Data="{StaticResource record_regular}" Margin="0,0,8,0" Foreground="DarkRed"></PathIcon>
+          <TextBlock Text="{Binding RunningTimeDisplay}"></TextBlock>
+        </StackPanel>
+      </Button>
+      <Button Margin="16,0,0,0">
+        <PathIcon Data="{StaticResource history_regular}"></PathIcon>
+      </Button>
+      <Button>
+        <PathIcon Data="{StaticResource list_regular}"></PathIcon>
+      </Button>
+      <Button Click="SettingsButton_Click">
+        <PathIcon Data="{StaticResource settings_regular}"></PathIcon>
+      </Button>
+    </StackPanel>
+    <views:MainView Grid.Row="1" Margin="16" Text="{Binding Text}"/>
+  </Grid>
+</Window>

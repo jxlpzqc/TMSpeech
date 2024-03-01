@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <AvaloniaVersion>11.0.9</AvaloniaVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="all"/>
+    </ItemGroup>
+</Project>

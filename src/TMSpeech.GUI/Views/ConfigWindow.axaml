@@ -1,0 +1,189 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:TMSpeech.GUI.Controls"
+        xmlns:vm="clr-namespace:TMSpeech.GUI.ViewModels"
+        xmlns:converter="clr-namespace:TMSpeech.GUI.Converters"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        x:Class="TMSpeech.GUI.Views.ConfigWindow"
+        Title="ConfigWindow"
+        FontFamily="微软雅黑,Microsoft YaHei,苹方-简">
+  <Design.DataContext>
+    <vm:ConfigViewModel />
+  </Design.DataContext>
+  <Window.Resources>
+    <converter:IntToColorConverter x:Key="IntToColorConverter"></converter:IntToColorConverter>
+  </Window.Resources>
+  <DockPanel>
+    <StackPanel Margin="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+      <Button Name="btnSave" Margin="4,0,4,0">确定</Button>
+      <Button Name="btnCancel" Margin="4,0,4,0">取消</Button>
+      <Button Name="btnApply" Margin="4,0,0,0">应用</Button>
+    </StackPanel>
+    <TabControl TabStripPlacement="Left" SelectedIndex="2">
+      <TabControl.Styles>
+        <Style Selector="Label,TextBox,ComboBox,Button,CheckBox,NumericUpDown">
+          <Setter Property="Margin" Value="5" />
+          <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ComboBox">
+          <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
+        <Style Selector="TabItem controls|AutoGrid">
+          <Setter Property="Margin" Value="16" />
+        </Style>
+      </TabControl.Styles>
+
+      <TabItem Header="通用">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralConfig}">
+          <Label>语言</Label>
+          <ComboBox SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language }"
+                    Name="comboLanguage" ItemsSource="{Binding LanguagesAvailable}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Value}"></TextBlock>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <Label>用户数据目录</Label>
+          <controls:FilePicker Text="{Binding UserDir}" Type="Folder" />
+          <Label>开机启动</Label>
+          <CheckBox IsChecked="{Binding LaunchOnStartup}" />
+          <Label>启动开始识别</Label>
+          <CheckBox IsChecked="{Binding StartOnLaunch }" />
+          <Label>自动更新</Label>
+          <CheckBox IsChecked="{Binding AutoUpdate}" />
+        </controls:AutoGrid>
+
+      </TabItem>
+      <TabItem Header="显示">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*" DataContext="{Binding AppearanceConfig}">
+          <Grid.Styles>
+            <Style Selector="ColorPicker">
+              <Setter Property="Width" Value="{Binding #comboAlign.Bounds.Width}"></Setter>
+            </Style>
+          </Grid.Styles>
+          <Label>阴影颜色</Label>
+          <ColorPicker Color="{Binding ShadowColor, Converter={StaticResource IntToColorConverter}}" />
+
+          <Label>阴影大小</Label>
+          <NumericUpDown Value="{Binding ShadowSize}" />
+
+          <Label>字体</Label>
+          <ComboBox
+            SelectedValueBinding="{Binding Name}"
+            SelectedValue="{Binding FontFamily}" SelectedIndex="0" ItemsSource="{Binding FontsAvailable}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}" FontFamily="{Binding}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+
+          <Label>字体大小</Label>
+          <NumericUpDown Value="{Binding FontSize}" />
+
+          <Label>字体颜色</Label>
+          <ColorPicker Color="{Binding FontColor, Converter={StaticResource IntToColorConverter}}" />
+
+          <Label>鼠标悬停背景</Label>
+          <ColorPicker Color="{Binding MouseHover, Converter={StaticResource IntToColorConverter}}" />
+
+          <Label>文字对齐</Label>
+          <ComboBox
+            Name="comboAlign"
+            SelectedValueBinding="{Binding Key}"
+            SelectedValue="{Binding TextAlign}"
+            ItemsSource="{Binding TextAligns}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Value}"></TextBlock>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </controls:AutoGrid>
+      </TabItem>
+
+      <TabItem Header="音频源">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding AudioConfig}">
+          <Label>音频源</Label>
+          <DockPanel>
+            <Button DockPanel.Dock="Right">刷新</Button>
+            <ComboBox ItemsSource="{Binding AudioSourcesAvailable}"
+                      SelectedValue="{Binding AudioSource}"
+                      SelectedValueBinding="{Binding Name}">
+              <ComboBox.Styles>
+                <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
+                  <Setter Property="IsVisible" Value="False"></Setter>
+                </Style>
+              </ComboBox.Styles>
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}"></TextBlock>
+                    <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </DockPanel>
+          <controls:PluginConfig Config="{Binding Config}"></controls:PluginConfig>
+        </controls:AutoGrid>
+      </TabItem>
+      <TabItem Header="语音识别">
+        <StackPanel DataContext="{Binding RecognizeConfig}">
+          <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
+            <Label>语音识别器</Label>
+            <DockPanel>
+              <Button DockPanel.Dock="Right">刷新</Button>
+              <ComboBox ItemsSource="{Binding RecognizersAvailable}"
+                        SelectedValue="{Binding Recognizer}"
+                        SelectedValueBinding="{Binding Name}">
+                <ComboBox.Styles>
+                  <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
+                    <Setter Property="IsVisible" Value="False"></Setter>
+                  </Style>
+                </ComboBox.Styles>
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}"></TextBlock>
+                      <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </DockPanel>
+          </controls:AutoGrid>
+
+          <controls:PluginConfig Config="{Binding Config}"></controls:PluginConfig>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="插件"></TabItem>
+      <TabItem Header="资源"></TabItem>
+
+      <TabItem Header="关于">
+
+        <TextBlock TextWrapping="Wrap" xml:space="preserve" Margin="8">TMSpeech - Tencent meeting Speech tool.
+A simple tool for recognize system audio.
+
+Used in slacking off when meeting on tencent meeting.
+
+This tool is made possible by the following open source projects:
+
+sherpa-onnx: Real-time speech recognition
+Reference: https://k2-fsa.github.io/sherpa/
+
+NAudio: an open source .NET audio library written by Mark Heath
+Reference: https://github.com/naudio/NAudio</TextBlock>
+
+      </TabItem>
+
+
+    </TabControl>
+
+
+  </DockPanel>
+</Window>
