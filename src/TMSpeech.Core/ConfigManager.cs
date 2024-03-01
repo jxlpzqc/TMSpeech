@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TMSpeech.Core.Utils;
 
 namespace TMSpeech.Core;
 
@@ -71,7 +72,14 @@ public abstract class ConfigManager
 
 class LocalConfigManagerImpl : ConfigManager
 {
-    private string _userDataDir = "";
+    public LocalConfigManagerImpl() : base()
+    {
+        _userDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TMSpeech");
+        if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
+        Load();
+    }
+
+    private string _userDataDir;
 
     public override string UserDataDir
     {
@@ -139,7 +147,11 @@ class LocalConfigManagerImpl : ConfigManager
     public override void Load()
     {
         var config = File.ReadAllText(ConfigFile);
-        var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config);
+        var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
+            new JsonSerializerOptions
+            {
+                Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
+            });
         if (value == null) return;
 
         _config = value;

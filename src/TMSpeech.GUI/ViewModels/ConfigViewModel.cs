@@ -5,7 +5,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -25,7 +27,28 @@ namespace TMSpeech.GUI.ViewModels
     {
         protected abstract string SectionName { get; }
 
-        public bool IsModified => ConfigManagerFactory.Instance.IsModified;
+        [Reactive]
+        public bool IsModified { get; protected set; }
+
+        [Reactive]
+        public bool IsDirty { get; protected set; }
+
+        private void UpdateModifyStatus()
+        {
+            IsModified = ConfigManagerFactory.Instance.IsModified;
+        }
+
+        private void UpdateDirtyStatus()
+        {
+            var value1 = Serialize();
+            var value2 = ConfigManagerFactory.Instance.GetAll()
+                .Where(x => ConfigManager.IsInSection(x.Key, SectionName))
+                .ToDictionary(
+                    x => string.IsNullOrEmpty(SectionName) ? x.Key : x.Key.Substring(SectionName.Length + 1),
+                    x => x.Value
+                );
+            IsDirty = JsonSerializer.Serialize(value1) != JsonSerializer.Serialize(value2);
+        }
 
         public virtual Dictionary<string, object> Serialize()
         {
@@ -48,25 +71,46 @@ namespace TMSpeech.GUI.ViewModels
                 .ToList()
                 .ForEach(p =>
                 {
+                    if (!dict.ContainsKey(p.Name)) return;
                     var value = dict[p.Name];
-                    if (value != null)
-                    {
-                        var type = p.PropertyType;
-                        p.SetValue(this, value);
-                    }
+                    var type = p.PropertyType;
+                    p.SetValue(this, Convert.ChangeType(value, type));
                 });
         }
 
         public void Reset()
         {
-            ConfigManagerFactory.Instance.Reset();
-            Load();
+            if (IsModified)
+            {
+                ConfigManagerFactory.Instance.Reset();
+                Load();
+            }
+
+            UpdateModifyStatus();
+            UpdateDirtyStatus();
         }
 
         public void Load()
         {
             var dict = ConfigManagerFactory.Instance.GetAll();
-            Deserialize(dict);
+            Deserialize(
+                dict.Where(x => ConfigManager.IsInSection(x.Key, SectionName))
+                    .ToDictionary(
+                        x => string.IsNullOrEmpty(SectionName) ? x.Key : x.Key.Substring(SectionName.Length + 1),
+                        x => x.Value
+                    )
+            );
+        }
+
+        public void Apply()
+        {
+            var dict = Serialize();
+            ConfigManagerFactory.Instance.BatchApply(dict.ToDictionary(
+                x => (SectionName != "" ? $"{SectionName}." : "") + x.Key,
+                x => x.Value
+            ));
+            UpdateModifyStatus();
+            UpdateDirtyStatus();
         }
 
         public void Save()
@@ -78,6 +122,26 @@ namespace TMSpeech.GUI.ViewModels
             catch
             {
             }
+
+            UpdateModifyStatus();
+            UpdateDirtyStatus();
+        }
+
+        public ConfigViewModelBase()
+        {
+            Load();
+            this.PropertyChanged += (sender, args) =>
+            {
+                var propName = args.PropertyName;
+                var type = sender.GetType();
+
+                if (sender.GetType().GetProperty(propName)
+                    .GetCustomAttributes(false)
+                    .Any(u => u.GetType() == typeof(ConfigJsonValueAttribute)))
+                {
+                    UpdateDirtyStatus();
+                }
+            };
         }
     }
 
@@ -88,9 +152,12 @@ namespace TMSpeech.GUI.ViewModels
         public AudioConfigViewModel AudioConfig { get; } = new AudioConfigViewModel();
         public RecognizeConfigViewModel RecognizeConfig { get; } = new RecognizeConfigViewModel();
 
-
         [Reactive]
         public int CurrentTab { get; set; } = 0;
+
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyCommand { get; }
 
         private const int TAB_GENERAL = 0;
         private const int TAB_APPEARANCE = 1;
@@ -98,10 +165,39 @@ namespace TMSpeech.GUI.ViewModels
         private const int TAB_RECOGNIZE = 3;
         private const int TAB_ABOUT = 4;
 
+        private ConfigViewModelBase? TabToConfig(int tab)
+        {
+            return tab switch
+            {
+                TAB_GENERAL => GeneralConfig,
+                TAB_APPEARANCE => AppearanceConfig,
+                TAB_AUDIO => AudioConfig,
+                TAB_RECOGNIZE => RecognizeConfig,
+                _ => null
+            };
+        }
+
+        private ConfigViewModelBase? CurrentConfig => TabToConfig(CurrentTab);
+
         public ConfigViewModel()
         {
-            this.WhenAnyValue(x => x.CurrentTab)
-                .Buffer(2, 1);
+            var totalDirty = this.WhenAnyValue(
+                x => x.GeneralConfig.IsDirty,
+                x => x.AppearanceConfig.IsDirty,
+                x => x.AudioConfig.IsDirty,
+                x => x.RecognizeConfig.IsDirty
+            ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
+
+            var totalModified = this.WhenAnyValue(
+                x => x.GeneralConfig.IsModified,
+                x => x.AppearanceConfig.IsModified,
+                x => x.AudioConfig.IsModified,
+                x => x.RecognizeConfig.IsModified
+            ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
+
+            this.SaveCommand = ReactiveCommand.Create(() => { CurrentConfig?.Save(); }, totalModified);
+            this.CancelCommand = ReactiveCommand.Create(() => { CurrentConfig?.Reset(); });
+            this.ApplyCommand = ReactiveCommand.Create(() => { CurrentConfig?.Apply(); }, totalDirty);
         }
     }
 
@@ -118,9 +214,6 @@ namespace TMSpeech.GUI.ViewModels
             new KeyValuePair<string, string>("zh-cn", "简体中文"),
             new KeyValuePair<string, string>("en-us", "English"),
         ];
-
-        /*[Reactive]
-        public string Theme { get; set; } = "light";*/
 
         [Reactive]
         [ConfigJsonValue]

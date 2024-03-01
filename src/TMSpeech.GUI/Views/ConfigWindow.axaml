@@ -17,11 +17,11 @@
   </Window.Resources>
   <DockPanel>
     <StackPanel Margin="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
-      <Button Name="btnSave" Margin="4,0,4,0">确定</Button>
-      <Button Name="btnCancel" Margin="4,0,4,0">取消</Button>
-      <Button Name="btnApply" Margin="4,0,0,0">应用</Button>
+      <Button Name="btnSave" Margin="4,0,4,0" Command="{Binding SaveCommand}">保存</Button>
+      <Button Name="btnCancel" Margin="4,0,4,0" Command="{Binding CancelCommand}">取消</Button>
+      <Button Name="btnApply" Margin="4,0,0,0" Command="{Binding ApplyCommand}">应用</Button>
     </StackPanel>
-    <TabControl TabStripPlacement="Left" SelectedIndex="2">
+    <TabControl TabStripPlacement="Left" SelectedIndex="{Binding CurrentTab}">
       <TabControl.Styles>
         <Style Selector="Label,TextBox,ComboBox,Button,CheckBox,NumericUpDown">
           <Setter Property="Margin" Value="5" />
@@ -36,10 +36,17 @@
         </Style>
       </TabControl.Styles>
 
-      <TabItem Header="通用">
+      <TabItem>
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock>通用</TextBlock>
+            <TextBlock IsVisible="{Binding GeneralConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding GeneralConfig.IsModified}">+</TextBlock>
+          </StackPanel>
+        </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralConfig}">
           <Label>语言</Label>
-          <ComboBox SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language }"
+          <ComboBox SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language,Mode=TwoWay}"
                     Name="comboLanguage" ItemsSource="{Binding LanguagesAvailable}">
             <ComboBox.ItemTemplate>
               <DataTemplate>
@@ -48,17 +55,24 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <Label>用户数据目录</Label>
-          <controls:FilePicker Text="{Binding UserDir}" Type="Folder" />
+          <controls:FilePicker Text="{Binding UserDir,Mode=TwoWay}" Type="Folder" />
           <Label>开机启动</Label>
-          <CheckBox IsChecked="{Binding LaunchOnStartup}" />
+          <CheckBox IsChecked="{Binding LaunchOnStartup,Mode=TwoWay}" />
           <Label>启动开始识别</Label>
-          <CheckBox IsChecked="{Binding StartOnLaunch }" />
+          <CheckBox IsChecked="{Binding StartOnLaunch,Mode=TwoWay}" />
           <Label>自动更新</Label>
-          <CheckBox IsChecked="{Binding AutoUpdate}" />
+          <CheckBox IsChecked="{Binding AutoUpdate,Mode=TwoWay}" />
         </controls:AutoGrid>
 
       </TabItem>
-      <TabItem Header="显示">
+      <TabItem>
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock>显示</TextBlock>
+            <TextBlock IsVisible="{Binding AppearanceConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding AppearanceConfig.IsModified}">+</TextBlock>
+          </StackPanel>
+        </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*" DataContext="{Binding AppearanceConfig}">
           <Grid.Styles>
             <Style Selector="ColorPicker">
@@ -106,7 +120,15 @@
         </controls:AutoGrid>
       </TabItem>
 
-      <TabItem Header="音频源">
+      <TabItem>
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock>音频源</TextBlock>
+            <TextBlock IsVisible="{Binding AudioConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding AudioConfig.IsModified}">+</TextBlock>
+          </StackPanel>
+        </TabItem.Header>
+
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding AudioConfig}">
           <Label>音频源</Label>
           <DockPanel>
@@ -132,7 +154,14 @@
           <controls:PluginConfig Config="{Binding Config}"></controls:PluginConfig>
         </controls:AutoGrid>
       </TabItem>
-      <TabItem Header="语音识别">
+      <TabItem>
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock>语音识别</TextBlock>
+            <TextBlock IsVisible="{Binding RecognizeConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding RecognizeConfig.IsModified}">+</TextBlock>
+          </StackPanel>
+        </TabItem.Header>
         <StackPanel DataContext="{Binding RecognizeConfig}">
           <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
             <Label>语音识别器</Label>
