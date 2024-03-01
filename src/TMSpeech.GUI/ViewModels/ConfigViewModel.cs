@@ -12,6 +12,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using ReactiveUI;
+using TMSpeech.Core;
 using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.ViewModels
@@ -24,119 +25,58 @@ namespace TMSpeech.GUI.ViewModels
     {
         protected abstract string SectionName { get; }
 
-        public bool IsModified
-        {
-            get { return _backupFile != Serialize().ToJsonString(); }
-        }
+        public bool IsModified => ConfigManagerFactory.Instance.IsModified;
 
-        public virtual JsonObject Serialize()
+        public virtual Dictionary<string, object> Serialize()
         {
-            var json = new JsonObject();
+            var ret = new Dictionary<string, object>();
             this.GetType().GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(ConfigJsonValueAttribute), false).Length > 0)
                 .ToList()
                 .ForEach(p =>
                 {
                     var value = p.GetValue(this);
-                    var type = p.PropertyType;
-                    if (value != null)
-                    {
-                        if (type == typeof(int)) json[p.Name] = (int)value;
-                        else if (type == typeof(string)) json[p.Name] = (string)value;
-                        else if (type == typeof(bool)) json[p.Name] = (bool)value;
-                        else if (type == typeof(double)) json[p.Name] = (double)value;
-                        else if (type == typeof(float)) json[p.Name] = (float)value;
-                        else if (type == typeof(long)) json[p.Name] = (long)value;
-                        else throw new InvalidCastException("Unsupported type");
-                    }
+                    ret[p.Name] = value;
                 });
-            return json;
+            return ret;
         }
 
-        public virtual void Deserialize(JsonObject json)
+        public virtual void Deserialize(IReadOnlyDictionary<string, object> dict)
         {
             this.GetType().GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(ConfigJsonValueAttribute), false).Length > 0)
                 .ToList()
                 .ForEach(p =>
                 {
-                    var value = json[p.Name];
+                    var value = dict[p.Name];
                     if (value != null)
                     {
                         var type = p.PropertyType;
-                        p.SetValue(this, value.Deserialize(type));
+                        p.SetValue(this, value);
                     }
                 });
         }
 
-        private string GetConfigFile()
-        {
-            return "D:\\TMSpeech.config.json";
-        }
-
-        private string _backupFile;
-
         public void Reset()
         {
-            Deserialize(JsonNode.Parse(_backupFile) as JsonObject);
+            ConfigManagerFactory.Instance.Reset();
+            Load();
         }
 
         public void Load()
         {
-            try
-            {
-                var filename = GetConfigFile();
-                var jsonText = File.ReadAllText(filename);
-                var jsonObj = JsonNode.Parse(jsonText) as JsonObject;
-                if (!string.IsNullOrEmpty(SectionName))
-                {
-                    foreach (var section in SectionName.Split(":"))
-                    {
-                        jsonObj = jsonObj[section] as JsonObject;
-                    }
-                }
-
-                _backupFile = jsonObj.ToJsonString();
-                Deserialize(jsonObj);
-            }
-            catch
-            {
-                //TODO: handle error
-            }
+            var dict = ConfigManagerFactory.Instance.GetAll();
+            Deserialize(dict);
         }
 
         public void Save()
         {
             try
             {
-                var filename = GetConfigFile();
-                var saveJsonObj = Serialize();
-
-                var jsonText = File.ReadAllText(filename);
-                var rootJsonObj = JsonNode.Parse(jsonText) as JsonObject;
-                var jsonObj = rootJsonObj;
-                if (!string.IsNullOrEmpty(SectionName))
-                {
-                    var sections = SectionName.Split(":");
-                    foreach (var section in sections[..-1])
-                    {
-                        var v = jsonObj[section] as JsonObject;
-                        if (v == null)
-                        {
-                            v = new JsonObject();
-                            jsonObj[section] = v;
-                        }
-
-                        jsonObj = v;
-                    }
-
-                    jsonObj[sections[sections.Length - 1]] = saveJsonObj;
-                    File.WriteAllText(filename, rootJsonObj.ToJsonString());
-                }
+                ConfigManagerFactory.Instance.Save();
             }
             catch
             {
-                //TODO: handle error
             }
         }
     }
@@ -160,6 +100,8 @@ namespace TMSpeech.GUI.ViewModels
 
         public ConfigViewModel()
         {
+            this.WhenAnyValue(x => x.CurrentTab)
+                .Buffer(2, 1);
         }
     }
 

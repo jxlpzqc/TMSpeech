@@ -36,6 +36,7 @@ public abstract class ConfigManager
     public abstract void DeleteAndApply<T>(string key);
 
     public abstract T Get<T>(string key);
+    public abstract IReadOnlyDictionary<string, object> GetAll();
 
     public event EventHandler<ConfigChangedEventArgs> ConfigChanged;
 
@@ -43,6 +44,8 @@ public abstract class ConfigManager
     {
         ConfigChanged?.Invoke(this, arg);
     }
+
+    public abstract bool IsModified { get; }
 
     public const string ConfigKeySeparator = ".";
 
@@ -86,6 +89,7 @@ class LocalConfigManagerImpl : ConfigManager
     public override void Apply<T>(string key, T value)
     {
         _config[key] = value;
+        _isModified = true;
         OnConfigChange(new ConfigChangedEventArgs(new List<string> { key }));
     }
 
@@ -98,12 +102,14 @@ class LocalConfigManagerImpl : ConfigManager
             changed.Add(c.Key);
         }
 
+        _isModified = true;
         OnConfigChange(new ConfigChangedEventArgs(changed));
     }
 
     public override void DeleteAndApply<T>(string key)
     {
         _config.Remove(key);
+        _isModified = true;
         OnConfigChange(new ConfigChangedEventArgs(new List<string> { key }));
     }
 
@@ -113,9 +119,18 @@ class LocalConfigManagerImpl : ConfigManager
         return (T)_config[key];
     }
 
+    public override IReadOnlyDictionary<string, object> GetAll()
+    {
+        return _config;
+    }
+
+    private bool _isModified = false;
+    public override bool IsModified => _isModified;
+
     public override void Reset()
     {
         _config = new Dictionary<string, object>(_configBackup);
+        _isModified = false;
         OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));
     }
 
@@ -130,6 +145,7 @@ class LocalConfigManagerImpl : ConfigManager
         _config = value;
         _configBackup = new Dictionary<string, object>(_config);
 
+        _isModified = false;
         OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));
     }
 
@@ -137,5 +153,13 @@ class LocalConfigManagerImpl : ConfigManager
     {
         var text = JsonSerializer.Serialize(_config);
         File.WriteAllText(ConfigFile, text);
+        _configBackup = new Dictionary<string, object>(_config);
+        _isModified = false;
     }
+}
+
+public static class ConfigManagerFactory
+{
+    private static Lazy<ConfigManager> _instance = new(() => new LocalConfigManagerImpl());
+    public static ConfigManager Instance => _instance.Value;
 }
