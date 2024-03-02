@@ -6,8 +6,10 @@
         xmlns:vm="clr-namespace:TMSpeech.GUI.ViewModels"
         xmlns:converter="clr-namespace:TMSpeech.GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        Width="720"
+        Icon="/Assets/tmspeech.ico"
         x:Class="TMSpeech.GUI.Views.ConfigWindow"
-        Title="ConfigWindow"
+        Title="配置"
         FontFamily="微软雅黑,Microsoft YaHei,苹方-简">
   <Design.DataContext>
     <vm:ConfigViewModel />
@@ -196,11 +198,36 @@
       <TabItem Header="资源"></TabItem>
 
       <TabItem Header="关于">
+        <ScrollViewer>
+          <ScrollViewer.Resources>
+            <ResourceDictionary>
+              <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="../ImageResources.axaml"></ResourceInclude>
+              </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
 
-        <TextBlock TextWrapping="Wrap" xml:space="preserve" Margin="8">TMSpeech - Tencent meeting Speech tool.
-A simple tool for recognize system audio.
 
-Used in slacking off when meeting on tencent meeting.
+          </ScrollViewer.Resources>
+
+          <StackPanel Margin="24">
+            <Border Margin="0,0,0,24" Background="#FF005F2D" CornerRadius="24" ClipToBounds="True">
+              <Image MaxWidth="400" Source="{StaticResource tmspeech_banner}" />
+            </Border>
+
+            <TextBlock TextWrapping="Wrap">
+              <Run FontSize="24">TMSpeech</Run>
+              <LineBreak />
+              <Run>版本：</Run>
+              <Run Name="runVersion"></Run>
+              <LineBreak />
+              <Run>内部版本：</Run>
+              <Run Name="runInternalVersion"></Run>
+              <LineBreak />
+            </TextBlock>
+            
+            <Button Margin="0,0,0,24">检查更新</Button>
+
+            <TextBlock xml:space="preserve">A simple tool for recognize system audio.
 
 This tool is made possible by the following open source projects:
 
@@ -208,7 +235,11 @@ sherpa-onnx: Real-time speech recognition
 Reference: https://k2-fsa.github.io/sherpa/
 
 NAudio: an open source .NET audio library written by Mark Heath
-Reference: https://github.com/naudio/NAudio</TextBlock>
+Reference: https://github.com/naudio/NAudio
+            </TextBlock>
+
+          </StackPanel>
+        </ScrollViewer>
 
       </TabItem>
 

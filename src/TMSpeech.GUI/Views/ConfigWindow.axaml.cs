@@ -13,6 +13,11 @@ namespace TMSpeech.GUI.Views
             InitializeComponent();
             ViewModel = new ConfigViewModel();
 
+            runVersion.Text = GitVersionInformation.FullSemVer;
+
+            runInternalVersion.Text = GitVersionInformation.ShortSha +
+                                      (GitVersionInformation.UncommittedChanges != "0" ? " (dirty)" : "");
+
 
             this.WhenActivated(d =>
             {

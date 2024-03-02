@@ -6,7 +6,7 @@
         xmlns:views="clr-namespace:TMSpeech.GUI.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="TMSpeech.GUI.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/tmspeech.ico"
         ShowInTaskbar="False"
         SystemDecorations="None"
         Topmost="True"

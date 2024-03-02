@@ -12,7 +12,7 @@
 
   <TrayIcon.Icons>
     <TrayIcons>
-      <TrayIcon Icon="/Assets/avalonia-logo.ico"
+      <TrayIcon Icon="/Assets/tmspeech-tray.ico"
                 ToolTipText="TMSpeech">
         <TrayIcon.Menu>
           <NativeMenu>
