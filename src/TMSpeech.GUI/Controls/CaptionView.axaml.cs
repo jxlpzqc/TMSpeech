@@ -3,14 +3,14 @@ using Avalonia.Controls;
 
 namespace TMSpeech.GUI.Views;
 
-public partial class MainView : UserControl
+public partial class CaptionView : UserControl
 {
-    public MainView()
+    public CaptionView()
     {
         InitializeComponent();
     }
 
-    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<MainView, string>(
+    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<CaptionView, string>(
         "Text");
 
     public string Text

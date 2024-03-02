@@ -83,6 +83,6 @@
         <PathIcon Data="{StaticResource settings_regular}"></PathIcon>
       </Button>
     </StackPanel>
-    <views:MainView Grid.Row="1" Margin="16" Text="{Binding Text}"/>
+    <views:CaptionView Grid.Row="1" Margin="16" Text="{Binding Text}"/>
   </Grid>
 </Window>

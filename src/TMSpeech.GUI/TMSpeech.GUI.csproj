@@ -24,4 +24,12 @@
     <ItemGroup>
         <ProjectReference Include="..\TMSpeech.Core\TMSpeech.Core.csproj"/>
     </ItemGroup>
+
+
+    <ItemGroup>
+      <Compile Update="Controls\CaptionView.axaml.cs">
+        <DependentUpon>MainView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>
