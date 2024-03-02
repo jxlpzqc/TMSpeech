@@ -1,12 +1,82 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia.Media;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using TMSpeech.Core;
 using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.ViewModels;
+
+public class MainCaptionViewModel : ViewModelBase
+{
+    [ObservableAsProperty]
+    public int ShadowSize { get; }
+
+    [ObservableAsProperty]
+    public Color ShadowColor { get; }
+
+    [ObservableAsProperty]
+    public int FontSize { get; }
+
+    [ObservableAsProperty]
+    public Color FontColor { get; }
+
+    [ObservableAsProperty]
+    public TextAlignment TextAlign { get; }
+    
+    [ObservableAsProperty]
+    public FontFamily FontFamily { get; }
+    
+    [ObservableAsProperty]
+    public string Text { get; }
+
+    private IObservable<T> GetPropObservable<T>(string key)
+    {
+        return Observable.Return(ConfigManagerFactory.Instance.Get<T>($"appearance.{key}"))
+            .Merge(
+                Observable.FromEventPattern<ConfigChangedEventArgs>(
+                        p => ConfigManagerFactory.Instance.ConfigChanged += p,
+                        p => ConfigManagerFactory.Instance.ConfigChanged -= p)
+                    .Where(x => x.EventArgs.Contains($"appearance.{key}"))
+                    .Select(x =>
+                        ConfigManagerFactory.Instance.Get<T>($"appearance.{key}")
+                    ));
+    }
+
+    public MainCaptionViewModel()
+    {
+        GetPropObservable<int>("ShadowSize")
+            .ToPropertyEx(this, x => x.ShadowSize);
+        GetPropObservable<uint>("ShadowColor")
+            .Select(Color.FromUInt32)
+            .ToPropertyEx(this, x => x.ShadowColor);
+        GetPropObservable<int>("FontSize")
+            .Select(x =>
+            {
+                return x;
+            })
+            .ToPropertyEx(this, x => x.FontSize);
+        GetPropObservable<uint>("FontColor")
+            .Select(Color.FromUInt32)
+            .ToPropertyEx(this, x => x.FontColor);
+        GetPropObservable<int>("TextAlign")
+            .Select(x => x switch
+            {
+                AppearanceSectionConfigViewModel.TextAlignEnum.Left => TextAlignment.Left,
+                AppearanceSectionConfigViewModel.TextAlignEnum.Center => TextAlignment.Center,
+                AppearanceSectionConfigViewModel.TextAlignEnum.Right => TextAlignment.Right,
+                AppearanceSectionConfigViewModel.TextAlignEnum.Justify => TextAlignment.Right,
+                _ => TextAlignment.Left
+            })
+            .ToPropertyEx(this, x => x.TextAlign);
+
+        GetPropObservable<string>("FontFamily")
+            .Select(x => new FontFamily(x))
+            .ToPropertyEx(this, x => x.FontFamily);
+    }
+}
 
 public class MainViewModel : ViewModelBase
 {
@@ -27,6 +97,8 @@ public class MainViewModel : ViewModelBase
 
     [ObservableAsProperty]
     public string RunningTimeDisplay { get; }
+
+    public MainCaptionViewModel CaptionViewModel { get; } = new MainCaptionViewModel();
 
     [ObservableAsProperty]
     public string Text { get; }

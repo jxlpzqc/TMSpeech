@@ -18,7 +18,7 @@ public class ConfigChangedEventArgs : EventArgs
     public bool Contains(string section)
     {
         if (Type == ChangeType.All) return true;
-        return ChangedKeys?.Any(u => ConfigManager.IsInSection(u, section)) ?? false;
+        return ChangedKeys?.Any(u => u == section || ConfigManager.IsInSection(u, section)) ?? false;
     }
 
     public ConfigChangedEventArgs(ICollection<string>? keys, ChangeType type = ChangeType.Partial) : base()
@@ -124,7 +124,7 @@ class LocalConfigManagerImpl : ConfigManager
     public override T Get<T>(string key)
     {
         if (!_config.ContainsKey(key)) return default(T);
-        return (T)_config[key];
+        return (T)Convert.ChangeType(_config[key], typeof(T));
     }
 
     public override IReadOnlyDictionary<string, object> GetAll()

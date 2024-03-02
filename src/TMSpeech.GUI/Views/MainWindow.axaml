@@ -83,6 +83,14 @@
         <PathIcon Data="{StaticResource settings_regular}"></PathIcon>
       </Button>
     </StackPanel>
-    <views:CaptionView Grid.Row="1" Margin="16" Text="{Binding Text}"/>
+    <views:CaptionView Grid.Row="1" Margin="16"
+                       FontWeight="Bold"
+                       FontColor="{Binding CaptionViewModel.FontColor}"
+                       FontSize="{Binding CaptionViewModel.FontSize}"
+                       FontFamily="{Binding CaptionViewModel.FontFamily}"
+                       TextAlign="{Binding CaptionViewModel.TextAlign}"
+                       ShadowColor="{Binding CaptionViewModel.ShadowColor}"
+                       ShadowSize="{Binding CaptionViewModel.ShadowSize}"
+                       Text="{Binding Text}" />
   </Grid>
 </Window>

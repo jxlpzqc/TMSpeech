@@ -3,10 +3,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:TMSpeech.GUI.ViewModels"
+             xmlns:aconverter="clr-namespace:Avalonia.Markup.Xaml.Converters;assembly=Avalonia.Markup.Xaml"
              xmlns:controls="clr-namespace:TMSpeech.GUI.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="TMSpeech.GUI.Views.CaptionView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="vm:MainViewModel"
+             Name="root">
+  <UserControl.Resources>
+    <aconverter:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+  </UserControl.Resources>
   <Canvas>
     <StackPanel VerticalAlignment="Bottom" Canvas.Bottom="0" Width="{Binding $parent.Bounds.Width}">
       <StackPanel.Styles>
@@ -19,13 +24,18 @@
             <Setter.Value>
               <DropShadowDirectionEffect
                 Direction="0,0"
-                BlurRadius="8"
-                Color="Black" />
+                BlurRadius="{Binding #root.ShadowSize}"
+                Color="{Binding #root.ShadowColor}" />
             </Setter.Value>
           </Setter>
         </Style>
       </StackPanel.Styles>
-      <TextBlock FontWeight="Bold" Foreground="White" Text="{Binding $parent[UserControl].Text}">
+      <TextBlock FontWeight="Bold"
+                 Foreground="{Binding #root.FontColor,Converter={StaticResource ColorToBrushConverter}}"
+                 FontSize="{Binding #root.FontSize}"
+                 FontFamily="{Binding #root.FontFamily}"
+                 TextAlignment="{Binding #root.TextAlign}"
+                 Text="{Binding #root.Text}">
       </TextBlock>
     </StackPanel>
   </Canvas>
