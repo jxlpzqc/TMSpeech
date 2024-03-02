@@ -69,7 +69,7 @@ public partial class MainWindow : Window
     private void SettingsButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         this.Topmost = false;
-        new ConfigWindow().Show(this);
+        new ConfigWindow().Show();
         this.Topmost = true;
     }
     

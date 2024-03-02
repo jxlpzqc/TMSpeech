@@ -41,7 +41,6 @@
           <StackPanel Orientation="Horizontal">
             <TextBlock>通用</TextBlock>
             <TextBlock IsVisible="{Binding GeneralConfig.IsDirty}">*</TextBlock>
-            <TextBlock IsVisible="{Binding GeneralConfig.IsModified}">+</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralConfig}">
@@ -70,7 +69,6 @@
           <StackPanel Orientation="Horizontal">
             <TextBlock>显示</TextBlock>
             <TextBlock IsVisible="{Binding AppearanceConfig.IsDirty}">*</TextBlock>
-            <TextBlock IsVisible="{Binding AppearanceConfig.IsModified}">+</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*" DataContext="{Binding AppearanceConfig}">
@@ -125,7 +123,6 @@
           <StackPanel Orientation="Horizontal">
             <TextBlock>音频源</TextBlock>
             <TextBlock IsVisible="{Binding AudioConfig.IsDirty}">*</TextBlock>
-            <TextBlock IsVisible="{Binding AudioConfig.IsModified}">+</TextBlock>
           </StackPanel>
         </TabItem.Header>
 
@@ -151,7 +148,8 @@
               </ComboBox.ItemTemplate>
             </ComboBox>
           </DockPanel>
-          <controls:PluginConfigView Config="{Binding Config}" Value="{Binding PluginConfig, Mode=TwoWay}" />
+          <controls:PluginConfigView ConfigEditor="{Binding ConfigEditor}"
+                                     Value="{Binding PluginConfig,Mode=TwoWay}" />
         </controls:AutoGrid>
       </TabItem>
       <TabItem>
@@ -159,7 +157,6 @@
           <StackPanel Orientation="Horizontal">
             <TextBlock>语音识别</TextBlock>
             <TextBlock IsVisible="{Binding RecognizeConfig.IsDirty}">*</TextBlock>
-            <TextBlock IsVisible="{Binding RecognizeConfig.IsModified}">+</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <StackPanel DataContext="{Binding RecognizeConfig}">
@@ -187,7 +184,8 @@
             </DockPanel>
           </controls:AutoGrid>
 
-          <controls:PluginConfigView Config="{Binding Config}" Value="{Binding PluginConfig, Mode=TwoWay}" />
+          <controls:PluginConfigView ConfigEditor="{Binding ConfigEditor}"
+                                     Value="{Binding PluginConfig,Mode=TwoWay}" />
         </StackPanel>
       </TabItem>
       <TabItem Header="插件"></TabItem>

@@ -21,19 +21,38 @@ public class PluginConfigView : UserControl
         this.Content = _container;
     }
 
-    public static readonly StyledProperty<IPluginConfiguration?> ConfigProperty =
-        AvaloniaProperty.Register<PluginConfigView, IPluginConfiguration?>(
-            nameof(IPluginConfiguration));
+    public static readonly StyledProperty<IPluginConfigEditor?> ConfigEditorProperty =
+        AvaloniaProperty.Register<PluginConfigView, IPluginConfigEditor?>(
+            nameof(ConfigEditor));
 
-    private void UpdateValueFromPluginLayer()
+    public IPluginConfigEditor? ConfigEditor
     {
-        this.Value = Config.Save();
+        get => GetValue(ConfigEditorProperty);
+        set => SetValue(ConfigEditorProperty, value);
     }
 
-    private void UpdateValues()
+    public static readonly StyledProperty<string> ValueProperty = AvaloniaProperty.Register<PluginConfigView, string>(
+        nameof(Value));
+
+    public string Value
     {
-        if (Config == null) return;
-        var values = Config.GetAll();
+        get => GetValue(ValueProperty);
+        set => SetValue(ValueProperty, value);
+    }
+
+    private bool _isNotifying;
+
+    private void NotifyValueUpdated()
+    {
+        _isNotifying = true;
+        Value = ConfigEditor.GenerateConfig();
+        _isNotifying = false;
+    }
+
+    private void UpdateValuesToView()
+    {
+        if (ConfigEditor == null) return;
+        var values = ConfigEditor.GetAll();
         foreach (var control in _container.Children.OfType<Control>())
         {
             if (control.Tag is string key)
@@ -42,59 +61,54 @@ public class PluginConfigView : UserControl
                 switch (control)
                 {
                     case TextBox tb:
-                        tb.Text = value;
+                        tb.Text = value?.ToString() ?? "";
                         break;
                     case FilePicker fp:
-                        fp.Text = value;
+                        fp.Text = value?.ToString() ?? "";
                         break;
                 }
             }
         }
     }
 
-    public event EventHandler<string> ValueUpdate;
-
     private void GenerateControls()
     {
         _container.Children.Clear();
-        if (Config == null) return;
-        foreach (var meta in Config.ListMeta())
+        if (ConfigEditor == null) return;
+        foreach (var formItem in ConfigEditor.GetFormItems())
         {
             var label = new Label()
             {
-                Content = meta.Name,
+                Content = formItem.Name,
             };
             _container.Children.Add(label);
             Control control;
-            if (meta.Type == PluginConfigurationMeta.MetaType.Text)
+            if (formItem is PluginConfigFormItemText)
             {
                 var tb = new TextBox()
                 {
-                    Text = meta.DefaultValue,
-                    Tag = meta.Key
+                    Tag = formItem.Key
                 };
                 tb.TextChanged += (_, _) =>
                 {
-                    Config.Set(meta.Key, tb.Text);
-                    UpdateValueFromPluginLayer();
+                    ConfigEditor.SetValue(formItem.Key, tb.Text);
+                    NotifyValueUpdated();
                 };
                 control = tb;
             }
-            else if (meta.Type == PluginConfigurationMeta.MetaType.File ||
-                     meta.Type == PluginConfigurationMeta.MetaType.Folder)
+            else if (formItem is PluginConfigFormItemFile fileFormItem)
             {
                 var fp = new FilePicker()
                 {
-                    Tag = meta.Key,
-                    Text = meta.DefaultValue,
-                    Type = meta.Type == PluginConfigurationMeta.MetaType.File
+                    Tag = fileFormItem.Key,
+                    Type = fileFormItem.Type == PluginConfigFormItemFileType.File
                         ? FilePickerType.File
                         : FilePickerType.Folder,
                 };
                 fp.FileChanged += (_, _) =>
                 {
-                    Config.Set(meta.Key, fp.Text);
-                    UpdateValueFromPluginLayer();
+                    ConfigEditor.SetValue(formItem.Key, fp.Text);
+                    NotifyValueUpdated();
                 };
                 control = fp;
             }
@@ -114,51 +128,31 @@ public class PluginConfigView : UserControl
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == ConfigProperty)
+        if (change.Property == ConfigEditorProperty)
         {
-            if (change.OldValue is IPluginConfiguration oldConfig)
+            if (change.OldValue is IPluginConfigEditor oldConfig)
             {
-                oldConfig.ValueUpdated -= ConfigValueUpdated;
+                oldConfig.ValueUpdated -= OnPluginLayerConfigValueUpdated;
             }
 
-
             GenerateControls();
-            if (change.NewValue is IPluginConfiguration newConfig)
+            if (change.NewValue is IPluginConfigEditor newConfig)
             {
-                Config?.Load(Value);
-                UpdateValues();
-                newConfig.ValueUpdated += ConfigValueUpdated;
+                OnPluginLayerConfigValueUpdated(this, null);
+                newConfig.ValueUpdated += OnPluginLayerConfigValueUpdated;
             }
         }
         else if (change.Property == ValueProperty)
         {
-            ValueUpdate?.Invoke(this, change.NewValue as string ?? "");
-            if (change.Sender != this)
-            {
-                Config?.Load(change.NewValue as string ?? "");
-                UpdateValues();
-            }
+            if (_isNotifying) return;
+            ConfigEditor?.LoadConfigString(change.GetNewValue<string>());
+            UpdateValuesToView();
         }
     }
 
-    private void ConfigValueUpdated(object? sender, EventArgs e)
+    private void OnPluginLayerConfigValueUpdated(object? sender, EventArgs e)
     {
-        UpdateValues();
-    }
-
-    public IPluginConfiguration? Config
-    {
-        get => GetValue(ConfigProperty);
-        set => SetValue(ConfigProperty, value);
-    }
-
-    public static readonly StyledProperty<string> ValueProperty = AvaloniaProperty.Register<PluginConfigView, string>(
-        "Value");
-
-
-    public string Value
-    {
-        get => GetValue(ValueProperty);
-        private set { SetValue(ValueProperty, value); }
+        UpdateValuesToView();
+        NotifyValueUpdated();
     }
 }

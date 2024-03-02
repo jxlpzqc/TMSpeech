@@ -27,16 +27,28 @@ namespace TMSpeech.AudioSource.Windows
 
         public string Note => "";
 
-        public IPluginConfiguration Configuration => null;
+        public IPluginConfigEditor CreateConfigEditor()
+        {
+            return null;
+        }
+
+        public void LoadConfig(string config)
+        {
+            throw new NotImplementedException();
+        }
 
         public bool Available => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         public event EventHandler<SourceStatus> StatusChanged;
         public event EventHandler<byte[]> DataAvailable;
 
-        public void Destroy() { }
+        public void Destroy()
+        {
+        }
 
-        public void Init() { }
+        public void Init()
+        {
+        }
 
         WasapiLoopbackCapture capture;
 
@@ -44,14 +56,10 @@ namespace TMSpeech.AudioSource.Windows
         {
             capture = new WasapiLoopbackCapture();
             capture.WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1);
-            capture.DataAvailable += (sender, data) =>
-            {
-                DataAvailable?.Invoke(sender, data.Buffer);
-            };
+            capture.DataAvailable += (sender, data) => { DataAvailable?.Invoke(sender, data.Buffer); };
 
             capture.StartRecording();
             StatusChanged?.Invoke(this, SourceStatus.Ready);
-
         }
 
         public void Stop()

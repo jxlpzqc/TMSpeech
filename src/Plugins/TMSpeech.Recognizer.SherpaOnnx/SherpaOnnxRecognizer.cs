@@ -27,12 +27,11 @@ namespace TMSpeech.Recognizer.SherpaOnnx
         public string License => "MIT License";
 
         public string Note => "";
+        public IPluginConfigEditor CreateConfigEditor() => new SherpaOnnxConfigEditor();
 
-        private SherpaOnnxConfiguration _configuration = new SherpaOnnxConfiguration();
-
-        public IPluginConfiguration Configuration
+        public void LoadConfig(string config)
         {
-            get { return _configuration; }
+            throw new NotImplementedException();
         }
 
         public bool Available => true;
@@ -61,10 +60,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             config = new OnlineRecognizerConfig();
             config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
-            config.TransducerModelConfig.Encoder = _configuration.Encoder;
-            config.TransducerModelConfig.Decoder = _configuration.Decoder;
-            config.TransducerModelConfig.Joiner = _configuration.Joiner;
-            config.TransducerModelConfig.Tokens = _configuration.Tokens;
+            config.TransducerModelConfig.Encoder = "";
+            config.TransducerModelConfig.Decoder = "";
+            config.TransducerModelConfig.Joiner = "";
+            config.TransducerModelConfig.Tokens = "";
             config.TransducerModelConfig.NumThreads = 1;
             config.TransducerModelConfig.Debug = 1;
             config.DecodingMethod = "greedy_search";

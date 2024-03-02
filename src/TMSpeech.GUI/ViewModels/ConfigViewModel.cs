@@ -25,20 +25,12 @@ namespace TMSpeech.GUI.ViewModels
 
     public abstract class ConfigViewModelBase : ViewModelBase
     {
-        protected abstract string SectionName { get; }
-
-        [Reactive]
-        public bool IsModified { get; protected set; }
+        protected virtual string SectionName => "";
 
         [Reactive]
         public bool IsDirty { get; protected set; }
 
-        private void UpdateModifyStatus()
-        {
-            IsModified = ConfigManagerFactory.Instance.IsModified;
-        }
-
-        private void UpdateDirtyStatus()
+        public virtual bool GetDirtyStatus()
         {
             var value1 = Serialize();
             var value2 = ConfigManagerFactory.Instance.GetAll()
@@ -47,7 +39,12 @@ namespace TMSpeech.GUI.ViewModels
                     x => string.IsNullOrEmpty(SectionName) ? x.Key : x.Key.Substring(SectionName.Length + 1),
                     x => x.Value
                 );
-            IsDirty = JsonSerializer.Serialize(value1) != JsonSerializer.Serialize(value2);
+            return JsonSerializer.Serialize(value1) != JsonSerializer.Serialize(value2);
+        }
+
+        private void UpdateDirtyStatus()
+        {
+            IsDirty = GetDirtyStatus();
         }
 
         public virtual Dictionary<string, object> Serialize()
@@ -80,13 +77,12 @@ namespace TMSpeech.GUI.ViewModels
 
         public void Reset()
         {
-            if (IsModified)
+            if (ConfigManagerFactory.Instance.IsModified)
             {
                 ConfigManagerFactory.Instance.Reset();
                 Load();
             }
 
-            UpdateModifyStatus();
             UpdateDirtyStatus();
         }
 
@@ -109,7 +105,6 @@ namespace TMSpeech.GUI.ViewModels
                 x => (SectionName != "" ? $"{SectionName}." : "") + x.Key,
                 x => x.Value
             ));
-            UpdateModifyStatus();
             UpdateDirtyStatus();
         }
 
@@ -123,7 +118,6 @@ namespace TMSpeech.GUI.ViewModels
             {
             }
 
-            UpdateModifyStatus();
             UpdateDirtyStatus();
         }
 
@@ -159,6 +153,9 @@ namespace TMSpeech.GUI.ViewModels
         public ReactiveCommand<Unit, Unit> CancelCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyCommand { get; }
 
+        [Reactive]
+        public bool IsModified { get; private set; }
+
         private const int TAB_GENERAL = 0;
         private const int TAB_APPEARANCE = 1;
         private const int TAB_AUDIO = 2;
@@ -188,16 +185,32 @@ namespace TMSpeech.GUI.ViewModels
                 x => x.RecognizeConfig.IsDirty
             ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
 
-            var totalModified = this.WhenAnyValue(
-                x => x.GeneralConfig.IsModified,
-                x => x.AppearanceConfig.IsModified,
-                x => x.AudioConfig.IsModified,
-                x => x.RecognizeConfig.IsModified
-            ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
+            List<ConfigViewModelBase> configs =
+            [
+                GeneralConfig,
+                AppearanceConfig,
+                AudioConfig,
+                RecognizeConfig
+            ];
 
-            this.SaveCommand = ReactiveCommand.Create(() => { CurrentConfig?.Save(); }, totalModified);
-            this.CancelCommand = ReactiveCommand.Create(() => { CurrentConfig?.Reset(); });
-            this.ApplyCommand = ReactiveCommand.Create(() => { CurrentConfig?.Apply(); }, totalDirty);
+            this.SaveCommand = ReactiveCommand.Create(() =>
+                {
+                    configs.ForEach(x => x.Save());
+                    IsModified = ConfigManagerFactory.Instance.IsModified;
+                },
+                totalDirty.CombineLatest(this.WhenAnyValue(x => x.IsModified))
+                    .Select(x => x.First || x.Second)
+            );
+            this.CancelCommand = ReactiveCommand.Create(() =>
+            {
+                configs.ForEach(x => x.Reset());
+                IsModified = ConfigManagerFactory.Instance.IsModified;
+            });
+            this.ApplyCommand = ReactiveCommand.Create(() =>
+            {
+                configs.ForEach(x => x.Apply());
+                IsModified = ConfigManagerFactory.Instance.IsModified;
+            }, totalDirty);
         }
     }
 
@@ -292,10 +305,7 @@ namespace TMSpeech.GUI.ViewModels
 
     public class AudioConfigViewModel : ConfigViewModelBase
     {
-        protected override string SectionName => "audio";
-
         [Reactive]
-        [ConfigJsonValue]
         public string AudioSource { get; set; } = "";
 
         [ObservableAsProperty]
@@ -303,10 +313,9 @@ namespace TMSpeech.GUI.ViewModels
             new List<Core.Plugins.IAudioSource>();
 
         [ObservableAsProperty]
-        public IPluginConfiguration? Config { get; }
+        public IPluginConfigEditor? ConfigEditor { get; }
 
         [Reactive]
-        [ConfigJsonValue]
         public string PluginConfig { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
@@ -319,6 +328,39 @@ namespace TMSpeech.GUI.ViewModels
             return plugins;
         }
 
+        public override Dictionary<string, object> Serialize()
+        {
+            var ret = new Dictionary<string, object>
+            {
+                { "audio.source", AudioSource },
+            };
+            if (!string.IsNullOrEmpty(AudioSource))
+            {
+                ret.Add($"plugin.{AudioSource}.config", PluginConfig);
+            }
+
+            return ret;
+        }
+
+        public override void Deserialize(IReadOnlyDictionary<string, object> dict)
+        {
+            if (dict.ContainsKey("audio.source"))
+            {
+                AudioSource = dict["audio.source"]?.ToString() ?? "";
+            }
+
+            if (dict.ContainsKey($"plugin.{AudioSource}.config"))
+            {
+                PluginConfig = dict[$"plugin.{AudioSource}.config"]?.ToString() ?? "";
+            }
+        }
+
+        public override bool GetDirtyStatus()
+        {
+            return ConfigManagerFactory.Instance.Get<string>("audio.source") != AudioSource ||
+                   ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config") != PluginConfig;
+        }
+
         public AudioConfigViewModel()
         {
             this.RefreshCommand = ReactiveCommand.Create(() => { });
@@ -329,16 +371,32 @@ namespace TMSpeech.GUI.ViewModels
             this.WhenAnyValue(u => u.AudioSource, u => u.AudioSourcesAvailable)
                 .Where((u) => u.Item1 != null && u.Item2 != null)
                 .Select(u => u.Item1)
+                .Where(x => !string.IsNullOrEmpty(x))
+                .DistinctUntilChanged()
                 .Select(x => AudioSourcesAvailable.FirstOrDefault(u => u.Name == x))
-                .Select(x => x?.Configuration)
-                .ToPropertyEx(this, x => x.Config);
+                .Select(x =>
+                {
+                    var editor = x?.CreateConfigEditor();
+                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config");
+                    editor?.LoadConfigString(config);
+                    return x?.CreateConfigEditor();
+                })
+                .ToPropertyEx(this, x => x.ConfigEditor);
+
+
+            this.WhenAnyValue(x => x.ConfigEditor)
+                .Subscribe(x =>
+                {
+                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config");
+                    PluginConfig = config;
+                });
         }
     }
 
 
     public class RecognizeConfigViewModel : ConfigViewModelBase
     {
-        protected override string SectionName => "recognize";
+        protected override string SectionName => "";
 
         [Reactive]
         [ConfigJsonValue]
@@ -349,7 +407,7 @@ namespace TMSpeech.GUI.ViewModels
             new List<Core.Plugins.IRecognizer>();
 
         [ObservableAsProperty]
-        public IPluginConfiguration? Config { get; }
+        public IPluginConfigEditor? ConfigEditor { get; }
 
         [Reactive]
         [ConfigJsonValue]
@@ -365,6 +423,39 @@ namespace TMSpeech.GUI.ViewModels
             return plugins;
         }
 
+        public override Dictionary<string, object> Serialize()
+        {
+            var ret = new Dictionary<string, object>
+            {
+                { "recognizer.source", Recognizer },
+            };
+            if (!string.IsNullOrEmpty(Recognizer))
+            {
+                ret.Add($"plugin.{Recognizer}.config", PluginConfig);
+            }
+
+            return ret;
+        }
+
+        public override void Deserialize(IReadOnlyDictionary<string, object> dict)
+        {
+            if (dict.ContainsKey("recognizer.source"))
+            {
+                Recognizer = dict["recognizer.source"]?.ToString() ?? "";
+            }
+
+            if (dict.ContainsKey($"plugin.{Recognizer}.config"))
+            {
+                PluginConfig = dict[$"plugin.{Recognizer}.config"]?.ToString() ?? "";
+            }
+        }
+
+        public override bool GetDirtyStatus()
+        {
+            return ConfigManagerFactory.Instance.Get<string>("recognizer.source") != Recognizer ||
+                   ConfigManagerFactory.Instance.Get<string>($"plugin.{Recognizer}.config") != PluginConfig;
+        }
+
         public RecognizeConfigViewModel()
         {
             this.RefreshCommand = ReactiveCommand.Create(() => { });
@@ -375,9 +466,18 @@ namespace TMSpeech.GUI.ViewModels
             this.WhenAnyValue(u => u.Recognizer, u => u.RecognizersAvailable)
                 .Where((u) => u.Item1 != null && u.Item2 != null)
                 .Select(u => u.Item1)
+                .Where(x => !string.IsNullOrEmpty(x))
+                .DistinctUntilChanged()
                 .Select(x => RecognizersAvailable.FirstOrDefault(u => u.Name == x))
-                .Select(x => x?.Configuration)
-                .ToPropertyEx(this, x => x.Config);
+                .Select(x => x?.CreateConfigEditor())
+                .ToPropertyEx(this, x => x.ConfigEditor);
+
+            this.WhenAnyValue(x => x.ConfigEditor)
+                .Subscribe(x =>
+                {
+                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{Recognizer}.config");
+                    PluginConfig = config;
+                });
         }
     }
 }

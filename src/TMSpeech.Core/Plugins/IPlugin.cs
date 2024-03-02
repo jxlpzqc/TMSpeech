@@ -16,9 +16,9 @@ namespace TMSpeech.Core.Plugins
         string Url { get; }
         string License { get; }
         string Note { get; }
-        IPluginConfiguration Configuration { get; }
+        IPluginConfigEditor CreateConfigEditor();
+        void LoadConfig(string config);
         bool Available { get; }
-
         void Init();
         void Destroy();
     }
