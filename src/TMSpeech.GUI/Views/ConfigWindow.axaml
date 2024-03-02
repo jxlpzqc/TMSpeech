@@ -16,11 +16,14 @@
     <converter:IntToColorConverter x:Key="IntToColorConverter"></converter:IntToColorConverter>
   </Window.Resources>
   <DockPanel>
-    <StackPanel Margin="8" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
-      <Button Name="btnSave" Margin="4,0,4,0" Command="{Binding SaveCommand}">保存</Button>
-      <Button Name="btnCancel" Margin="4,0,4,0" Command="{Binding CancelCommand}">取消</Button>
-      <Button Name="btnApply" Margin="4,0,0,0" Command="{Binding ApplyCommand}">应用</Button>
-    </StackPanel>
+    <Border HorizontalAlignment="Stretch" DockPanel.Dock="Bottom" Background="#EFEFEF">
+      <StackPanel Orientation="Horizontal" Margin="8" HorizontalAlignment="Right">
+        <Button Name="btnSave" Margin="4,0,4,0" Command="{Binding SaveCommand}">确定</Button>
+        <Button Name="btnCancel" Margin="4,0,4,0" Command="{Binding CancelCommand}">取消</Button>
+        <Button Name="btnApply" Margin="4,0,0,0" Command="{Binding ApplyCommand}">应用</Button>
+      </StackPanel>
+
+    </Border>
     <TabControl TabStripPlacement="Left" SelectedIndex="{Binding CurrentTab}">
       <TabControl.Styles>
         <Style Selector="Label,TextBox,ComboBox,Button,CheckBox,NumericUpDown">
@@ -40,10 +43,10 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>通用</TextBlock>
-            <TextBlock IsVisible="{Binding GeneralConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding GeneralSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralConfig}">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralSectionConfig}">
           <Label>语言</Label>
           <ComboBox SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language,Mode=TwoWay}"
                     Name="comboLanguage" ItemsSource="{Binding LanguagesAvailable}">
@@ -68,10 +71,11 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>显示</TextBlock>
-            <TextBlock IsVisible="{Binding AppearanceConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding AppearanceSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*" DataContext="{Binding AppearanceConfig}">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*"
+                           DataContext="{Binding AppearanceSectionConfig}">
           <Grid.Styles>
             <Style Selector="ColorPicker">
               <Setter Property="Width" Value="{Binding #comboAlign.Bounds.Width}"></Setter>
@@ -122,11 +126,11 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>音频源</TextBlock>
-            <TextBlock IsVisible="{Binding AudioConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding AudioSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
 
-        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding AudioConfig}">
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding AudioSectionConfig}">
           <Label>音频源</Label>
           <DockPanel>
             <Button DockPanel.Dock="Right">刷新</Button>
@@ -156,10 +160,10 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>语音识别</TextBlock>
-            <TextBlock IsVisible="{Binding RecognizeConfig.IsDirty}">*</TextBlock>
+            <TextBlock IsVisible="{Binding RecognizeSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <StackPanel DataContext="{Binding RecognizeConfig}">
+        <StackPanel DataContext="{Binding RecognizeSectionConfig}">
           <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
             <Label>语音识别器</Label>
             <DockPanel>

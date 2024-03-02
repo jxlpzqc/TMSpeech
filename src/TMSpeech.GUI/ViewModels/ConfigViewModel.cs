@@ -23,7 +23,7 @@ namespace TMSpeech.GUI.ViewModels
     {
     }
 
-    public abstract class ConfigViewModelBase : ViewModelBase
+    public abstract class SectionConfigViewModelBase : ViewModelBase
     {
         protected virtual string SectionName => "";
 
@@ -121,7 +121,7 @@ namespace TMSpeech.GUI.ViewModels
             UpdateDirtyStatus();
         }
 
-        public ConfigViewModelBase()
+        public SectionConfigViewModelBase()
         {
             Load();
             this.PropertyChanged += (sender, args) =>
@@ -139,15 +139,20 @@ namespace TMSpeech.GUI.ViewModels
         }
     }
 
-    public class ConfigViewModel
+    public class ConfigViewModel : ViewModelBase
     {
-        public GeneralConfigViewModel GeneralConfig { get; } = new GeneralConfigViewModel();
-        public AppearanceConfigViewModel AppearanceConfig { get; } = new AppearanceConfigViewModel();
-        public AudioConfigViewModel AudioConfig { get; } = new AudioConfigViewModel();
-        public RecognizeConfigViewModel RecognizeConfig { get; } = new RecognizeConfigViewModel();
+        public GeneralSectionConfigViewModel GeneralSectionConfig { get; } = new GeneralSectionConfigViewModel();
+
+        public AppearanceSectionConfigViewModel AppearanceSectionConfig { get; } =
+            new AppearanceSectionConfigViewModel();
+
+        public AudioSectionConfigViewModel AudioSectionConfig { get; } = new AudioSectionConfigViewModel();
+        public RecognizeSectionConfigViewModel RecognizeSectionConfig { get; } = new RecognizeSectionConfigViewModel();
 
         [Reactive]
         public int CurrentTab { get; set; } = 0;
+
+        public IObservable<Unit> WindowNeedClose { get; }
 
         public ReactiveCommand<Unit, Unit> SaveCommand { get; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; }
@@ -162,39 +167,43 @@ namespace TMSpeech.GUI.ViewModels
         private const int TAB_RECOGNIZE = 3;
         private const int TAB_ABOUT = 4;
 
-        private ConfigViewModelBase? TabToConfig(int tab)
+        private SectionConfigViewModelBase? TabToConfig(int tab)
         {
             return tab switch
             {
-                TAB_GENERAL => GeneralConfig,
-                TAB_APPEARANCE => AppearanceConfig,
-                TAB_AUDIO => AudioConfig,
-                TAB_RECOGNIZE => RecognizeConfig,
+                TAB_GENERAL => GeneralSectionConfig,
+                TAB_APPEARANCE => AppearanceSectionConfig,
+                TAB_AUDIO => AudioSectionConfig,
+                TAB_RECOGNIZE => RecognizeSectionConfig,
                 _ => null
             };
         }
 
-        private ConfigViewModelBase? CurrentConfig => TabToConfig(CurrentTab);
+        private SectionConfigViewModelBase? CurrentConfig => TabToConfig(CurrentTab);
 
         public ConfigViewModel()
         {
             var totalDirty = this.WhenAnyValue(
-                x => x.GeneralConfig.IsDirty,
-                x => x.AppearanceConfig.IsDirty,
-                x => x.AudioConfig.IsDirty,
-                x => x.RecognizeConfig.IsDirty
+                x => x.GeneralSectionConfig.IsDirty,
+                x => x.AppearanceSectionConfig.IsDirty,
+                x => x.AudioSectionConfig.IsDirty,
+                x => x.RecognizeSectionConfig.IsDirty
             ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
 
-            List<ConfigViewModelBase> configs =
+            List<SectionConfigViewModelBase> configs =
             [
-                GeneralConfig,
-                AppearanceConfig,
-                AudioConfig,
-                RecognizeConfig
+                GeneralSectionConfig,
+                AppearanceSectionConfig,
+                AudioSectionConfig,
+                RecognizeSectionConfig
             ];
 
             this.SaveCommand = ReactiveCommand.Create(() =>
                 {
+                    configs.ForEach(x =>
+                    {
+                        if (x.IsDirty) x.Apply();
+                    });
                     configs.ForEach(x => x.Save());
                     IsModified = ConfigManagerFactory.Instance.IsModified;
                 },
@@ -211,10 +220,12 @@ namespace TMSpeech.GUI.ViewModels
                 configs.ForEach(x => x.Apply());
                 IsModified = ConfigManagerFactory.Instance.IsModified;
             }, totalDirty);
+
+            this.WindowNeedClose = this.SaveCommand.Merge(this.CancelCommand);
         }
     }
 
-    public class GeneralConfigViewModel : ConfigViewModelBase
+    public class GeneralSectionConfigViewModel : SectionConfigViewModelBase
     {
         protected override string SectionName => "general";
 
@@ -245,7 +256,7 @@ namespace TMSpeech.GUI.ViewModels
         public bool AutoUpdate { get; set; } = true;
     }
 
-    public class AppearanceConfigViewModel : ConfigViewModelBase
+    public class AppearanceSectionConfigViewModel : SectionConfigViewModelBase
     {
         protected override string SectionName => "appearance";
 
@@ -297,13 +308,13 @@ namespace TMSpeech.GUI.ViewModels
             new KeyValuePair<int, string>(TextAlignEnum.Justify, "两端对齐"),
         ];
 
-        public AppearanceConfigViewModel()
+        public AppearanceSectionConfigViewModel()
         {
             FontsAvailable = FontManager.Current.SystemFonts.ToList();
         }
     }
 
-    public class AudioConfigViewModel : ConfigViewModelBase
+    public class AudioSectionConfigViewModel : SectionConfigViewModelBase
     {
         [Reactive]
         public string AudioSource { get; set; } = "";
@@ -361,7 +372,7 @@ namespace TMSpeech.GUI.ViewModels
                    ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config") != PluginConfig;
         }
 
-        public AudioConfigViewModel()
+        public AudioSectionConfigViewModel()
         {
             this.RefreshCommand = ReactiveCommand.Create(() => { });
             this.RefreshCommand.Merge(Observable.Return(Unit.Default))
@@ -394,7 +405,7 @@ namespace TMSpeech.GUI.ViewModels
     }
 
 
-    public class RecognizeConfigViewModel : ConfigViewModelBase
+    public class RecognizeSectionConfigViewModel : SectionConfigViewModelBase
     {
         protected override string SectionName => "";
 
@@ -456,7 +467,7 @@ namespace TMSpeech.GUI.ViewModels
                    ConfigManagerFactory.Instance.Get<string>($"plugin.{Recognizer}.config") != PluginConfig;
         }
 
-        public RecognizeConfigViewModel()
+        public RecognizeSectionConfigViewModel()
         {
             this.RefreshCommand = ReactiveCommand.Create(() => { });
             this.RefreshCommand.Merge(Observable.Return(Unit.Default))
