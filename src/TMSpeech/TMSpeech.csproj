@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\tmspeech-circle.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,6 +68,11 @@
     <UpToDateCheckInput Include="..\Plugins\**\*.cs;..\Plugins\**\*.csproj" Set="Plugins"/>
     <UpToDateCheckInput Remove="..\Plugins\*\obj\**;..\Plugins\*\bin\**" Set="Plugins"/>
     <UpToDateCheckOutput Include="$(OutDir)$(PluginsOutputDir)" Set="Plugins"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <AvaloniaResource Include="Resources\tmspeech-circle.ico" />
   </ItemGroup>
 
   <Target Name="BuildPlugins" AfterTargets="Build" Condition="'$(BuildPlugins)'=='true'">
