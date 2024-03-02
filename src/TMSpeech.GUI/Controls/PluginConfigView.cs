@@ -7,11 +7,11 @@ using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.Controls;
 
-public class PluginConfig : UserControl
+public class PluginConfigView : UserControl
 {
     private readonly Grid _container;
 
-    public PluginConfig()
+    public PluginConfigView()
     {
         _container = new AutoGrid()
         {
@@ -22,8 +22,13 @@ public class PluginConfig : UserControl
     }
 
     public static readonly StyledProperty<IPluginConfiguration?> ConfigProperty =
-        AvaloniaProperty.Register<PluginConfig, IPluginConfiguration?>(
+        AvaloniaProperty.Register<PluginConfigView, IPluginConfiguration?>(
             nameof(IPluginConfiguration));
+
+    private void UpdateValueFromPluginLayer()
+    {
+        this.Value = Config.Save();
+    }
 
     private void UpdateValues()
     {
@@ -47,6 +52,8 @@ public class PluginConfig : UserControl
         }
     }
 
+    public event EventHandler<string> ValueUpdate;
+
     private void GenerateControls()
     {
         _container.Children.Clear();
@@ -66,7 +73,11 @@ public class PluginConfig : UserControl
                     Text = meta.DefaultValue,
                     Tag = meta.Key
                 };
-                tb.TextChanged += (_, _) => { Config.Set(meta.Name, tb.Text); };
+                tb.TextChanged += (_, _) =>
+                {
+                    Config.Set(meta.Key, tb.Text);
+                    UpdateValueFromPluginLayer();
+                };
                 control = tb;
             }
             else if (meta.Type == PluginConfigurationMeta.MetaType.File ||
@@ -80,7 +91,11 @@ public class PluginConfig : UserControl
                         ? FilePickerType.File
                         : FilePickerType.Folder,
                 };
-                fp.FileChanged += (_, _) => { Config.Set(meta.Name, fp.Text); };
+                fp.FileChanged += (_, _) =>
+                {
+                    Config.Set(meta.Key, fp.Text);
+                    UpdateValueFromPluginLayer();
+                };
                 control = fp;
             }
             else
@@ -110,8 +125,18 @@ public class PluginConfig : UserControl
             GenerateControls();
             if (change.NewValue is IPluginConfiguration newConfig)
             {
+                Config?.Load(Value);
                 UpdateValues();
                 newConfig.ValueUpdated += ConfigValueUpdated;
+            }
+        }
+        else if (change.Property == ValueProperty)
+        {
+            ValueUpdate?.Invoke(this, change.NewValue as string ?? "");
+            if (change.Sender != this)
+            {
+                Config?.Load(change.NewValue as string ?? "");
+                UpdateValues();
             }
         }
     }
@@ -125,5 +150,15 @@ public class PluginConfig : UserControl
     {
         get => GetValue(ConfigProperty);
         set => SetValue(ConfigProperty, value);
+    }
+
+    public static readonly StyledProperty<string> ValueProperty = AvaloniaProperty.Register<PluginConfigView, string>(
+        "Value");
+
+
+    public string Value
+    {
+        get => GetValue(ValueProperty);
+        private set { SetValue(ValueProperty, value); }
     }
 }

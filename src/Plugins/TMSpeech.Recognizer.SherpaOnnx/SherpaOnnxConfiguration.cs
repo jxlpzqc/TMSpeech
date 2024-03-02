@@ -44,7 +44,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
         {
             new PluginConfigurationMeta
             {
-                Key = "module",
+                Key = "model",
                 DefaultValue = "",
                 Name = "模型",
                 Type = PluginConfigurationMeta.MetaType.Option,
@@ -82,6 +82,20 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void Load(string data)
         {
+            if (string.IsNullOrEmpty(data))
+            {
+                _config = new Dictionary<string, string>()
+                {
+                    { "model", "" },
+                    { "encoder", "<path>" },
+                    { "decoder", "<path>" },
+                    { "joiner", "<path>" },
+                    { "tokens", "<path>" }
+                };
+
+                return;
+            }
+
             _config = JsonSerializer.Deserialize<Dictionary<string, string>>(data);
         }
 

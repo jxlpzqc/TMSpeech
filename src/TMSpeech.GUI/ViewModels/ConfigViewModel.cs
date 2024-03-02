@@ -305,6 +305,10 @@ namespace TMSpeech.GUI.ViewModels
         [ObservableAsProperty]
         public IPluginConfiguration? Config { get; }
 
+        [Reactive]
+        [ConfigJsonValue]
+        public string PluginConfig { get; set; } = "";
+
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
         public IReadOnlyList<Core.Plugins.IAudioSource> Refresh()
@@ -346,6 +350,10 @@ namespace TMSpeech.GUI.ViewModels
 
         [ObservableAsProperty]
         public IPluginConfiguration? Config { get; }
+
+        [Reactive]
+        [ConfigJsonValue]
+        public string PluginConfig { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
