@@ -16,7 +16,7 @@ public record PluginConfigFormItemText(
 public record PluginConfigFormItemOption(
     string Key,
     string Name,
-    IList<string> Options,
+    IDictionary<object, string> Options,
     string Description = ""
 ) : PluginConfigFormItem(Key, Name, Description);
 

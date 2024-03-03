@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
+using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using TMSpeech.Core.Plugins;
 
@@ -66,6 +70,9 @@ public class PluginConfigView : UserControl
                     case FilePicker fp:
                         fp.Text = value?.ToString() ?? "";
                         break;
+                    case ComboBox cb:
+                        cb.SelectedValue = value;
+                        break;
                 }
             }
         }
@@ -111,6 +118,27 @@ public class PluginConfigView : UserControl
                     NotifyValueUpdated();
                 };
                 control = fp;
+            }
+            else if (formItem is PluginConfigFormItemOption optionFormItem)
+            {
+                var cb = new ComboBox()
+                {
+                    Tag = optionFormItem.Key,
+                    ItemsSource = optionFormItem.Options.ToList(),
+                    SelectedValueBinding = new Binding("Key"),
+                    ItemTemplate = new FuncDataTemplate<KeyValuePair<object, string>>((v, namescope) => new TextBlock()
+                        {
+                            [!TextBlock.TextProperty] = new Binding("Value"),
+                        }
+                    )
+                };
+
+                cb.SelectionChanged += (_, _) =>
+                {
+                    ConfigEditor.SetValue(formItem.Key, optionFormItem.Options.Keys.ToList()[cb.SelectedIndex]);
+                    NotifyValueUpdated();
+                };
+                control = cb;
             }
             else
             {
