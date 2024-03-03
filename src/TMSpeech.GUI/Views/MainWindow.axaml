@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:TMSpeech.GUI.Views"
+        xmlns:aconverter="clr-namespace:Avalonia.Markup.Xaml.Converters;assembly=Avalonia.Markup.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="TMSpeech.GUI.Views.MainWindow"
         Icon="/Assets/tmspeech.ico"
@@ -20,12 +21,22 @@
   <Design.DataContext>
     <vm:MainViewModel />
   </Design.DataContext>
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/IconResources.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <aconverter:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+    </ResourceDictionary>
+  </Window.Resources>
   <Window.Styles>
     <Style Selector="Grid">
       <Setter Property="Background" Value="#01FFFFFF" />
     </Style>
     <Style Selector="Grid:pointerover">
-      <Setter Property="Background" Value="#AAA9CEFF" />
+      <!-- <Setter Property="Background" Value="#AAA9CEFF" /> -->
+      <Setter Property="Background"
+              Value="{Binding CaptionStyle.MouseHover, Converter={StaticResource ColorToBrushConverter}}" />
     </Style>
     <Style Selector="Grid StackPanel#controls">
       <Setter Property="Opacity" Value="0" />
@@ -34,14 +45,6 @@
       <Setter Property="Opacity" Value="1" />
     </Style>
   </Window.Styles>
-  <Window.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="/IconResources.axaml" />
-      </ResourceDictionary.MergedDictionaries>
-    </ResourceDictionary>
-
-  </Window.Resources>
   <Grid Name="mainGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -85,12 +88,12 @@
     </StackPanel>
     <views:CaptionView Grid.Row="1" Margin="16"
                        FontWeight="Bold"
-                       FontColor="{Binding CaptionViewModel.FontColor}"
-                       FontSize="{Binding CaptionViewModel.FontSize}"
-                       FontFamily="{Binding CaptionViewModel.FontFamily}"
-                       TextAlign="{Binding CaptionViewModel.TextAlign}"
-                       ShadowColor="{Binding CaptionViewModel.ShadowColor}"
-                       ShadowSize="{Binding CaptionViewModel.ShadowSize}"
+                       FontColor="{Binding CaptionStyle.FontColor}"
+                       FontSize="{Binding CaptionStyle.FontSize}"
+                       FontFamily="{Binding CaptionStyle.FontFamily}"
+                       TextAlign="{Binding CaptionStyle.TextAlign}"
+                       ShadowColor="{Binding CaptionStyle.ShadowColor}"
+                       ShadowSize="{Binding CaptionStyle.ShadowSize}"
                        Text="{Binding Text}" />
   </Grid>
 </Window>

@@ -9,7 +9,7 @@ using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.ViewModels;
 
-public class MainCaptionViewModel : ViewModelBase
+public class CaptionStyleViewModel : ViewModelBase
 {
     [ObservableAsProperty]
     public int ShadowSize { get; }
@@ -25,10 +25,13 @@ public class MainCaptionViewModel : ViewModelBase
 
     [ObservableAsProperty]
     public TextAlignment TextAlign { get; }
-    
+
     [ObservableAsProperty]
     public FontFamily FontFamily { get; }
-    
+
+    [ObservableAsProperty]
+    public Color MouseHover { get; }
+
     [ObservableAsProperty]
     public string Text { get; }
 
@@ -45,7 +48,7 @@ public class MainCaptionViewModel : ViewModelBase
                     ));
     }
 
-    public MainCaptionViewModel()
+    public CaptionStyleViewModel()
     {
         GetPropObservable<int>("ShadowSize")
             .ToPropertyEx(this, x => x.ShadowSize);
@@ -53,10 +56,7 @@ public class MainCaptionViewModel : ViewModelBase
             .Select(Color.FromUInt32)
             .ToPropertyEx(this, x => x.ShadowColor);
         GetPropObservable<int>("FontSize")
-            .Select(x =>
-            {
-                return x;
-            })
+            .Select(x => { return x; })
             .ToPropertyEx(this, x => x.FontSize);
         GetPropObservable<uint>("FontColor")
             .Select(Color.FromUInt32)
@@ -75,6 +75,10 @@ public class MainCaptionViewModel : ViewModelBase
         GetPropObservable<string>("FontFamily")
             .Select(x => new FontFamily(x))
             .ToPropertyEx(this, x => x.FontFamily);
+
+        GetPropObservable<uint>("MouseHover")
+            .Select(Color.FromUInt32)
+            .ToPropertyEx(this, x => x.MouseHover);
     }
 }
 
@@ -98,7 +102,7 @@ public class MainViewModel : ViewModelBase
     [ObservableAsProperty]
     public string RunningTimeDisplay { get; }
 
-    public MainCaptionViewModel CaptionViewModel { get; } = new MainCaptionViewModel();
+    public CaptionStyleViewModel CaptionStyle { get; } = new CaptionStyleViewModel();
 
     [ObservableAsProperty]
     public string Text { get; }
