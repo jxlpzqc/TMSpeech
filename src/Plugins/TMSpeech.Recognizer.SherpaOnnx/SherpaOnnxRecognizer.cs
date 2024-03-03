@@ -14,7 +14,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
     {
         public string Name => "Sherpa-Onnx离线识别器";
 
-        public string Description => "";
+        public string Description => "一款占用资源少，识别速度快的离线识别器";
 
         public string Version => "0.0.1";
 
