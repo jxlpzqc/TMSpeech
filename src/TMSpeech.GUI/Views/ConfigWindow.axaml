@@ -59,7 +59,7 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <Label>用户数据目录</Label>
-          <controls:FilePicker Text="{Binding UserDir,Mode=TwoWay}" Type="Folder" />
+          <controls:FilePicker Text="{Binding UserDir,Mode=TwoWay}" ExtendedOptions="True" Type="Folder" />
           <Label>开机启动</Label>
           <CheckBox IsChecked="{Binding LaunchOnStartup,Mode=TwoWay}" />
           <Label>启动开始识别</Label>
@@ -195,8 +195,8 @@
                                      Value="{Binding PluginConfig, Mode=TwoWay}" />
         </StackPanel>
       </TabItem>
-      <TabItem Header="插件"></TabItem>
-      <TabItem Header="资源"></TabItem>
+      <TabItem Header="插件" IsVisible="False"></TabItem>
+      <TabItem Header="资源" IsVisible="False"></TabItem>
 
       <TabItem Header="关于">
         <ScrollViewer>

@@ -17,6 +17,7 @@ public partial class FilePicker : UserControl
     public FilePicker()
     {
         InitializeComponent();
+        UpdatePanelVisible();
     }
 
     public static readonly StyledProperty<string> TextProperty =
@@ -26,6 +27,15 @@ public partial class FilePicker : UserControl
     {
         get => GetValue(TextProperty);
         set => SetValue(TextProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> ExtendedOptionsProperty = AvaloniaProperty.Register<FilePicker, bool>(
+        "ExtendedOptions", false);
+
+    public bool ExtendedOptions
+    {
+        get => GetValue(ExtendedOptionsProperty);
+        set => SetValue(ExtendedOptionsProperty, value);
     }
 
     public static readonly StyledProperty<FilePickerType> TypeProperty =
@@ -51,6 +61,7 @@ public partial class FilePicker : UserControl
         base.OnPropertyChanged(change);
         if (change.Property == TextProperty)
         {
+            if (ExtendedOptions) UpdateSelectedIndex();
             RaiseEvent(new TextChangedEventArgs(FileChangedEvent, this));
         }
     }
@@ -83,5 +94,60 @@ public partial class FilePicker : UserControl
         }
 
         if (OperatingSystem.IsWindows()) Text = Text.Replace("/", "\\");
+    }
+
+    private const int OPTION_APPDATA = 0;
+    private const int OPTION_PROGRAM = 1;
+    private const int OPTION_DOCUMENTS = 2;
+    private const int OPTION_DESKTOP = 3;
+    private const int OPTION_CUSTOM = 4;
+
+    private void UpdateSelectedIndex()
+    {
+        if (Text == "?appdata") combo.SelectedIndex = OPTION_APPDATA;
+        else if (Text == "?program") combo.SelectedIndex = OPTION_PROGRAM;
+        else if (Text == "?documents") combo.SelectedIndex = OPTION_DOCUMENTS;
+        else if (Text == "?desktop") combo.SelectedIndex = OPTION_DESKTOP;
+        else combo.SelectedIndex = OPTION_CUSTOM;
+    }
+
+    private void UpdatePanelVisible()
+    {
+        if (panelFileBox == null) return;
+        if (!ExtendedOptions)
+        {
+            panelFileBox.IsVisible = true;
+            return;
+        }
+
+        if (combo.SelectedIndex == OPTION_CUSTOM)
+        {
+            panelFileBox.IsVisible = true;
+            if (Text?.StartsWith("?") == true) Text = "";
+        }
+        else
+        {
+            panelFileBox.IsVisible = false;
+            switch (combo.SelectedIndex)
+            {
+                case OPTION_APPDATA:
+                    Text = "?appdata";
+                    break;
+                case OPTION_PROGRAM:
+                    Text = "?program";
+                    break;
+                case OPTION_DOCUMENTS:
+                    Text = "?documents";
+                    break;
+                case OPTION_DESKTOP:
+                    Text = "?desktop";
+                    break;
+            }
+        }
+    }
+
+    private void SelectingItemsControl_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        UpdatePanelVisible();
     }
 }

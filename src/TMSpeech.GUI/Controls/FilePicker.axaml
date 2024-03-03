@@ -5,8 +5,18 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="TMSpeech.GUI.Controls.FilePicker"
              Name="picker">
-  <DockPanel>
-    <Button DockPanel.Dock="Right" Click="Button_OnClick">浏览</Button>
-    <TextBox Text="{Binding Text,ElementName=picker}" />
-  </DockPanel>
+  <StackPanel>
+    <ComboBox Name="combo" SelectedIndex="0" SelectionChanged="SelectingItemsControl_OnSelectionChanged" IsVisible="{Binding #picker.ExtendedOptions}">
+      <ComboBoxItem>用户数据目录</ComboBoxItem>
+      <ComboBoxItem>程序所在目录</ComboBoxItem>
+      <ComboBoxItem>我的文档</ComboBoxItem>
+      <ComboBoxItem>桌面</ComboBoxItem>
+      <ComboBoxItem>自定义</ComboBoxItem>
+    </ComboBox>
+    <DockPanel Name="panelFileBox">
+      <Button DockPanel.Dock="Right" Click="Button_OnClick">浏览</Button>
+      <TextBox Text="{Binding Text,ElementName=picker}" />
+    </DockPanel>
+
+  </StackPanel>
 </UserControl>
