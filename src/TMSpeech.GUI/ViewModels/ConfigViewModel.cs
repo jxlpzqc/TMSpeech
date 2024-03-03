@@ -317,6 +317,7 @@ namespace TMSpeech.GUI.ViewModels
     public class AudioSectionConfigViewModel : SectionConfigViewModelBase
     {
         [Reactive]
+        [ConfigJsonValue]
         public string AudioSource { get; set; } = "";
 
         [ObservableAsProperty]
@@ -327,6 +328,7 @@ namespace TMSpeech.GUI.ViewModels
         public IPluginConfigEditor? ConfigEditor { get; }
 
         [Reactive]
+        [ConfigJsonValue]
         public string PluginConfig { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }

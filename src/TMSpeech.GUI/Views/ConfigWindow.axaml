@@ -131,32 +131,33 @@
             <TextBlock IsVisible="{Binding AudioSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
-
-        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding AudioSectionConfig}">
-          <Label>音频源</Label>
-          <DockPanel>
-            <Button DockPanel.Dock="Right">刷新</Button>
-            <ComboBox ItemsSource="{Binding AudioSourcesAvailable}"
-                      SelectedValue="{Binding AudioSource}"
-                      SelectedValueBinding="{Binding Name}">
-              <ComboBox.Styles>
-                <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
-                  <Setter Property="IsVisible" Value="False"></Setter>
-                </Style>
-              </ComboBox.Styles>
-              <ComboBox.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}"></TextBlock>
-                    <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
-                  </StackPanel>
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-          </DockPanel>
+        <StackPanel DataContext="{Binding AudioSectionConfig}">
+          <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
+            <Label>音频源</Label>
+            <DockPanel>
+              <Button DockPanel.Dock="Right">刷新</Button>
+              <ComboBox ItemsSource="{Binding AudioSourcesAvailable}"
+                        SelectedValue="{Binding AudioSource}"
+                        SelectedValueBinding="{Binding Name}">
+                <ComboBox.Styles>
+                  <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
+                    <Setter Property="IsVisible" Value="False"></Setter>
+                  </Style>
+                </ComboBox.Styles>
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}"></TextBlock>
+                      <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </DockPanel>
+          </controls:AutoGrid>
           <controls:PluginConfigView ConfigEditor="{Binding ConfigEditor}"
-                                     Value="{Binding PluginConfig,Mode=TwoWay}" />
-        </controls:AutoGrid>
+                                     Value="{Binding PluginConfig, Mode=TwoWay}" />
+        </StackPanel>
       </TabItem>
       <TabItem>
         <TabItem.Header>
@@ -191,7 +192,7 @@
           </controls:AutoGrid>
 
           <controls:PluginConfigView ConfigEditor="{Binding ConfigEditor}"
-                                     Value="{Binding PluginConfig,Mode=TwoWay}" />
+                                     Value="{Binding PluginConfig, Mode=TwoWay}" />
         </StackPanel>
       </TabItem>
       <TabItem Header="插件"></TabItem>
@@ -224,7 +225,7 @@
               <Run Name="runInternalVersion"></Run>
               <LineBreak />
             </TextBlock>
-            
+
             <Button Margin="0,0,0,24">检查更新</Button>
 
             <TextBlock xml:space="preserve">A simple tool for recognize system audio.
