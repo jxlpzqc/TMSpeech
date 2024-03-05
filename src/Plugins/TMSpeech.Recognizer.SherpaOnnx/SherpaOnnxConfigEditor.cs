@@ -10,25 +10,52 @@ using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.Recognizer.SherpaOnnx
 {
+    class SherpaOnnxConfig
+    {
+        [JsonPropertyName("model")]
+        public string Model { get; set; } = "";
+
+        [JsonPropertyName("encoder")]
+        public string Encoder { get; set; } = "";
+
+        [JsonPropertyName("decoder")]
+        public string Decoder { get; set; } = "";
+
+        [JsonPropertyName("joiner")]
+        public string Joiner { get; set; } = "";
+
+        [JsonPropertyName("tokens")]
+        public string Tokens { get; set; } = "";
+    }
+
     public class SherpaOnnxConfigEditor : IPluginConfigEditor
     {
-        private Dictionary<string, object> _config = new Dictionary<string, object>();
+        private SherpaOnnxConfig _config = new SherpaOnnxConfig();
 
         public void SetValue(string key, object value)
         {
-            _config[key] = value.ToString();
+            if (key == "model") _config.Model = (string)value;
+            if (key == "encoder") _config.Encoder = (string)value;
+            if (key == "decoder") _config.Decoder = (string)value;
+            if (key == "joiner") _config.Joiner = (string)value;
+            if (key == "tokens") _config.Tokens = (string)value;
         }
 
         public object GetValue(string key)
         {
-            return _config[key];
+            if (key == "model") return _config.Model;
+            if (key == "encoder") return _config.Encoder;
+            if (key == "decoder") return _config.Decoder;
+            if (key == "joiner") return _config.Joiner;
+            if (key == "tokens") return _config.Tokens;
+            return "";
         }
 
         public IReadOnlyList<PluginConfigFormItem> GetFormItems()
         {
             return new PluginConfigFormItem[]
             {
-                new PluginConfigFormItemText("model", "模型"),
+                // new PluginConfigFormItemText("model", "模型"),
                 new PluginConfigFormItemFile("encoder", "编码器"),
                 new PluginConfigFormItemFile("decoder", "解码器"),
                 new PluginConfigFormItemFile("joiner", "连接器"),
@@ -37,54 +64,37 @@ namespace TMSpeech.Recognizer.SherpaOnnx
         }
 
         public event EventHandler<EventArgs>? FormItemsUpdated;
-        
+
         public event EventHandler<EventArgs>? ValueUpdated;
 
         IReadOnlyDictionary<string, object> IPluginConfigEditor.GetAll()
         {
-            return _config;
+            return new Dictionary<string, object>()
+            {
+                { "model", _config.Model },
+                { "encoder", _config.Encoder },
+                { "decoder", _config.Decoder },
+                { "joiner", _config.Joiner },
+                { "tokens", _config.Tokens }
+            };
         }
 
         public void LoadConfigString(string data)
         {
-            if (string.IsNullOrEmpty(data))
+            try
             {
-                _config = new Dictionary<string, object>()
-                {
-                    { "model", "" },
-                    { "encoder", "<path>" },
-                    { "decoder", "<path>" },
-                    { "joiner", "<path>" },
-                    { "tokens", "<path>" }
-                };
-                return;
+                _config = JsonSerializer.Deserialize<SherpaOnnxConfig>(data);
             }
-
-            _config = JsonSerializer.Deserialize<Dictionary<string, object>>(data);
+            catch
+            {
+                _config = new SherpaOnnxConfig();
+            }
         }
 
 
         public string GenerateConfig()
         {
             return JsonSerializer.Serialize(_config);
-        }
-
-        public void Set(string key, string value)
-        {
-            if (key == "models")
-            {
-                _config["models"] = value;
-                //TODO: read other config
-
-                ValueUpdated?.Invoke(this, null);
-            }
-            else
-            {
-                _config[key] = value;
-                _config["models"] = "";
-
-                ValueUpdated?.Invoke(this, null);
-            }
         }
     }
 }

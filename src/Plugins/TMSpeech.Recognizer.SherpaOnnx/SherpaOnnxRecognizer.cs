@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TMSpeech.Core.Plugins;
 
@@ -29,9 +30,11 @@ namespace TMSpeech.Recognizer.SherpaOnnx
         public string Note => "";
         public IPluginConfigEditor CreateConfigEditor() => new SherpaOnnxConfigEditor();
 
+        private SherpaOnnxConfig _userConfig = new SherpaOnnxConfig();
+
         public void LoadConfig(string config)
         {
-            throw new NotImplementedException();
+            _userConfig = JsonSerializer.Deserialize<SherpaOnnxConfig>(config);
         }
 
         public bool Available => true;
@@ -60,10 +63,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             config = new OnlineRecognizerConfig();
             config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
-            config.TransducerModelConfig.Encoder = "";
-            config.TransducerModelConfig.Decoder = "";
-            config.TransducerModelConfig.Joiner = "";
-            config.TransducerModelConfig.Tokens = "";
+            config.TransducerModelConfig.Encoder = _userConfig.Encoder;
+            config.TransducerModelConfig.Decoder = _userConfig.Decoder;
+            config.TransducerModelConfig.Joiner = _userConfig.Joiner;
+            config.TransducerModelConfig.Tokens = _userConfig.Tokens;
             config.TransducerModelConfig.NumThreads = 1;
             config.TransducerModelConfig.Debug = 1;
             config.DecodingMethod = "greedy_search";
