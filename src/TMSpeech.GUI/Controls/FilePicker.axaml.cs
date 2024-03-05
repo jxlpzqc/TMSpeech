@@ -78,7 +78,7 @@ public partial class FilePicker : UserControl
             });
             if (result.Count > 0)
             {
-                Text = result[0].Path.AbsolutePath;
+                Text = result[0].TryGetLocalPath() ?? "";
             }
         }
         else if (Type == FilePickerType.Folder)
@@ -89,7 +89,7 @@ public partial class FilePicker : UserControl
             });
             if (result.Count > 0)
             {
-                Text = result[0].Path.AbsolutePath;
+                Text = result[0].TryGetLocalPath() ?? "";
             }
         }
 
