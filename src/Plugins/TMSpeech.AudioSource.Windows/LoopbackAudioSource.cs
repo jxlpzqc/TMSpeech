@@ -34,7 +34,6 @@ namespace TMSpeech.AudioSource.Windows
 
         public void LoadConfig(string config)
         {
-            throw new NotImplementedException();
         }
 
         public bool Available => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
