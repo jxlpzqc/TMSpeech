@@ -61,12 +61,19 @@ namespace TMSpeech.Core
 
         private void InitAudioSource()
         {
-            _audioSource = _pluginManager.AudioSources.FirstOrDefault();
+            var configAudioSource = ConfigManagerFactory.Instance.Get<string>("audio.source");
+            var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configAudioSource}.config");
+
+            _audioSource = _pluginManager.AudioSources.FirstOrDefault(x => x.Name == configAudioSource);
+            _audioSource?.LoadConfig(config);
         }
 
         private void InitRecognizer()
         {
-            _recognizer = _pluginManager.Recognizers.FirstOrDefault();
+            var configRecognizer = ConfigManagerFactory.Instance.Get<string>("recognizer.source");
+            var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configRecognizer}.config");
+            _recognizer = _pluginManager.Recognizers.FirstOrDefault(x => x.Name == configRecognizer);
+            _recognizer?.LoadConfig(config);
         }
 
         private void StartRecognize()
@@ -105,7 +112,7 @@ namespace TMSpeech.Core
                 StartRecognize();
                 Status = JobStatus.Running;
             }
-            catch
+            catch (Exception e)
             {
                 // TODO: notify user
             }
