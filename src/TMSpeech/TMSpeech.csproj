@@ -65,9 +65,9 @@
 
 
   <ItemGroup>
-    <UpToDateCheckInput Include="..\Plugins\**\*.cs;..\Plugins\**\*.csproj" Set="Plugins"/>
-    <UpToDateCheckInput Remove="..\Plugins\*\obj\**;..\Plugins\*\bin\**" Set="Plugins"/>
-    <UpToDateCheckOutput Include="$(OutDir)$(PluginsOutputDir)" Set="Plugins"/>
+    <UpToDateCheckInput Include="..\Plugins\**\*.cs;..\Plugins\**\*.csproj" Set="Plugins" />
+    <UpToDateCheckInput Remove="..\Plugins\*\obj\**;..\Plugins\*\bin\**" Set="Plugins" />
+    <UpToDateCheckOutput Include="$(OutDir)$(PluginsOutputDir)" Set="Plugins" />
   </ItemGroup>
 
 

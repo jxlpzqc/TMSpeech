@@ -21,9 +21,6 @@ namespace TMSpeech.GUI.Views
 
             this.WhenActivated(d =>
             {
-                ViewModel.WindowNeedClose
-                    .Subscribe(_ => { this.Close(); })
-                    .DisposeWith(d);
             });
         }
     }

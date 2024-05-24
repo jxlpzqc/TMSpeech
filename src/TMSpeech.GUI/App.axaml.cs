@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using TMSpeech.Core;
 using TMSpeech.GUI.ViewModels;
 using TMSpeech.GUI.Views;
 
@@ -13,6 +14,8 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        ConfigManagerFactory.Init(DefaultConfig.GenerateConfig());
     }
 
     public override void OnFrameworkInitializationCompleted()

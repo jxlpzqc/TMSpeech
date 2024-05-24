@@ -27,26 +27,6 @@ namespace TMSpeech.GUI.ViewModels
     {
         protected virtual string SectionName => "";
 
-        [Reactive]
-        public bool IsDirty { get; protected set; }
-
-        public virtual bool GetDirtyStatus()
-        {
-            var value1 = Serialize();
-            var value2 = ConfigManagerFactory.Instance.GetAll()
-                .Where(x => ConfigManager.IsInSection(x.Key, SectionName))
-                .ToDictionary(
-                    x => string.IsNullOrEmpty(SectionName) ? x.Key : x.Key.Substring(SectionName.Length + 1),
-                    x => x.Value
-                );
-            return JsonSerializer.Serialize(value1) != JsonSerializer.Serialize(value2);
-        }
-
-        private void UpdateDirtyStatus()
-        {
-            IsDirty = GetDirtyStatus();
-        }
-
         public virtual Dictionary<string, object> Serialize()
         {
             var ret = new Dictionary<string, object>();
@@ -75,17 +55,6 @@ namespace TMSpeech.GUI.ViewModels
                 });
         }
 
-        public void Reset()
-        {
-            if (ConfigManagerFactory.Instance.IsModified)
-            {
-                ConfigManagerFactory.Instance.Reset();
-                Load();
-            }
-
-            UpdateDirtyStatus();
-        }
-
         public void Load()
         {
             var dict = ConfigManagerFactory.Instance.GetAll();
@@ -101,24 +70,11 @@ namespace TMSpeech.GUI.ViewModels
         public void Apply()
         {
             var dict = Serialize();
-            ConfigManagerFactory.Instance.BatchApply(dict.ToDictionary(
+            ConfigManagerFactory.Instance.BatchApply(dict.Where(u => u.Value != null).ToDictionary(
                 x => (SectionName != "" ? $"{SectionName}." : "") + x.Key,
                 x => x.Value
             ));
-            UpdateDirtyStatus();
-        }
 
-        public void Save()
-        {
-            try
-            {
-                ConfigManagerFactory.Instance.Save();
-            }
-            catch
-            {
-            }
-
-            UpdateDirtyStatus();
         }
 
         public SectionConfigViewModelBase()
@@ -133,7 +89,7 @@ namespace TMSpeech.GUI.ViewModels
                     .GetCustomAttributes(false)
                     .Any(u => u.GetType() == typeof(ConfigJsonValueAttribute)))
                 {
-                    UpdateDirtyStatus();
+                    Apply();
                 }
             };
         }
@@ -151,78 +107,6 @@ namespace TMSpeech.GUI.ViewModels
 
         [Reactive]
         public int CurrentTab { get; set; } = 0;
-
-        public IObservable<Unit> WindowNeedClose { get; }
-
-        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
-        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
-        public ReactiveCommand<Unit, Unit> ApplyCommand { get; }
-
-        [Reactive]
-        public bool IsModified { get; private set; }
-
-        private const int TAB_GENERAL = 0;
-        private const int TAB_APPEARANCE = 1;
-        private const int TAB_AUDIO = 2;
-        private const int TAB_RECOGNIZE = 3;
-        private const int TAB_ABOUT = 4;
-
-        private SectionConfigViewModelBase? TabToConfig(int tab)
-        {
-            return tab switch
-            {
-                TAB_GENERAL => GeneralSectionConfig,
-                TAB_APPEARANCE => AppearanceSectionConfig,
-                TAB_AUDIO => AudioSectionConfig,
-                TAB_RECOGNIZE => RecognizeSectionConfig,
-                _ => null
-            };
-        }
-
-        private SectionConfigViewModelBase? CurrentConfig => TabToConfig(CurrentTab);
-
-        public ConfigViewModel()
-        {
-            var totalDirty = this.WhenAnyValue(
-                x => x.GeneralSectionConfig.IsDirty,
-                x => x.AppearanceSectionConfig.IsDirty,
-                x => x.AudioSectionConfig.IsDirty,
-                x => x.RecognizeSectionConfig.IsDirty
-            ).Select(x => x.Item1 || x.Item2 || x.Item3 || x.Item4);
-
-            List<SectionConfigViewModelBase> configs =
-            [
-                GeneralSectionConfig,
-                AppearanceSectionConfig,
-                AudioSectionConfig,
-                RecognizeSectionConfig
-            ];
-
-            this.SaveCommand = ReactiveCommand.Create(() =>
-                {
-                    configs.ForEach(x =>
-                    {
-                        if (x.IsDirty) x.Apply();
-                    });
-                    configs.ForEach(x => x.Save());
-                    IsModified = ConfigManagerFactory.Instance.IsModified;
-                },
-                totalDirty.CombineLatest(this.WhenAnyValue(x => x.IsModified))
-                    .Select(x => x.First || x.Second)
-            );
-            this.CancelCommand = ReactiveCommand.Create(() =>
-            {
-                configs.ForEach(x => x.Reset());
-                IsModified = ConfigManagerFactory.Instance.IsModified;
-            });
-            this.ApplyCommand = ReactiveCommand.Create(() =>
-            {
-                configs.ForEach(x => x.Apply());
-                IsModified = ConfigManagerFactory.Instance.IsModified;
-            }, totalDirty);
-
-            this.WindowNeedClose = this.SaveCommand.Merge(this.CancelCommand);
-        }
     }
 
     public class GeneralSectionConfigViewModel : SectionConfigViewModelBase
@@ -239,9 +123,9 @@ namespace TMSpeech.GUI.ViewModels
             new KeyValuePair<string, string>("en-us", "English"),
         ];
 
-        [Reactive]
-        [ConfigJsonValue]
-        public string UserDir { get; set; } = "D:\\TMSpeech";
+        //[Reactive]
+        //[ConfigJsonValue]
+        //public string UserDir { get; set; } = "D:\\TMSpeech";
 
         [Reactive]
         [ConfigJsonValue]
@@ -275,7 +159,6 @@ namespace TMSpeech.GUI.ViewModels
         [Reactive]
         [ConfigJsonValue]
         public string FontFamily { get; set; } = "Arial";
-
         [Reactive]
         [ConfigJsonValue]
         public int FontSize { get; set; } = 24;
@@ -368,12 +251,6 @@ namespace TMSpeech.GUI.ViewModels
             }
         }
 
-        public override bool GetDirtyStatus()
-        {
-            return ConfigManagerFactory.Instance.Get<string>("audio.source") != AudioSource ||
-                   ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config") != PluginConfig;
-        }
-
         public AudioSectionConfigViewModel()
         {
             this.RefreshCommand = ReactiveCommand.Create(() => { });
@@ -461,12 +338,6 @@ namespace TMSpeech.GUI.ViewModels
             {
                 PluginConfig = dict[$"plugin.{Recognizer}.config"]?.ToString() ?? "";
             }
-        }
-
-        public override bool GetDirtyStatus()
-        {
-            return ConfigManagerFactory.Instance.Get<string>("recognizer.source") != Recognizer ||
-                   ConfigManagerFactory.Instance.Get<string>($"plugin.{Recognizer}.config") != PluginConfig;
         }
 
         public RecognizeSectionConfigViewModel()

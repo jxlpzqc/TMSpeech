@@ -46,8 +46,6 @@ public abstract class ConfigManager
         ConfigChanged?.Invoke(this, arg);
     }
 
-    public abstract bool IsModified { get; }
-
     public const string ConfigKeySeparator = ".";
 
     public static bool IsInSection(string key, string section)
@@ -65,21 +63,19 @@ public abstract class ConfigManager
         return string.Join(ConfigKeySeparator, list);
     }
 
-    public abstract void Reset();
     public abstract void Load();
-    public abstract void Save();
+    protected abstract void Save();
 }
 
 class LocalConfigManagerImpl : ConfigManager
 {
-    public LocalConfigManagerImpl() : base()
+    public LocalConfigManagerImpl(Dictionary<string, object> defaultConfig) : base()
     {
-        _userDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TMSpeech");
-        if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
+        _config = defaultConfig;
         Load();
     }
 
-    private string _userDataDir;
+    private string _userDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TMSpeech");
 
     public override string UserDataDir
     {
@@ -92,13 +88,10 @@ class LocalConfigManagerImpl : ConfigManager
     }
 
     private Dictionary<string, object>? _config = new();
-    private Dictionary<string, object>? _configBackup = new();
 
     public override void Apply<T>(string key, T value)
     {
-        _config[key] = value;
-        _isModified = true;
-        OnConfigChange(new ConfigChangedEventArgs(new List<string> { key }));
+        BatchApply(new Dictionary<string, object> { { key, value } });
     }
 
     public override void BatchApply(IDictionary<string, object> config)
@@ -110,15 +103,15 @@ class LocalConfigManagerImpl : ConfigManager
             changed.Add(c.Key);
         }
 
-        _isModified = true;
         OnConfigChange(new ConfigChangedEventArgs(changed));
+        Save();
     }
 
     public override void DeleteAndApply<T>(string key)
     {
         _config.Remove(key);
-        _isModified = true;
         OnConfigChange(new ConfigChangedEventArgs(new List<string> { key }));
+        Save();
     }
 
     public override T Get<T>(string key)
@@ -132,46 +125,56 @@ class LocalConfigManagerImpl : ConfigManager
         return _config;
     }
 
-    private bool _isModified = false;
-    public override bool IsModified => _isModified;
-
-    public override void Reset()
-    {
-        _config = new Dictionary<string, object>(_configBackup);
-        _isModified = false;
-        OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));
-    }
-
     private string ConfigFile => Path.Combine(UserDataDir, "config.json");
 
     public override void Load()
     {
-        var config = File.ReadAllText(ConfigFile);
-        var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
-            new JsonSerializerOptions
-            {
-                Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
-            });
-        if (value == null) return;
 
-        _config = value;
-        _configBackup = new Dictionary<string, object>(_config);
+        if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
+        try
+        {
+            var config = File.ReadAllText(ConfigFile);
+            var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
+                new JsonSerializerOptions
+                {
+                    Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
+                });
+            if (value == null) return;
 
-        _isModified = false;
+            _config = value;
+        }
+        catch
+        {
+        }
+
         OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));
     }
 
-    public override void Save()
+    protected override void Save()
     {
+        if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
         var text = JsonSerializer.Serialize(_config);
         File.WriteAllText(ConfigFile, text);
-        _configBackup = new Dictionary<string, object>(_config);
-        _isModified = false;
     }
 }
 
 public static class ConfigManagerFactory
 {
-    private static Lazy<ConfigManager> _instance = new(() => new LocalConfigManagerImpl());
-    public static ConfigManager Instance => _instance.Value;
+    private static Dictionary<string, object> _defaultConfig;
+
+    public static void Init(Dictionary<string, object> defaultConfig)
+    {
+        if (_instance.IsValueCreated) throw new Exception("ConfigManagerFactory already initialized");
+        _defaultConfig = defaultConfig;
+    }
+
+    private static Lazy<ConfigManager> _instance = new(() => new LocalConfigManagerImpl(_defaultConfig));
+    public static ConfigManager Instance
+    {
+        get
+        {
+            if (_defaultConfig == null) throw new Exception("Default config does not exists, call Init() first");
+            return _instance.Value;
+        }
+    }
 }

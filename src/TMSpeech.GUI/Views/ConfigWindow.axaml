@@ -18,14 +18,6 @@
     <converter:IntToColorConverter x:Key="IntToColorConverter"></converter:IntToColorConverter>
   </Window.Resources>
   <DockPanel>
-    <Border HorizontalAlignment="Stretch" DockPanel.Dock="Bottom" Background="#EFEFEF">
-      <StackPanel Orientation="Horizontal" Margin="8" HorizontalAlignment="Right">
-        <Button Name="btnSave" Margin="4,0,4,0" Command="{Binding SaveCommand}">确定</Button>
-        <Button Name="btnCancel" Margin="4,0,4,0" Command="{Binding CancelCommand}">取消</Button>
-        <Button Name="btnApply" Margin="4,0,0,0" Command="{Binding ApplyCommand}">应用</Button>
-      </StackPanel>
-
-    </Border>
     <TabControl TabStripPlacement="Left" SelectedIndex="{Binding CurrentTab}">
       <TabControl.Styles>
         <Style Selector="Label,TextBox,ComboBox,Button,CheckBox,NumericUpDown">
@@ -45,7 +37,6 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>通用</TextBlock>
-            <TextBlock IsVisible="{Binding GeneralSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralSectionConfig}">
@@ -58,8 +49,10 @@
               </DataTemplate>
             </ComboBox.ItemTemplate>
           </ComboBox>
+          <!--
           <Label>用户数据目录</Label>
           <controls:FilePicker Text="{Binding UserDir,Mode=TwoWay}" ExtendedOptions="True" Type="Folder" />
+           -->
           <Label>开机启动</Label>
           <CheckBox IsChecked="{Binding LaunchOnStartup,Mode=TwoWay}" />
           <Label>启动开始识别</Label>
@@ -73,7 +66,6 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>显示</TextBlock>
-            <TextBlock IsVisible="{Binding AppearanceSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*,100,*"
@@ -128,7 +120,6 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>音频源</TextBlock>
-            <TextBlock IsVisible="{Binding AudioSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <StackPanel DataContext="{Binding AudioSectionConfig}">
@@ -163,7 +154,6 @@
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>语音识别</TextBlock>
-            <TextBlock IsVisible="{Binding RecognizeSectionConfig.IsDirty}">*</TextBlock>
           </StackPanel>
         </TabItem.Header>
         <StackPanel DataContext="{Binding RecognizeSectionConfig}">
