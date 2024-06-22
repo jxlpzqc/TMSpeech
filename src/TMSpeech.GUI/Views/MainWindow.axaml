@@ -76,7 +76,7 @@
           <TextBlock Text="{Binding RunningTimeDisplay}"></TextBlock>
         </StackPanel>
       </Button>
-      <Button Margin="16,0,0,0">
+      <Button Click="HistoryButton_Click" Margin="16,0,0,0">
         <PathIcon Data="{StaticResource history_regular}"></PathIcon>
       </Button>
       <Button>

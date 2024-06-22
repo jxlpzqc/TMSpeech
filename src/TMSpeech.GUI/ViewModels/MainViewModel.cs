@@ -97,6 +97,9 @@ public class MainViewModel : ViewModelBase
     public bool StopButtonVisible { get; }
 
     [ObservableAsProperty]
+    public bool HistroyPanelVisible { get; }
+
+    [ObservableAsProperty]
     public int RunningSeconds { get; }
 
     [ObservableAsProperty]
@@ -110,6 +113,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
     public ReactiveCommand<Unit, Unit> StopCommand { get; }
+    public ReactiveCommand<Unit, Unit> HistoryCommand { get; }
 
     private readonly JobController _jobController;
 
@@ -124,8 +128,8 @@ public class MainViewModel : ViewModelBase
             .Merge(Observable.Return(_jobController.Status))
             .ToPropertyEx(this, x => x.Status);
 
-        this.WhenAnyValue(x => x.Status)
-            .Select(x => x == JobStatus.Stopped || x == JobStatus.Paused)
+        this.WhenAnyValue(x => x.Status) // IObservable<JobStatus>
+            .Select(x => x == JobStatus.Stopped || x == JobStatus.Paused) // IObservable<bool>
             .ToPropertyEx(this, x => x.PlayButtonVisible);
 
         this.WhenAnyValue(x => x.Status)
@@ -142,6 +146,8 @@ public class MainViewModel : ViewModelBase
             this.WhenAnyValue(x => x.PauseButtonVisible));
         this.StopCommand = ReactiveCommand.Create(() => { _jobController.Stop(); },
             this.WhenAnyValue(x => x.StopButtonVisible));
+        // TODO
+        this.HistoryCommand = ReactiveCommand.Create(() => {  });
 
 
         Observable.Interval(TimeSpan.FromSeconds(1))

@@ -13,19 +13,19 @@ namespace TMSpeech.Recognizer.SherpaOnnx
     class SherpaOnnxConfig
     {
         [JsonPropertyName("model")]
-        public string Model { get; set; } = "";
+        public string Model { get; set; } = "models";
 
         [JsonPropertyName("encoder")]
-        public string Encoder { get; set; } = "";
+        public string Encoder { get; set; } = "models\\encoder.onnx";
 
         [JsonPropertyName("decoder")]
-        public string Decoder { get; set; } = "";
+        public string Decoder { get; set; } = "models\\decoder.onnx";
 
         [JsonPropertyName("joiner")]
-        public string Joiner { get; set; } = "";
+        public string Joiner { get; set; } = "models\\joiner.onnx";
 
         [JsonPropertyName("tokens")]
-        public string Tokens { get; set; } = "";
+        public string Tokens { get; set; } = "models\\tokens.txt";
     }
 
     public class SherpaOnnxConfigEditor : IPluginConfigEditor
@@ -91,10 +91,13 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             }
         }
 
-
         public string GenerateConfig()
         {
-            return JsonSerializer.Serialize(_config);
+            return JsonSerializer.Serialize(_config, new JsonSerializerOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            });
         }
     }
 }

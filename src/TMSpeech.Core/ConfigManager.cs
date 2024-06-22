@@ -143,7 +143,7 @@ class LocalConfigManagerImpl : ConfigManager
 
             _config = value;
         }
-        catch
+        catch (FileNotFoundException)
         {
         }
 
@@ -153,7 +153,11 @@ class LocalConfigManagerImpl : ConfigManager
     protected override void Save()
     {
         if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
-        var text = JsonSerializer.Serialize(_config);
+        var text = JsonSerializer.Serialize(_config, new JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true
+        });
         File.WriteAllText(ConfigFile, text);
     }
 }
