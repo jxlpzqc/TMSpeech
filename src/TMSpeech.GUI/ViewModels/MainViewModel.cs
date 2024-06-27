@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Media;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using TMSpeech.Core;
@@ -110,6 +113,9 @@ public class MainViewModel : ViewModelBase
     [ObservableAsProperty]
     public string Text { get; }
 
+    [ObservableAsProperty]
+    public IList<string> HistoryTexts { get; }
+
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
     public ReactiveCommand<Unit, Unit> StopCommand { get; }
@@ -140,7 +146,19 @@ public class MainViewModel : ViewModelBase
             .Select(x => x == JobStatus.Running || x == JobStatus.Paused)
             .ToPropertyEx(this, x => x.StopButtonVisible);
 
-        this.PlayCommand = ReactiveCommand.Create(() => { _jobController.Start(); },
+        this.PlayCommand = ReactiveCommand.Create(() => {
+            try
+            {
+                _jobController.Start();
+            }
+            catch (Exception e)
+            {
+                var box = MessageBoxManager
+                    .GetMessageBoxStandard("Error", e.ToString(), ButtonEnum.Ok);
+
+                var result = box.ShowAsync();
+            }
+        },
             this.WhenAnyValue(x => x.PlayButtonVisible));
         this.PauseCommand = ReactiveCommand.Create(() => { _jobController.Pause(); },
             this.WhenAnyValue(x => x.PauseButtonVisible));
@@ -167,5 +185,12 @@ public class MainViewModel : ViewModelBase
             .Select(x => x.EventArgs.Text.Text)
             .Merge(Observable.Return("欢迎使用TMSpeech"))
             .ToPropertyEx(this, x => x.Text);
+
+        Observable.FromEventPattern<SpeechEventArgs>(
+                p => _jobController.TextChanged += p,
+                p => _jobController.TextChanged -= p)
+            .Select(x => x.EventArgs.Text.Text)
+            .ToList()
+            .ToPropertyEx(this, x => x.HistoryTexts);
     }
 }

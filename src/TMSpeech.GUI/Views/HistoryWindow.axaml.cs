@@ -1,13 +1,13 @@
 using Avalonia.Controls;
+using TMSpeech.GUI.ViewModels;
 
 namespace TMSpeech.GUI.Views;
 
 public partial class HistoryWindow : Window
 {
-    public HistoryWindow()
+    public HistoryWindow(MainViewModel model)
     {
         InitializeComponent();
-        listHistory.ItemsSource = new string[]
-                {"cat", "camel", "cow", "chameleon", "mouse", "lion", "zebra" };
+        DataContext = model;
     }
 }

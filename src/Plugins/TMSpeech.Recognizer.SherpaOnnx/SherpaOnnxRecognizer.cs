@@ -34,7 +34,9 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void LoadConfig(string config)
         {
-            _userConfig = JsonSerializer.Deserialize<SherpaOnnxConfig>(config);
+            if (config.Length != 0) {
+                _userConfig = JsonSerializer.Deserialize<SherpaOnnxConfig>(config);
+            }
         }
 
         public bool Available => true;
@@ -112,6 +114,14 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void Start()
         {
+            foreach (string path in new[] { _userConfig.Encoder, _userConfig.Decoder, _userConfig.Joiner, _userConfig.Tokens })
+            {
+                if (!File.Exists(path))
+                {
+                    throw new InvalidOperationException("Cannot find model file: " + path);
+                }
+            }
+
             if (thread != null)
                 throw new InvalidOperationException("The recognizer is already running.");
             stop = false;
@@ -121,9 +131,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 {
                     Run();
                 }
-                catch
+                catch (Exception e)
                 {
-                    // TODO: notify user
+                    Trace.TraceError("{0:HH:mm:ss.fff} Exception {1}", DateTime.Now, e);
+                    // TODO: how to notify user?
                     stop = true;
                     thread = null;
                 }

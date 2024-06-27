@@ -87,7 +87,7 @@ namespace TMSpeech.Core
                 return;
             }
 
-            // TODO: remove event handler
+            // TODO: remove event handler ?
             _recognizer.TextChanged += (sender, args) => OnTextChanged(args);
             _recognizer.SentenceDone += (sender, args) => OnSentenceDone(args);
             _recognizer.Start();
@@ -107,41 +107,20 @@ namespace TMSpeech.Core
 
         public override void Start()
         {
-            try
-            {
-                StartRecognize();
-                Status = JobStatus.Running;
-            }
-            catch (Exception e)
-            {
-                // TODO: notify user
-            }
+            StartRecognize();
+            Status = JobStatus.Running;
         }
 
         public override void Pause()
         {
-            try
-            {
-                StopRecognize();
-                Status = JobStatus.Paused;
-            }
-            catch
-            {
-                // TDOO: notify user
-            }
+            StopRecognize();
+            Status = JobStatus.Paused;
         }
 
         public override void Stop()
         {
-            try
-            {
-                StopRecognize();
-                Status = JobStatus.Stopped;
-            }
-            catch
-            {
-                // TODO: notify user
-            }
+            StopRecognize();
+            Status = JobStatus.Stopped;
         }
     }
 }

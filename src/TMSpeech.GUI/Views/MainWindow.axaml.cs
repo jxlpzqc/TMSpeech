@@ -76,7 +76,7 @@ public partial class MainWindow : Window
     private void HistoryButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         this.Topmost = false;
-        new HistoryWindow().Show();
+        new HistoryWindow(this.ViewModel).Show();
         this.Topmost = true;
     }
 }
