@@ -118,7 +118,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             {
                 if (!File.Exists(path))
                 {
-                    throw new InvalidOperationException("Cannot find model file: " + path);
+                    throw new InvalidOperationException("Cannot find model file: " + path +"\n Current working directory: " + Directory.GetCurrentDirectory());
                 }
             }
 

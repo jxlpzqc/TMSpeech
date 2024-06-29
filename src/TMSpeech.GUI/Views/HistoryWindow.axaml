@@ -1,10 +1,30 @@
 <Window xmlns="https://github.com/avaloniaui"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
         x:Class="TMSpeech.GUI.Views.HistoryWindow"
         Title="History">
-  <ListBox x:Name="listHistory" ItemsSource="{Binding HistoryTexts}">
+  <ListBox x:Name="listHistory">
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      </Style>
+    </ListBox.Styles>
+    <ListBox.ItemTemplate>
+      <DataTemplate>
+        <TextBlock Text="{Binding}" Padding="5" Background="Transparent">
+          <i:Interaction.Behaviors>
+            <ia:EventTriggerBehavior EventName="DoubleTapped">
+              <ia:InvokeCommandAction
+                  Command="{Binding DoubelClickText, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            </ia:EventTriggerBehavior>
+          </i:Interaction.Behaviors>
+        </TextBlock>
+      </DataTemplate>
+    </ListBox.ItemTemplate>
   </ListBox>
 </Window>

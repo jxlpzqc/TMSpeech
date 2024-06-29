@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -113,8 +114,7 @@ public class MainViewModel : ViewModelBase
     [ObservableAsProperty]
     public string Text { get; }
 
-    [ObservableAsProperty]
-    public IList<string> HistoryTexts { get; }
+    public ObservableCollection<string> HistoryTexts { get; } = new();
 
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
@@ -164,9 +164,6 @@ public class MainViewModel : ViewModelBase
             this.WhenAnyValue(x => x.PauseButtonVisible));
         this.StopCommand = ReactiveCommand.Create(() => { _jobController.Stop(); },
             this.WhenAnyValue(x => x.StopButtonVisible));
-        // TODO
-        this.HistoryCommand = ReactiveCommand.Create(() => {  });
-
 
         Observable.Interval(TimeSpan.FromSeconds(1))
             .CombineLatest(this.WhenAnyValue(x => x.PlayButtonVisible))
@@ -187,10 +184,8 @@ public class MainViewModel : ViewModelBase
             .ToPropertyEx(this, x => x.Text);
 
         Observable.FromEventPattern<SpeechEventArgs>(
-                p => _jobController.TextChanged += p,
-                p => _jobController.TextChanged -= p)
-            .Select(x => x.EventArgs.Text.Text)
-            .ToList()
-            .ToPropertyEx(this, x => x.HistoryTexts);
+                p => _jobController.SentenceDone += p,
+                p => _jobController.SentenceDone -= p)
+            .Subscribe(x => HistoryTexts.Insert(0, DateTime.Now.ToString("[HH:mm:ss] ") + x.EventArgs.Text.Text));
     }
 }
