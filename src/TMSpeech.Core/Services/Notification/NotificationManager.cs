@@ -2,7 +2,7 @@ namespace TMSpeech.Core.Services.Notification;
 
 public class NotificationManager
 {
-    private List<INotificationService> _services;
+    private List<INotificationService> _services = new List<INotificationService>();
     private NotificationType _level;
 
     public void RegistService(INotificationService service)

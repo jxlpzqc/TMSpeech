@@ -15,6 +15,7 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
 
+        Services.Initializer.InitialzeServices();
         ConfigManagerFactory.Init(DefaultConfig.GenerateConfig());
     }
 
