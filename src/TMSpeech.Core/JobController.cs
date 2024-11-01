@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMSpeech.Core.Plugins;
+using TMSpeech.Core.Services.Notification;
 
 namespace TMSpeech.Core
 {
@@ -61,19 +62,55 @@ namespace TMSpeech.Core
 
         private void InitAudioSource()
         {
+            if (_audioSource != null)
+            {
+                _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;
+            }
+
             var configAudioSource = ConfigManagerFactory.Instance.Get<string>("audio.source");
             var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configAudioSource}.config");
 
             _audioSource = _pluginManager.AudioSources.FirstOrDefault(x => x.Name == configAudioSource);
-            _audioSource?.LoadConfig(config);
+            if (_audioSource != null)
+            {
+                _audioSource.LoadConfig(config);
+                _audioSource.DataAvailable += OnAudioSourceOnDataAvailable;
+            }
+        }
+
+        private void OnAudioSourceOnDataAvailable(object? _, byte[] data)
+        {
+            _recognizer.Feed(data);
         }
 
         private void InitRecognizer()
         {
+            if (_recognizer != null)
+            {
+                _recognizer.TextChanged -= OnRecognizerOnTextChanged;
+                _recognizer.SentenceDone -= OnRecognizerOnSentenceDone;
+            }
+
             var configRecognizer = ConfigManagerFactory.Instance.Get<string>("recognizer.source");
             var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configRecognizer}.config");
             _recognizer = _pluginManager.Recognizers.FirstOrDefault(x => x.Name == configRecognizer);
-            _recognizer?.LoadConfig(config);
+
+            if (_recognizer != null)
+            {
+                _recognizer.LoadConfig(config);
+                _recognizer.TextChanged += OnRecognizerOnTextChanged;
+                _recognizer.SentenceDone += OnRecognizerOnSentenceDone;
+            }
+        }
+
+        private void OnRecognizerOnSentenceDone(object? sender, SpeechEventArgs args)
+        {
+            OnSentenceDone(args);
+        }
+
+        private void OnRecognizerOnTextChanged(object? sender, SpeechEventArgs args)
+        {
+            OnTextChanged(args);
         }
 
         private void StartRecognize()
@@ -84,22 +121,50 @@ namespace TMSpeech.Core
             if (_audioSource == null || _recognizer == null)
             {
                 Status = JobStatus.Stopped;
+                NotificationManager.Instance.Notify("语音源或识别器初始化失败", "启动失败", NotificationType.Error);
                 return;
             }
 
-            // TODO: remove event handler ?
-            _recognizer.TextChanged += (sender, args) => OnTextChanged(args);
-            _recognizer.SentenceDone += (sender, args) => OnSentenceDone(args);
-            _recognizer.Start();
 
-            _audioSource.DataAvailable += (_, data) => { _recognizer.Feed(data); };
-            _audioSource.Start();
+            try
+            {
+                _recognizer.Start();
+            }
+            catch (Exception ex)
+            {
+                NotificationManager.Instance.Notify($"识别器启动失败：{ex.Message}", "启动失败",
+                    NotificationType.Error);
+                return;
+            }
+
+            try
+            {
+                _audioSource.Start();
+            }
+            catch (Exception ex)
+            {
+                _recognizer.Stop();
+                NotificationManager.Instance.Notify($"语音源启动失败 {ex.Message}", "启动失败",
+                    NotificationType.Error);
+                return;
+            }
+
+            Status = JobStatus.Running;
         }
 
         private void StopRecognize()
         {
-            _audioSource?.Stop();
-            _recognizer?.Stop();
+            try
+            {
+                _audioSource?.Stop();
+                _recognizer?.Stop();
+            }
+            catch
+            {
+                NotificationManager.Instance.Notify("停止失败！", "停止失败", NotificationType.Fatal);
+                // TODO: exit or recover ?
+                return;
+            }
 
             _audioSource = null;
             _recognizer = null;
@@ -107,19 +172,19 @@ namespace TMSpeech.Core
 
         public override void Start()
         {
+            if (Status == JobStatus.Running) return;
             StartRecognize();
-            Status = JobStatus.Running;
         }
 
         public override void Pause()
         {
-            StopRecognize();
+            if (Status == JobStatus.Running) StopRecognize();
             Status = JobStatus.Paused;
         }
 
         public override void Stop()
         {
-            StopRecognize();
+            if (Status == JobStatus.Running) StopRecognize();
             Status = JobStatus.Stopped;
         }
     }
