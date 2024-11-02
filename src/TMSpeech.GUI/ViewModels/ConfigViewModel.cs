@@ -19,9 +19,7 @@ using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.ViewModels
 {
-    class ConfigJsonValueAttribute : Attribute
-    {
-    }
+    class ConfigJsonValueAttribute : Attribute;
 
     public abstract class SectionConfigViewModelBase : ViewModelBase
     {
@@ -74,7 +72,6 @@ namespace TMSpeech.GUI.ViewModels
                 x => (SectionName != "" ? $"{SectionName}." : "") + x.Key,
                 x => x.Value
             ));
-
         }
 
         public SectionConfigViewModelBase()
@@ -104,6 +101,7 @@ namespace TMSpeech.GUI.ViewModels
 
         public AudioSectionConfigViewModel AudioSectionConfig { get; } = new AudioSectionConfigViewModel();
         public RecognizeSectionConfigViewModel RecognizeSectionConfig { get; } = new RecognizeSectionConfigViewModel();
+        public NotificationConfigViewModel NotificationConfig { get; } = new NotificationConfigViewModel();
 
         [Reactive]
         public int CurrentTab { get; set; } = 0;
@@ -159,6 +157,7 @@ namespace TMSpeech.GUI.ViewModels
         [Reactive]
         [ConfigJsonValue]
         public string FontFamily { get; set; } = "Arial";
+
         [Reactive]
         [ConfigJsonValue]
         public int FontSize { get; set; } = 24;
@@ -195,6 +194,33 @@ namespace TMSpeech.GUI.ViewModels
         {
             FontsAvailable = FontManager.Current.SystemFonts.ToList();
         }
+    }
+
+    public class NotificationConfigViewModel : SectionConfigViewModelBase
+    {
+        protected override string SectionName => "notification";
+
+        public static class NotificationTypeEnum
+        {
+            public const int None = 0;
+            public const int System = 1;
+            public const int Custom = 2;
+        }
+
+        public List<KeyValuePair<int, string>> NotificaitonTypes { get; } =
+        [
+            new KeyValuePair<int, string>(NotificationTypeEnum.None, "关闭通知"),
+            new KeyValuePair<int, string>(NotificationTypeEnum.System, "系统通知 (暂不支持 macOS)"),
+            // new KeyValuePair<int, string>(NotificationTypeEnum.Custom, "TMSpeech 通知"),
+        ];
+
+        [Reactive]
+        [ConfigJsonValue]
+        public int NotificationType { get; set; } = NotificationTypeEnum.System;
+
+        [Reactive]
+        [ConfigJsonValue]
+        public string SensitiveWords { get; set; } = "";
     }
 
     public class AudioSectionConfigViewModel : SectionConfigViewModelBase

@@ -18,10 +18,6 @@ namespace TMSpeech.GUI.Views
             runInternalVersion.Text = GitVersionInformation.ShortSha +
                                       (GitVersionInformation.UncommittedChanges != "0" ? " (dirty)" : "");
 
-
-            this.WhenActivated(d =>
-            {
-            });
         }
     }
 }

@@ -120,6 +120,35 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
+            <TextBlock>通知</TextBlock>
+          </StackPanel>
+        </TabItem.Header>
+        <StackPanel DataContext="{Binding NotificationConfig}">
+          <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
+            <Label>通知类型</Label>
+            <ComboBox
+              SelectedValueBinding="{Binding Key}"
+              SelectedValue="{Binding NotificationType}"
+              ItemsSource="{Binding NotificaitonTypes}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Value}"></TextBlock>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <Label Grid.ColumnSpan="2">违禁词（使用逗号或换行分割）</Label>
+            <TextBox Height="100" TextWrapping="Wrap" AcceptsReturn="True"
+                     AcceptsTab="True" Text="{Binding SensitiveWords}"
+                     MaxLines="8" Grid.ColumnSpan="2"></TextBox>
+
+          </controls:AutoGrid>
+        </StackPanel>
+      </TabItem>
+
+      <TabItem>
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
             <TextBlock>音频源</TextBlock>
           </StackPanel>
         </TabItem.Header>
