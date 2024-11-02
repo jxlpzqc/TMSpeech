@@ -1,0 +1,6 @@
+{
+  "apiLevel": 1,
+  "assemblies": [
+    "TMSpeech.AudioSource.Windows.dll"
+  ]
+}

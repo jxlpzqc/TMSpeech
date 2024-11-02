@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -75,6 +76,7 @@ namespace TMSpeech.Core.Plugins
         {
             RegistErrorHandlers();
             Assembly assembly;
+            var _context = new PluginLoadContext(pluginFile);
             try
             {
                 assembly = _context.LoadFromAssemblyPath(pluginFile);
@@ -129,7 +131,7 @@ namespace TMSpeech.Core.Plugins
             public PluginLoadContext(string pluginPath)
             {
                 _resolver = new AssemblyDependencyResolver(pluginPath);
-                var nativeRuntimes = Path.Combine(pluginPath, "runtimes", GetRuntimeIdentifier(), "native");
+                var nativeRuntimes = Path.Combine(Path.GetDirectoryName(pluginPath), "runtimes", GetRuntimeIdentifier(), "native");
                 if (Directory.Exists(nativeRuntimes)) _runtimesNativePath = nativeRuntimes;
             }
 
@@ -178,26 +180,40 @@ namespace TMSpeech.Core.Plugins
             }
         }
 
-        private PluginLoadContext _context = null;
-
         public override void LoadPlugins()
         {
             var execuatblePath = Assembly.GetEntryAssembly().Location;
             var pluginPath = Path.Combine(Path.GetDirectoryName(execuatblePath), "plugins");
 
-            _context = new PluginLoadContext(pluginPath);
 
-            var pluginFiles = Directory.GetFiles(pluginPath, "*.dll", SearchOption.AllDirectories);
-
-            foreach (var pluginFile in pluginFiles)
+            foreach (var dir in Directory.GetDirectories(pluginPath))
             {
-                try
+                var jsonFileName = Path.Combine(dir, "tmmodule.json");
+                if (File.Exists(jsonFileName))
                 {
-                    LoadPlugin(pluginFile);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine($"Error loading plugin {pluginFile}: {e}");
+                    string moduleJson = File.ReadAllText(jsonFileName);
+                    ModuleInfo moduleInfo;
+                    try
+                    {
+                        moduleInfo = JsonSerializer.Deserialize<ModuleInfo>(moduleJson);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine($"Error deserialize module info: {e}");
+                        continue;
+                    }
+                    
+                    foreach (var assembly in moduleInfo.Assemblies)
+                    {
+                        try
+                        {
+                            LoadPlugin(Path.Combine(dir, assembly));
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.WriteLine($"Error loading plugin {assembly}: {e}");
+                        }
+                    }
                 }
             }
         }

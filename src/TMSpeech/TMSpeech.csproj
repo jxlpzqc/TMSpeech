@@ -60,7 +60,7 @@
     <PluginsOutputDir>plugins\</PluginsOutputDir>
   </PropertyGroup>
   <ItemGroup>
-    <PluginProjects Include="..\Plugins\*\*.csproj" />
+    <PluginProjects Include="..\Plugins\*\*.csproj" OutPutDir="%(Filename)" />
   </ItemGroup>
 
 
@@ -81,7 +81,7 @@
     </ConvertToAbsolutePath>
     <Message Importance="high" Text="Found built-in plugins: @(PluginProjects, ', ')" />
     <Message Importance="high" Text="Building plugins to $(PluginsOutputDirAbs)" />
-    <MSBuild Projects="@(PluginProjects)" Targets="Build" Properties="OutDir=$(PluginsOutputDirAbs)" />
+    <MSBuild Projects="@(PluginProjects)" Targets="Build" Properties="OutDir=$(PluginsOutputDirAbs)\%(OutPutDir)" />
     <ItemGroup>
       <FilesToDelete Include="$(PluginsOutputDirAbs)\TMSpeech.Core.*" />
     </ItemGroup>

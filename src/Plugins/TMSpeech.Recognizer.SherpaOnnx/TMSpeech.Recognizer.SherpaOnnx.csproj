@@ -19,4 +19,10 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="tmmodule.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
