@@ -8,21 +8,18 @@ namespace TMSpeech.Core.Services.Resource;
 
 public class Resource
 {
-    public string ID { get; set; }
-    public string Name { get; set; }
-    public string Desc { get; set; }
-    // TODO: is local
-    public bool IsLocal => false;
-    public bool NeedUpdate => false;
-    public string DownloadURL { get; set; }
-}
+    private ModuleInfo? _localInfo;
+    private ModuleInfo? _remoteInfo;
 
-public class SherpaOnnxModelResource : Resource
-{
-    public string EncoderPath { get; set; }
-    public string DocoderPath { get; set; }
-    public string JoinerPath { get; set; }
-    public string TokenPath { get; set; }
+    public ModuleInfo ModuleInfo => (_remoteInfo ?? _localInfo)!;
+
+    public string ID => ModuleInfo.ID;
+    public string Name => ModuleInfo.Name;
+    public string Desc => ModuleInfo.Desc;
+
+    public bool IsLocal => _localInfo != null;
+
+    public bool NeedUpdate => (_remoteInfo != null && _localInfo != null) && _remoteInfo.Version > _localInfo.Version;
 }
 
 public class ResourceManager
