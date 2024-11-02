@@ -23,7 +23,7 @@ public class ModuleInfo
     public string Name { get; set; }
 
     [JsonPropertyName("author")]
-    public string Author { get; set; }
+    public string? Author { get; set; }
 
     [JsonPropertyName("publisher")]
     public string? Publisher { get; set; }
@@ -35,7 +35,7 @@ public class ModuleInfo
     public string? Repository { get; set; }
 
     [JsonPropertyName("type")]
-    public string? type { get; set; }
+    public string? Type { get; set; }
 
     /// <summary>
     /// only for plugin

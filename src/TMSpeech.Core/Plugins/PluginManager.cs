@@ -133,7 +133,7 @@ namespace TMSpeech.Core.Plugins
             {
                 _resolver = new AssemblyDependencyResolver(pluginPath);
                 var nativeRuntimes = Path.Combine(Path.GetDirectoryName(pluginPath), "runtimes", GetRuntimeIdentifier(), "native");
-                if (Directory.Exists(nativeRuntimes)) _runtimesNativePath = nativeRuntimes;
+                if (!Directory.Exists(nativeRuntimes)) _runtimesNativePath = nativeRuntimes;
             }
 
             protected override Assembly Load(AssemblyName assemblyName)
@@ -183,8 +183,8 @@ namespace TMSpeech.Core.Plugins
 
         public override void LoadPlugins()
         {
-            var execuatblePath = Assembly.GetEntryAssembly().Location;
-            var pluginPath = Path.Combine(Path.GetDirectoryName(execuatblePath), "plugins");
+            var executablePath = Assembly.GetEntryAssembly().Location;
+            var pluginPath = Path.Combine(Path.GetDirectoryName(executablePath), "plugins");
 
 
             foreach (var dir in Directory.GetDirectories(pluginPath))

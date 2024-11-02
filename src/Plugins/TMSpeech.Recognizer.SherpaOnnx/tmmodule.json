@@ -1,4 +1,9 @@
 {
+  "id": "TMSpeech.Recognizer.SherpaOnnx",
+  "version": 1,
+  "desc": "",
+  "displayVersion": "0.1",
+  "name": "SherpaOnnx 识别器",
   "apiLevel": 1,
   "assemblies": [
     "TMSpeech.Recognizer.SherpaOnnx.dll"

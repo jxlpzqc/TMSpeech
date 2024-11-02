@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
@@ -72,7 +72,7 @@ public class ResourceItemViewModel : ViewModelBase
         downloadItemObservable.Select(x => x.Status == DownloadStatus.Downloading)
             .ToPropertyEx(this, x => x.IsPauseButtonShown);
 
-        downloadItemObservable.Select(x => !x.IsWorking && x.Resource.IsLocal)
+        downloadItemObservable.Select(x => !x.IsWorking && x.Resource.IsLocal && x.Resource.CanRemove)
             .ToPropertyEx(this, x => x.IsUninstallButtonShown);
 
         downloadItemObservable.Select(x => x.IsWorking)
@@ -82,7 +82,7 @@ public class ResourceItemViewModel : ViewModelBase
             .ToPropertyEx(this, x => x.IsIndeterminate);
 
         downloadItemObservable.Select(x =>
-                x.IsIndeterminate ? -1 : x.Finished * 100 / x.Total)
+                (int)(x.IsIndeterminate || x.Total == 0 ? -1 : x.Finished * 100 / x.Total))
             .ToPropertyEx(this, x => x.Progress);
 
         downloadItemObservable.Select(x => x.Speed)
@@ -143,5 +143,7 @@ public class ResourceManagerViewModel : ViewModelBase
         LoadCommand.IsExecuting.ToPropertyEx(this, x => x.Loading);
         LoadCommand.ThrownExceptions.Select(u => u.Message)
             .ToPropertyEx(this, x => x.LoadMessage);
+
+        LoadCommand.Execute().Subscribe();
     }
 }

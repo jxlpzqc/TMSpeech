@@ -6,6 +6,7 @@ namespace TMSpeech.Core.Services.Resource;
 
 public enum DownloadStatus
 {
+    Idle,
     Pending,
     Downloading,
     Installing,
@@ -36,8 +37,17 @@ public class DownloadManager
 
     public IReadOnlyDictionary<string, DownloadItem> Tasks => _tasks;
 
-    public DownloadItem GetItem(Resource resource)
+    public DownloadItem? GetItem(Resource resource)
     {
+        if (!_tasks.ContainsKey(resource.ID))
+        {
+            _tasks.Add(resource.ID, new DownloadItem
+            {
+                Resource = resource,
+                Status = DownloadStatus.Idle
+            });
+        }
+
         return _tasks[resource.ID];
     }
 
@@ -101,14 +111,14 @@ public class DownloadManager
         }
 
         var dir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, res.ID);
-        if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
         return dir;
     }
 
     private static string GetDownloadingFileName(Resource res, int step)
     {
         var dir = Path.Combine(GetPluginDirName(res), "downloading");
-        if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
         return Path.Combine(dir, step + ".tmp");
     }
 
@@ -261,6 +271,6 @@ public class DownloadManager
 
 public static class DownloadManagerFactory
 {
-    private static Lazy<DownloadManager> _instance = new();
+    private static Lazy<DownloadManager> _instance = new(() => new DownloadManager());
     public static DownloadManager Instance => _instance.Value;
 }

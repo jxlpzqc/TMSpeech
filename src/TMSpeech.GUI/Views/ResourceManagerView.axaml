@@ -11,7 +11,7 @@
   <DockPanel Margin="16,8">
     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8" DockPanel.Dock="Top">
       <Button Command="{Binding LoadCommand}">刷新</Button>
-      <CheckBox DockPanel.Dock="Right">仅查看已安装</CheckBox>
+      <CheckBox IsVisible="False" DockPanel.Dock="Right">仅查看已安装</CheckBox>
       <TextBlock Text="{Binding LoadMessage}" Foreground="Red" VerticalAlignment="Center"></TextBlock>
     </StackPanel>
     <ListBox ItemsSource="{Binding Items, Mode=OneWay}">
@@ -22,7 +22,7 @@
             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ResouceInfo.Desc}"></TextBlock>
 
             <TextBlock Grid.Row="0" Grid.Column="1" IsVisible="{Binding IsInstalled}">已安装</TextBlock>
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
               <Button IsVisible="{Binding IsInstallButtonShown}">
                 <Grid>
                   <TextBlock IsVisible="{Binding IsInstallButtonUpdate}">更新</TextBlock>

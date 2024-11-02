@@ -1,4 +1,9 @@
 {
+  "id": "TMSpeech.AudioSource.Windows",
+  "version": 1,
+  "desc": "",
+  "displayVersion": "0.1",
+  "name": "Windows 语音采集器",
   "apiLevel": 1,
   "assemblies": [
     "TMSpeech.AudioSource.Windows.dll"
