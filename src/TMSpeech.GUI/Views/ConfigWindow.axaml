@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:TMSpeech.GUI.Controls"
         xmlns:vm="clr-namespace:TMSpeech.GUI.ViewModels"
+        xmlns:views="using:TMSpeech.GUI.Views"
         xmlns:converter="clr-namespace:TMSpeech.GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
         Width="720"
@@ -186,7 +187,9 @@
         </StackPanel>
       </TabItem>
       <TabItem Header="插件" IsVisible="False"></TabItem>
-      <TabItem Header="资源" IsVisible="False"></TabItem>
+      <TabItem Header="资源">
+        <views:ResourceManagerView />
+      </TabItem>
 
       <TabItem Header="关于">
         <ScrollViewer>

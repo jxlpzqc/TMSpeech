@@ -65,7 +65,7 @@ public partial class MainWindow : Window
     #endregion
 
     MainViewModel ViewModel => (MainViewModel)DataContext;
-    
+
     private void SettingsButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         this.Topmost = false;
@@ -73,10 +73,18 @@ public partial class MainWindow : Window
         this.Topmost = true;
     }
 
+    private HistoryWindow? _historyWindow;
+
     private void HistoryButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        this.Topmost = false;
-        new HistoryWindow(this.ViewModel).Show();
-        this.Topmost = true;
+        if (_historyWindow != null)
+        {
+            _historyWindow.Activate();
+            return;
+        }
+
+        _historyWindow = new HistoryWindow(this.ViewModel);
+        _historyWindow.Closed += (o, e) => { _historyWindow = null; };
+        _historyWindow.Show();
     }
 }
