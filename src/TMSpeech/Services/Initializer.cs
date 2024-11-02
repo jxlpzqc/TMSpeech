@@ -1,6 +1,6 @@
 using TMSpeech.Core.Services.Notification;
 
-namespace TMSpeech.GUI.Services;
+namespace TMSpeech.Services;
 
 static public class Initializer
 {

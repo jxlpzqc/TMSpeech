@@ -9,9 +9,14 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Resources\tmspeech-circle.ico</ApplicationIcon>
   </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="DesktopNotifications.Avalonia" Version="1.3.1" />
     <PackageReference Include="nulastudio.NetBeauty" Version="2.1.4.3" />
   </ItemGroup>
 
@@ -85,6 +90,6 @@
     <ItemGroup>
       <FilesToDelete Include="$(PluginsOutputDirAbs)\TMSpeech.Core.*" />
     </ItemGroup>
-    <Delete Files="@(FilesToDelete)"></Delete>
+    <Delete Files="@(FilesToDelete)"/>
   </Target>
 </Project>
