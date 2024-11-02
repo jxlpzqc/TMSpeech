@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO.Compression;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Downloader;
 
 namespace TMSpeech.Core.Services.Resource;
@@ -14,7 +10,6 @@ public enum DownloadStatus
     Downloading,
     Installing,
     Done,
-    Pausing,
     Paused,
     Failed
 }
@@ -24,12 +19,15 @@ public class DownloadItem
     public Resource Resource { get; set; }
     public DownloadStatus Status { get; set; }
     public bool IsWorking => Status is DownloadStatus.Downloading or DownloadStatus.Installing;
+
     public bool IsIndeterminate { get; set; }
     public long Finished { get; set; }
     public long Total { get; set; }
     public double Speed { get; set; }
 
+    internal int _step = 0;
     internal DownloadService? _service;
+    internal TaskCompletionSource? _downloadTask;
 }
 
 public class DownloadManager
@@ -43,33 +41,48 @@ public class DownloadManager
         return _tasks[resource.ID];
     }
 
-    public void DownloadItem(Resource resource)
+    public void StartJob(Resource resource)
     {
-        lock (_tasks)
+        Task.Run(() =>
         {
-            var task = new DownloadItem()
+            lock (_tasks)
             {
-                Resource = resource,
-                Status = DownloadStatus.Pending
-            };
-            _tasks.Add(resource.ID, task);
+                while (_tasks.Count(u => u.Value.IsWorking) >= _maxDownloadSize)
+                {
+                    Monitor.Wait(_tasks);
+                }
 
-            NotifyDownloadStatus(_tasks[resource.ID]);
+                DownloadItem task;
 
-            while (_tasks.Count(u => u.Value.IsWorking) >= _maxDownloadSize)
-            {
-                Monitor.Wait(_tasks);
+                if (!_tasks.ContainsKey(resource.ID))
+                {
+                    task = new DownloadItem
+                    {
+                        Resource = resource,
+                        Status = DownloadStatus.Pending
+                    };
+                    _tasks.Add(resource.ID, task);
+                    NotifyDownloadStatus(_tasks[resource.ID]);
+                    DoJob(task);
+                }
+                else
+                {
+                    task = _tasks[resource.ID];
+                    if (task.Status != DownloadStatus.Paused || task._service == null) return;
+                    task.Status = DownloadStatus.Downloading;
+                    NotifyDownloadStatus(task);
+                    task._service.Resume();
+                }
             }
-
-            DoDownload(task);
-        }
+        });
     }
 
-    public void PauseItem(Resource resource)
+    public void PauseJob(Resource resource)
     {
         lock (_tasks)
         {
             var task = _tasks[resource.ID];
+            if (task.Status != DownloadStatus.Downloading) return;
             task._service.Pause();
             task.Status = DownloadStatus.Paused;
             NotifyDownloadStatus(_tasks[resource.ID]);
@@ -77,51 +90,144 @@ public class DownloadManager
         }
     }
 
-    private static string GetDownloadingFileName(Resource res)
+    private static string GetPluginDirName(Resource res)
     {
-        var dir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, "downloading");
-        if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        // security check
         var strTheseAreInvalidFileNameChars = new string(System.IO.Path.GetInvalidFileNameChars());
         var regInvalidFileName = new Regex("[" + Regex.Escape(strTheseAreInvalidFileNameChars) + "]");
-        // security check
         if (regInvalidFileName.IsMatch(res.ID))
         {
             throw new Exception("id contains illegal filename");
         }
 
-        return Path.Combine(dir, res.ID + ".tmp");
+        var dir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, res.ID);
+        if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        return dir;
     }
 
-    private void DoInstall(DownloadItem task)
+    private static string GetDownloadingFileName(Resource res, int step)
     {
-        task.Status = DownloadStatus.Installing;
+        var dir = Path.Combine(GetPluginDirName(res), "downloading");
+        if (Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        return Path.Combine(dir, step + ".tmp");
+    }
+
+    private async Task DoExtract(DownloadItem task)
+    {
+        var currrentStep = task.Resource.ModuleInfo.InstallSteps[task._step];
         task.IsIndeterminate = true;
-        NotifyDownloadStatus(task);
-        Task.Run(() => { }); // installing
+        UpdateJobStatus(task, DownloadStatus.Installing);
+        await Task.Run(() =>
+        {
+            var fileStep = currrentStep.ExtractStep ?? task._step - 1;
+            ZipFile.ExtractToDirectory(GetDownloadingFileName(task.Resource, fileStep),
+                string.IsNullOrEmpty(currrentStep.ExtractTo)
+                    ? GetPluginDirName(task.Resource)
+                    : Path.Combine(GetPluginDirName(task.Resource), currrentStep.ExtractTo)
+            );
+        });
     }
 
-    private void DoDownload(DownloadItem task)
+    private async Task DoWriteFile(DownloadItem task)
     {
-        if (task._service != null)
+        task.IsIndeterminate = true;
+        UpdateJobStatus(task, DownloadStatus.Installing);
+        var currrentStep = task.Resource.ModuleInfo.InstallSteps[task._step];
+        File.WriteAllText(currrentStep.WritePath, currrentStep.WriteContent);
+    }
+
+    private void UpdateJobStatus(DownloadItem task, DownloadStatus newStatus)
+    {
+        lock (_tasks)
         {
-            task._service.Resume();
+            task.Status = newStatus;
+            NotifyDownloadStatus(task);
+            Monitor.Pulse(_tasks);
+        }
+    }
+
+    private async Task DoJob(DownloadItem task)
+    {
+        var installsteps = task.Resource.ModuleInfo.InstallSteps;
+        if (installsteps == null)
+        {
+            UpdateJobStatus(task, DownloadStatus.Done);
             return;
         }
 
-        task._service = new DownloadService();
-        task._service.DownloadFileTaskAsync(task.Resource.DownloadURL, GetDownloadingFileName(task.Resource));
-        task.Status = DownloadStatus.Downloading;
-        NotifyDownloadStatus(task);
 
+        for (; task._step < installsteps.Count; task._step++)
+        {
+            var currentStepIdx = task._step;
+            var step = installsteps[currentStepIdx];
+
+            if (step.Type == "download")
+            {
+                try
+                {
+                    await DoDownload(task);
+                }
+                catch
+                {
+                    UpdateJobStatus(task, DownloadStatus.Failed);
+                    return;
+                    // TODO: reason
+                }
+            }
+            else if (step.Type == "extract")
+            {
+                try
+                {
+                    await DoExtract(task);
+                }
+                catch
+                {
+                    UpdateJobStatus(task, DownloadStatus.Failed);
+                    return;
+                }
+            }
+            else if (step.Type == "write_file")
+            {
+                try
+                {
+                    await DoWriteFile(task);
+                }
+                catch (Exception e)
+                {
+                    UpdateJobStatus(task, DownloadStatus.Failed);
+                    return;
+                }
+            }
+        }
+    }
+
+    private Task DoDownload(DownloadItem task)
+    {
+        var t = new TaskCompletionSource();
+
+        if (task._service != null)
+        {
+            task._service.Resume();
+            t.SetResult();
+            return t.Task;
+        }
+
+        task._service = new DownloadService();
+
+        task._service.Pause();
+        task._service.CancelAsync();
         task._service.DownloadFileCompleted += (sender, args) =>
         {
-            DoInstall(task);
-            lock (_tasks)
+            if (args.Cancelled || args.Error != null)
             {
-                task.Status = DownloadStatus.Done;
-                NotifyDownloadStatus(task);
-                Monitor.Pulse(_tasks);
+                UpdateJobStatus(task, DownloadStatus.Failed);
             }
+            else
+            {
+                UpdateJobStatus(task, DownloadStatus.Done);
+            }
+
+            t.SetResult();
         };
         task._service.DownloadProgressChanged += (sender, args) =>
         {
@@ -130,6 +236,13 @@ public class DownloadManager
             task.Speed = args.BytesPerSecondSpeed;
             NotifyDownloadStatus(task);
         };
+
+
+        task._service.DownloadFileTaskAsync(task.Resource.ModuleInfo.InstallSteps[task._step].DownloadURL,
+            GetDownloadingFileName(task.Resource, task._step));
+        task.Status = DownloadStatus.Downloading;
+        NotifyDownloadStatus(task);
+        return t.Task;
     }
 
     private readonly int _maxDownloadSize = 3;

@@ -74,7 +74,10 @@ public class InstallStep
 
     public string? DownloadURL { get; set; }
 
+    public int? ExtractStep { get; set; }
+
     public string? WriteContent { get; set; }
 
     public string? WritePath { get; set; }
+    public string? ExtractTo { get; set; }
 }

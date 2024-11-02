@@ -92,12 +92,12 @@ public class ResourceItemViewModel : ViewModelBase
 
     private void InstallImpl()
     {
-        DownloadManagerFactory.Instance.DownloadItem(ResouceInfo);
+        DownloadManagerFactory.Instance.StartJob(ResouceInfo);
     }
 
     private void PauseImpl()
     {
-        DownloadManagerFactory.Instance.PauseItem(ResouceInfo);
+        DownloadManagerFactory.Instance.PauseJob(ResouceInfo);
     }
 
     private void UninstallImpl()
