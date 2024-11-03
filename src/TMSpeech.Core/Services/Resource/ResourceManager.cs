@@ -28,7 +28,7 @@ public class Resource
     public string ID => ModuleInfo.ID;
     public string Name => ModuleInfo.Name;
     public string Desc => ModuleInfo.Desc;
-    public bool IsPlugin => ModuleInfo.Type == "plugin";
+    public bool IsPlugin => ModuleInfo.Type == ModuleInfoTypeEnums.Plugin;
     public bool IsLocal => LocalInfo != null;
     public bool NeedUpdate => (RemoteInfo != null && LocalInfo != null) && RemoteInfo.Version > LocalInfo.Version;
 
@@ -57,12 +57,13 @@ public class ResourceManager
 
     public async Task<Resource?> GetLocalResource(string id, bool dismissCache = false)
     {
-        if (_localCacheDict == null || dismissCache)
-        {
-            await RealGetLocalResources();
-        }
-
+        await GetLocalResources(dismissCache);
         return _localCacheDict?[id];
+    }
+
+    public async Task<IList<ModuleInfo>> GetLocalModuleInfos()
+    {
+        return (await GetLocalResources()).Select(u => u.ModuleInfo).ToList();
     }
 
     public async Task<ModuleInfo?> GetLocalModuleInfo(string id, bool dismissCache = false)
@@ -74,7 +75,18 @@ public class ResourceManager
     {
         if (_localCache == null || dismissCache)
         {
-            await RealGetLocalResources();
+            try
+            {
+                Monitor.Enter(this);
+                if (_localCache == null || dismissCache)
+                {
+                    await RealGetLocalResources();
+                }
+            }
+            finally
+            {
+                Monitor.Exit(this);
+            }
         }
 
         return _localCache;
@@ -145,7 +157,7 @@ public class ResourceManager
 
     public async Task<IList<Resource>> GetAllResources()
     {
-        var local = await GetLocalResources(true);
+        var local = (await GetLocalResources(true)).ToList();
         var localDict = local.ToDictionary(x => x.ID, x => x);
         var remote = await GetRemoteResources();
         foreach (var r in remote)

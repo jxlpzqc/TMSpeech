@@ -2,6 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace TMSpeech.Core.Services.Resource;
 
+public static class ModuleInfoTypeEnums
+{
+    public const string Plugin = "plugin";
+    public const string SherpaOnnxModel = "sherpaonnx_model";
+}
+
 public class ModuleInfo
 {
     [JsonPropertyName("id")]
@@ -34,6 +40,9 @@ public class ModuleInfo
     [JsonPropertyName("repository")]
     public string? Repository { get; set; }
 
+    /// <summary>
+    /// plugin, sherpaonnx_model
+    /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
 
@@ -85,7 +94,7 @@ public class InstallStep
 
     [JsonPropertyName("extractStep")]
     public int? ExtractStep { get; set; }
-    
+
     [JsonPropertyName("extractType")]
     public string ExtractType { get; set; }
 
