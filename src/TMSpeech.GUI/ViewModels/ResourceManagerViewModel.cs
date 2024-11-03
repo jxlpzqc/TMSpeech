@@ -80,8 +80,8 @@ public class ResourceItemViewModel : ViewModelBase
 
         downloadItemObservable.Select(x =>
         {
-            if (!x.IsWorking && x.Resource.NeedUpdate) return "更新";
             if (!x.IsWorking && x.Status == DownloadStatus.Paused) return "继续";
+            if (!x.IsWorking && x.Resource.NeedUpdate) return "更新";
             return "安装";
         }).ToPropertyEx(this, x => x.InstallButtonText);
 
