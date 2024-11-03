@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
@@ -165,6 +166,6 @@ public class ResourceManagerViewModel : ViewModelBase
         LoadCommand.ThrownExceptions.Select(u => u.Message)
             .ToPropertyEx(this, x => x.LoadMessage);
 
-        LoadCommand.Execute().Subscribe();
+        LoadCommand.Execute().SubscribeOn(Scheduler.Default).Subscribe();
     }
 }
