@@ -257,7 +257,7 @@ public class DownloadManager
             }
         }
 
-        task.Resource.UpdateLocal();
+        await task.Resource.UpdateLocal();
         task._step = 0;
         UpdateJobStatus(task, DownloadStatus.Idle);
         Directory.Delete(Path.Combine(GetPluginDirName(task.Resource), "downloading"), true);

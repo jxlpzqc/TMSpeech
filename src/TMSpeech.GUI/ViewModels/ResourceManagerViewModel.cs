@@ -63,7 +63,7 @@ public class ResourceItemViewModel : ViewModelBase
             Observable.Return(DownloadManagerFactory.Instance.GetItem(res)),
             UninstallCommand.Select(_ =>
             {
-                res.UpdateLocal();
+                res.UpdateLocalSync();
                 DownloadManagerFactory.Instance.UpdateItem(res);
                 return DownloadManagerFactory.Instance.GetItem(res);
             }),

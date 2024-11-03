@@ -23,6 +23,7 @@ public class Resource
     public ModuleInfo? LocalInfo { get; set; }
     public string LocalDir { get; set; }
     public ModuleInfo? RemoteInfo { get; set; }
+
     public ModuleInfo ModuleInfo => (RemoteInfo ?? LocalInfo)!;
     public string ID => ModuleInfo.ID;
     public string Name => ModuleInfo.Name;
@@ -31,72 +32,73 @@ public class Resource
     public bool IsLocal => LocalInfo != null;
     public bool NeedUpdate => (RemoteInfo != null && LocalInfo != null) && RemoteInfo.Version > LocalInfo.Version;
 
-    public void UpdateLocal()
+    public void UpdateLocalSync()
     {
-        const string pluginDirName = "plugins";
-        var execuatblePath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), pluginDirName);
-        var userdatadir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, pluginDirName);
+        UpdateLocal().Wait();
+    }
 
-        ModuleInfo? resultInfo = null;
-        string resultDir = null;
-        bool resultCanremove = false;
-
-        foreach (var (canremove, dir) in Directory.GetDirectories(execuatblePath).Select(u => (false, u))
-                     .Concat(Directory.GetDirectories(userdatadir).Select(u => (true, u))))
-        {
-            var jsonFileName = Path.Combine(dir, "tmmodule.json");
-            if (File.Exists(jsonFileName))
-            {
-                string moduleJson = File.ReadAllText(jsonFileName);
-                ModuleInfo moduleInfo;
-                try
-                {
-                    moduleInfo = JsonSerializer.Deserialize<ModuleInfo>(moduleJson);
-                }
-                catch
-                {
-                    Debug.WriteLine($"Fail to parse json file at {dir}");
-                    continue;
-                }
-
-                if (moduleInfo.ID == ID)
-                {
-                    resultInfo = moduleInfo;
-                    resultDir = dir;
-                    resultCanremove = canremove;
-                }
-            }
-        }
-
-        LocalInfo = resultInfo;
-        LocalDir = resultDir;
-        CanRemove = resultCanremove;
+    public async Task UpdateLocal()
+    {
+        var res = await ResourceManagerFactory.Instance.GetLocalResource(ID, true);
+        if (res == null) return;
+        LocalInfo = res.LocalInfo;
+        LocalDir = res.LocalDir;
+        CanRemove = res.CanRemove;
     }
 }
 
 public class ResourceManager
 {
-    public async Task<IList<Resource>> GetLocalResources()
+    const string PluginDirName = "plugins";
+    const string ModuleJsonFileName = "tmmodule.json";
+
+    private IList<Resource>? _localCache;
+    private IDictionary<string, Resource>? _localCacheDict;
+
+    public async Task<Resource?> GetLocalResource(string id, bool dismissCache = false)
     {
-        const string pluginDirName = "plugins";
-        var execuatblePath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), pluginDirName);
-        var userdatadir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, pluginDirName);
+        if (_localCacheDict == null || dismissCache)
+        {
+            await RealGetLocalResources();
+        }
+
+        return _localCacheDict?[id];
+    }
+
+    public async Task<ModuleInfo?> GetLocalModuleInfo(string id, bool dismissCache = false)
+    {
+        return (await GetLocalResource(id, dismissCache))?.LocalInfo;
+    }
+
+    public async Task<IList<Resource>> GetLocalResources(bool dismissCache = false)
+    {
+        if (_localCache == null || dismissCache)
+        {
+            await RealGetLocalResources();
+        }
+
+        return _localCache;
+    }
+
+    private async Task RealGetLocalResources()
+    {
+        var execuatblePath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), PluginDirName);
+        var userdatadir = Path.Combine(ConfigManagerFactory.Instance.UserDataDir, PluginDirName);
         if (!Directory.Exists(execuatblePath)) Directory.CreateDirectory(execuatblePath);
         if (!Directory.Exists(userdatadir)) Directory.CreateDirectory(userdatadir);
 
         List<Resource> ret = new List<Resource>();
 
-        foreach (var (canremove, dir) in Directory.GetDirectories(execuatblePath).Select(u => (false, u))
+        foreach (var (canRemove, dir) in Directory.GetDirectories(execuatblePath).Select(u => (false, u))
                      .Concat(Directory.GetDirectories(userdatadir).Select(u => (true, u))))
         {
-            var jsonFileName = Path.Combine(dir, "tmmodule.json");
+            var jsonFileName = Path.Combine(dir, ModuleJsonFileName);
             if (File.Exists(jsonFileName))
             {
-                string moduleJson = File.ReadAllText(jsonFileName);
-                ModuleInfo moduleInfo;
+                ModuleInfo? moduleInfo;
                 try
                 {
-                    moduleInfo = JsonSerializer.Deserialize<ModuleInfo>(moduleJson);
+                    moduleInfo = await JsonSerializer.DeserializeAsync<ModuleInfo>(File.OpenRead(jsonFileName));
                 }
                 catch
                 {
@@ -108,12 +110,13 @@ public class ResourceManager
                 {
                     LocalInfo = moduleInfo,
                     LocalDir = dir,
-                    CanRemove = canremove
+                    CanRemove = canRemove
                 });
             }
         }
 
-        return ret;
+        _localCache = ret;
+        _localCacheDict = ret.ToDictionary(x => x.ID, x => x);
     }
 
     public async Task RemoveResource(Resource resource)
@@ -131,7 +134,7 @@ public class ResourceManager
         public IList<ModuleInfo> Modules { get; set; }
     }
 
-    public async Task<IList<Resource>> GetRemoteResources()
+    private async Task<IList<Resource>> GetRemoteResources()
     {
         var client = new HttpClient();
         var json = await client.GetStringAsync("https://chengzi.tech/TMSpeechCommunity/marketplace.json");
@@ -142,7 +145,7 @@ public class ResourceManager
 
     public async Task<IList<Resource>> GetAllResources()
     {
-        var local = await GetLocalResources();
+        var local = await GetLocalResources(true);
         var localDict = local.ToDictionary(x => x.ID, x => x);
         var remote = await GetRemoteResources();
         foreach (var r in remote)
