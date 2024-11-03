@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TMSpeech.Core.Plugins;
+using TMSpeech.Core.Services.Resource;
 
 namespace TMSpeech.Recognizer.SherpaOnnx
 {
@@ -34,7 +35,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void LoadConfig(string config)
         {
-            if (config.Length != 0) {
+            if (config.Length != 0)
+            {
                 _userConfig = JsonSerializer.Deserialize<SherpaOnnxConfig>(config);
             }
         }
@@ -65,10 +67,30 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             config = new OnlineRecognizerConfig();
             config.FeatConfig.SampleRate = 16000;
             config.FeatConfig.FeatureDim = 80;
-            config.TransducerModelConfig.Encoder = _userConfig.Encoder;
-            config.TransducerModelConfig.Decoder = _userConfig.Decoder;
-            config.TransducerModelConfig.Joiner = _userConfig.Joiner;
-            config.TransducerModelConfig.Tokens = _userConfig.Tokens;
+
+            string encoder, decoder, joiner, tokens;
+
+            if (!string.IsNullOrEmpty(_userConfig.Model))
+            {
+                var res = ResourceManagerFactory.Instance.GetLocalResource(_userConfig.Model).Result;
+                if (res == null) throw new InvalidDataException("Cannot find model: " + _userConfig.Model);
+                encoder = Path.Combine(res.LocalDir, res.ModuleInfo.SherpaOnnxModelPath.EncoderPath);
+                decoder = Path.Combine(res.LocalDir, res.ModuleInfo.SherpaOnnxModelPath.DecoderPath);
+                joiner = Path.Combine(res.LocalDir, res.ModuleInfo.SherpaOnnxModelPath.JoinerPath);
+                tokens = Path.Combine(res.LocalDir, res.ModuleInfo.SherpaOnnxModelPath.TokenPath);
+            }
+            else
+            {
+                encoder = _userConfig.Encoder;
+                decoder = _userConfig.Decoder;
+                joiner = _userConfig.Joiner;
+                tokens = _userConfig.Tokens;
+            }
+
+            config.TransducerModelConfig.Encoder = encoder;
+            config.TransducerModelConfig.Decoder = decoder;
+            config.TransducerModelConfig.Joiner = joiner;
+            config.TransducerModelConfig.Tokens = tokens;
             config.TransducerModelConfig.NumThreads = 1;
             config.TransducerModelConfig.Debug = 1;
             config.DecodingMethod = "greedy_search";
@@ -114,11 +136,14 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void Start()
         {
-            foreach (string path in new[] { _userConfig.Encoder, _userConfig.Decoder, _userConfig.Joiner, _userConfig.Tokens })
+            foreach (string path in new[]
+                         { _userConfig.Encoder, _userConfig.Decoder, _userConfig.Joiner, _userConfig.Tokens })
             {
                 if (!File.Exists(path))
                 {
-                    throw new InvalidOperationException("Cannot find model file: " + path +"\n Current working directory: " + Directory.GetCurrentDirectory());
+                    throw new InvalidOperationException("Cannot find model file: " + path +
+                                                        "\n Current working directory: " +
+                                                        Directory.GetCurrentDirectory());
                 }
             }
 
