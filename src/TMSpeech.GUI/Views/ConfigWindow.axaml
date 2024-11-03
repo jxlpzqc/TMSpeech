@@ -137,7 +137,7 @@
               </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Label Grid.ColumnSpan="2">违禁词（使用逗号或换行分割）</Label>
+            <Label Grid.ColumnSpan="2">敏感词（使用逗号或换行分割）</Label>
             <TextBox Height="100" TextWrapping="Wrap" AcceptsReturn="True"
                      AcceptsTab="True" Text="{Binding SensitiveWords}"
                      MaxLines="8" Grid.ColumnSpan="2"></TextBox>
