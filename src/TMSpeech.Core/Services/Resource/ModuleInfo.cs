@@ -71,7 +71,7 @@ public class SherpaOnnxModelPathInfo
     public string EncoderPath { get; set; }
 
     [JsonPropertyName("decoder")]
-    public string DocoderPath { get; set; }
+    public string DecoderPath { get; set; }
 
     [JsonPropertyName("joiner")]
     public string JoinerPath { get; set; }
