@@ -15,7 +15,7 @@
         </ProjectReference>
 
         <PackageReference Include="org.k2fsa.sherpa.onnx">
-            <Version>1.4.8</Version>
+            <Version>1.10.30</Version>
         </PackageReference>
     </ItemGroup>
 

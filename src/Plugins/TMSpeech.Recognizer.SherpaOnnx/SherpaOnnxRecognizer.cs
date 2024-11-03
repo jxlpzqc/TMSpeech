@@ -87,12 +87,22 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 tokens = _userConfig.Tokens;
             }
 
-            config.TransducerModelConfig.Encoder = encoder;
-            config.TransducerModelConfig.Decoder = decoder;
-            config.TransducerModelConfig.Joiner = joiner;
-            config.TransducerModelConfig.Tokens = tokens;
-            config.TransducerModelConfig.NumThreads = 1;
-            config.TransducerModelConfig.Debug = 1;
+            foreach (string path in new[] { encoder, decoder, joiner, tokens })
+            {
+                if (!File.Exists(path))
+                {
+                    throw new InvalidOperationException("Cannot find model file: " + path +
+                                                        "\n Current working directory: " +
+                                                        Directory.GetCurrentDirectory());
+                }
+            }
+
+            config.ModelConfig.Transducer.Encoder = encoder;
+            config.ModelConfig.Transducer.Decoder = decoder;
+            config.ModelConfig.Transducer.Joiner = joiner;
+            config.ModelConfig.Tokens = tokens;
+            config.ModelConfig.NumThreads = 1;
+            config.ModelConfig.Debug = 1;
             config.DecodingMethod = "greedy_search";
             config.EnableEndpoint = 1;
             config.Rule1MinTrailingSilence = 2.4f;
@@ -136,17 +146,6 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void Start()
         {
-            foreach (string path in new[]
-                         { _userConfig.Encoder, _userConfig.Decoder, _userConfig.Joiner, _userConfig.Tokens })
-            {
-                if (!File.Exists(path))
-                {
-                    throw new InvalidOperationException("Cannot find model file: " + path +
-                                                        "\n Current working directory: " +
-                                                        Directory.GetCurrentDirectory());
-                }
-            }
-
             if (thread != null)
                 throw new InvalidOperationException("The recognizer is already running.");
             stop = false;
