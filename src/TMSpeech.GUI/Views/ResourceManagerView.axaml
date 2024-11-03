@@ -8,12 +8,13 @@
   <Design.DataContext>
     <vm:ResourceManagerViewModel />
   </Design.DataContext>
-  <DockPanel Margin="16,8">
+  <DockPanel Margin="16,8,16,24">
     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8" DockPanel.Dock="Top">
       <Button Command="{Binding LoadCommand}">刷新</Button>
       <TextBlock Text="{Binding LoadMessage}" Foreground="Red" VerticalAlignment="Center"></TextBlock>
       <ProgressBar IsVisible="{Binding Loading}" IsIndeterminate="True" VerticalAlignment="Center" Height="30"></ProgressBar>
     </StackPanel>
+    <TextBlock DockPanel.Dock="Bottom" Margin="0,8" TextWrapping="Wrap">请在 https://github.com/jxlpzqc/TMSpeechCommunity 贡献模型和插件。</TextBlock>
     <ListBox ItemsSource="{Binding Items, Mode=OneWay}">
       <ListBox.ItemTemplate>
         <DataTemplate>
@@ -25,7 +26,8 @@
                        FontStyle="Italic">
               已安装
             </TextBlock>
-            <StackPanel Margin="0,0,-4,0" Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Margin="0,0,-4,0" Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
+                        HorizontalAlignment="Right">
               <Button IsVisible="{Binding IsInstallButtonShown}" Command="{Binding InstallCommand}"
                       Content="{Binding InstallButtonText}" />
               <Button IsVisible="{Binding IsPauseButtonShown}" Command="{Binding PauseCommand}">暂停</Button>
