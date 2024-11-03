@@ -41,7 +41,7 @@ public class DownloadManager
 
     public IReadOnlyDictionary<string, DownloadItem> Tasks => _tasks;
 
-    public DownloadItem? GetItem(Resource resource)
+    public DownloadItem? UpdateItemAndGet(Resource resource)
     {
         if (!_tasks.ContainsKey(resource.ID))
         {
@@ -50,6 +50,10 @@ public class DownloadManager
                 Resource = resource,
                 Status = DownloadStatus.Idle
             });
+        }
+        else
+        {
+            _tasks[resource.ID].Resource = resource;
         }
 
         return _tasks[resource.ID];
@@ -316,11 +320,6 @@ public class DownloadManager
 
     internal DownloadManager()
     {
-    }
-
-    public void UpdateItem(Resource res)
-    {
-        if (_tasks.ContainsKey(res.ID)) _tasks[res.ID].Resource = res;
     }
 }
 

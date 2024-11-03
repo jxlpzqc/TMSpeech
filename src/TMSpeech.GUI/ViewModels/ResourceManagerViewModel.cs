@@ -60,12 +60,11 @@ public class ResourceItemViewModel : ViewModelBase
         UninstallCommand = ReactiveCommand.CreateFromTask(UninstallImpl);
 
         var downloadItemObservable = Observable.Merge(
-            Observable.Return(DownloadManagerFactory.Instance.GetItem(res)),
+            Observable.Return(DownloadManagerFactory.Instance.UpdateItemAndGet(res)),
             UninstallCommand.Select(_ =>
             {
                 res.UpdateLocalSync();
-                DownloadManagerFactory.Instance.UpdateItem(res);
-                return DownloadManagerFactory.Instance.GetItem(res);
+                return DownloadManagerFactory.Instance.UpdateItemAndGet(res);
             }),
             Observable.FromEventPattern<DownloadItem>(
                 x => DownloadManagerFactory.Instance.DownloadStatusUpdated += x,
@@ -153,7 +152,7 @@ public class ResourceManagerViewModel : ViewModelBase
 
     private async Task Load()
     {
-        var local = await ResourceManagerFactory.Instance.GetLocalResources();
+        var local = await ResourceManagerFactory.Instance.GetLocalResources(true);
         Items = local.Select(u => new ResourceItemViewModel(u)).ToList();
         var all = await ResourceManagerFactory.Instance.GetAllResources();
         Items = all.Select(u => new ResourceItemViewModel(u)).ToList();
