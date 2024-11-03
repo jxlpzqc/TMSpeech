@@ -7,6 +7,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
+using Avalonia.Threading;
 using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.Controls;
@@ -44,16 +45,21 @@ public class PluginConfigView : UserControl
         set => SetValue(ValueProperty, value);
     }
 
-    private bool _isNotifying;
-
-    private void NotifyValueUpdated()
+    private enum UpdateMode
     {
-        _isNotifying = true;
-        Value = ConfigEditor.GenerateConfig();
-        _isNotifying = false;
+        ViewToBoth,
+        PluginLayerToViewToValue,
+        ValueToViewToPluginLayer,
     }
 
-    private void UpdateValuesToView()
+    private UpdateMode _updateMode = UpdateMode.ViewToBoth;
+
+    private void UpdateValueAndNotify()
+    {
+        Value = ConfigEditor.GenerateConfig();
+    }
+
+    private void LoadValuesToView()
     {
         if (ConfigEditor == null) return;
         var values = ConfigEditor.GetAll();
@@ -78,6 +84,7 @@ public class PluginConfigView : UserControl
         }
     }
 
+    // generate controls and events
     private void GenerateControls()
     {
         _container.Children.Clear();
@@ -98,8 +105,10 @@ public class PluginConfigView : UserControl
                 };
                 tb.TextChanged += (_, _) =>
                 {
+                    if (_updateMode != UpdateMode.ViewToBoth) return;
+
                     ConfigEditor.SetValue(formItem.Key, tb.Text);
-                    NotifyValueUpdated();
+                    UpdateValueAndNotify();
                 };
                 control = tb;
             }
@@ -114,8 +123,10 @@ public class PluginConfigView : UserControl
                 };
                 fp.FileChanged += (_, _) =>
                 {
+                    if (_updateMode != UpdateMode.ViewToBoth) return;
+                    
                     ConfigEditor.SetValue(formItem.Key, fp.Text);
-                    NotifyValueUpdated();
+                    UpdateValueAndNotify();
                 };
                 control = fp;
             }
@@ -135,8 +146,10 @@ public class PluginConfigView : UserControl
 
                 cb.SelectionChanged += (_, _) =>
                 {
+                    if (_updateMode != UpdateMode.ViewToBoth) return;
+                    
                     ConfigEditor.SetValue(formItem.Key, optionFormItem.Options.Keys.ToList()[cb.SelectedIndex]);
-                    NotifyValueUpdated();
+                    UpdateValueAndNotify();
                 };
                 control = cb;
             }
@@ -161,6 +174,7 @@ public class PluginConfigView : UserControl
             if (change.OldValue is IPluginConfigEditor oldConfig)
             {
                 oldConfig.ValueUpdated -= OnPluginLayerConfigValueUpdated;
+                oldConfig.FormItemsUpdated -= OnPluginLayerConfigFormItemsUpdated;
             }
 
             GenerateControls();
@@ -168,19 +182,38 @@ public class PluginConfigView : UserControl
             {
                 OnPluginLayerConfigValueUpdated(this, null);
                 newConfig.ValueUpdated += OnPluginLayerConfigValueUpdated;
+                newConfig.FormItemsUpdated += OnPluginLayerConfigFormItemsUpdated;
             }
         }
         else if (change.Property == ValueProperty)
         {
-            if (_isNotifying) return;
+            if (_updateMode != UpdateMode.ViewToBoth) return;
+            _updateMode = UpdateMode.ValueToViewToPluginLayer;
             ConfigEditor?.LoadConfigString(change.GetNewValue<string>());
-            UpdateValuesToView();
+            LoadValuesToView();
+            _updateMode = UpdateMode.ViewToBoth;
         }
+    }
+
+
+    private void OnPluginLayerConfigFormItemsUpdated(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            if (_updateMode != UpdateMode.ViewToBoth) return;
+            _updateMode = UpdateMode.PluginLayerToViewToValue;
+            GenerateControls();
+            LoadValuesToView();
+            _updateMode = UpdateMode.ViewToBoth;
+        });
     }
 
     private void OnPluginLayerConfigValueUpdated(object? sender, EventArgs e)
     {
-        UpdateValuesToView();
-        NotifyValueUpdated();
+        if (_updateMode != UpdateMode.ViewToBoth) return;
+        _updateMode = UpdateMode.PluginLayerToViewToValue;
+        UpdateValueAndNotify();
+        LoadValuesToView();
+        _updateMode = UpdateMode.ViewToBoth;
     }
 }
