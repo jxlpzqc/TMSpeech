@@ -21,7 +21,7 @@ public class ResourceItemViewModel : ViewModelBase
     public bool IsInstallButtonShown { get; }
 
     [ObservableAsProperty]
-    public bool IsInstallButtonUpdate { get; }
+    public string InstallButtonText { get; }
 
     [ObservableAsProperty]
     public bool IsPauseButtonShown { get; }
@@ -39,6 +39,12 @@ public class ResourceItemViewModel : ViewModelBase
     public bool IsIndeterminate { get; }
 
     [ObservableAsProperty]
+    public bool IsFailed { get; }
+
+    [ObservableAsProperty]
+    public string FailReason { get; }
+
+    [ObservableAsProperty]
     public string Speed { get; }
 
 
@@ -51,13 +57,20 @@ public class ResourceItemViewModel : ViewModelBase
         ResouceInfo = res;
         InstallCommand = ReactiveCommand.Create(InstallImpl);
         PauseCommand = ReactiveCommand.Create(PauseImpl);
-        UninstallCommand = ReactiveCommand.Create(UninstallImpl);
+        UninstallCommand = ReactiveCommand.CreateFromTask(UninstallImpl);
 
-        var downloadItemObservable = Observable.Return(DownloadManagerFactory.Instance.GetItem(res)).Merge(
+        var downloadItemObservable = Observable.Merge(
+            Observable.Return(DownloadManagerFactory.Instance.GetItem(res)),
+            UninstallCommand.Select(_ =>
+            {
+                res.UpdateLocal();
+                DownloadManagerFactory.Instance.UpdateItem(res);
+                return DownloadManagerFactory.Instance.GetItem(res);
+            }),
             Observable.FromEventPattern<DownloadItem>(
                 x => DownloadManagerFactory.Instance.DownloadStatusUpdated += x,
                 x => DownloadManagerFactory.Instance.DownloadStatusUpdated -= x).Select(
-                x => x.EventArgs).Where(x => x.Resource == this.ResouceInfo)
+                x => x.EventArgs).Where(x => x.Resource?.ID == this.ResouceInfo?.ID)
         );
 
         downloadItemObservable.Select(x => x.Resource.IsLocal)
@@ -66,23 +79,32 @@ public class ResourceItemViewModel : ViewModelBase
         downloadItemObservable.Select(x => !x.IsWorking && (!x.Resource.IsLocal || x.Resource.NeedUpdate))
             .ToPropertyEx(this, x => x.IsInstallButtonShown);
 
-        downloadItemObservable.Select(x => !x.IsWorking && x.Resource.NeedUpdate)
-            .ToPropertyEx(this, x => x.IsInstallButtonUpdate);
+        downloadItemObservable.Select(x =>
+        {
+            if (!x.IsWorking && x.Resource.NeedUpdate) return "更新";
+            if (!x.IsWorking && x.Status == DownloadStatus.Paused) return "继续";
+            return "安装";
+        }).ToPropertyEx(this, x => x.InstallButtonText);
 
         downloadItemObservable.Select(x => x.Status == DownloadStatus.Downloading)
             .ToPropertyEx(this, x => x.IsPauseButtonShown);
 
+        downloadItemObservable.Select(x => x.Status == DownloadStatus.Failed)
+            .ToPropertyEx(this, x => x.IsFailed);
+
+        downloadItemObservable.Select(x => x.FailReason?.Message ?? "")
+            .ToPropertyEx(this, x => x.FailReason);
+
         downloadItemObservable.Select(x => !x.IsWorking && x.Resource.IsLocal && x.Resource.CanRemove)
             .ToPropertyEx(this, x => x.IsUninstallButtonShown);
 
-        downloadItemObservable.Select(x => x.IsWorking)
+        downloadItemObservable.Select(x => x.IsWorking || x.Status == DownloadStatus.Paused)
             .ToPropertyEx(this, x => x.IsProgressShown);
 
         downloadItemObservable.Select(x => x.IsIndeterminate)
             .ToPropertyEx(this, x => x.IsIndeterminate);
 
-        downloadItemObservable.Select(x =>
-                (int)(x.IsIndeterminate || x.Total == 0 ? -1 : x.Finished * 100 / x.Total))
+        downloadItemObservable.Select(x => (int)(x.IsIndeterminate || x.Total == 0 ? 0 : x.Finished * 100 / x.Total))
             .ToPropertyEx(this, x => x.Progress);
 
         downloadItemObservable.Select(x => x.Speed)
@@ -100,9 +122,9 @@ public class ResourceItemViewModel : ViewModelBase
         DownloadManagerFactory.Instance.PauseJob(ResouceInfo);
     }
 
-    private void UninstallImpl()
+    private async Task UninstallImpl()
     {
-        throw new System.NotImplementedException();
+        await ResourceManagerFactory.Instance.RemoveResource(ResouceInfo);
     }
 
     private string SpeedToStr(double bytesPerSecond)
@@ -110,8 +132,8 @@ public class ResourceItemViewModel : ViewModelBase
         return bytesPerSecond switch
         {
             < 1024 => "< 1kb/s",
-            < 1024 * 1024 => $"{bytesPerSecond / 1024:2F} KiB/s",
-            _ => $"{bytesPerSecond / 1024 / 1024: 2F} MiB/s"
+            < 1024 * 1024 => $"{bytesPerSecond / 1024:0.00} KiB/s",
+            _ => $"{bytesPerSecond / 1024 / 1024:0.00} MiB/s"
         };
     }
 }
@@ -133,8 +155,8 @@ public class ResourceManagerViewModel : ViewModelBase
     {
         var local = await ResourceManagerFactory.Instance.GetLocalResources();
         Items = local.Select(u => new ResourceItemViewModel(u)).ToList();
-        var remote = await ResourceManagerFactory.Instance.GetRemoteResources();
-        Items = local.Union(remote).Select(u => new ResourceItemViewModel(u)).ToList();
+        var all = await ResourceManagerFactory.Instance.GetAllResources();
+        Items = all.Select(u => new ResourceItemViewModel(u)).ToList();
     }
 
     public ResourceManagerViewModel()

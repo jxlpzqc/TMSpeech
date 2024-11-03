@@ -11,8 +11,8 @@
   <DockPanel Margin="16,8">
     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8" DockPanel.Dock="Top">
       <Button Command="{Binding LoadCommand}">刷新</Button>
-      <CheckBox IsVisible="False" DockPanel.Dock="Right">仅查看已安装</CheckBox>
       <TextBlock Text="{Binding LoadMessage}" Foreground="Red" VerticalAlignment="Center"></TextBlock>
+      <ProgressBar IsVisible="{Binding Loading}" IsIndeterminate="True" VerticalAlignment="Center" Height="30"></ProgressBar>
     </StackPanel>
     <ListBox ItemsSource="{Binding Items, Mode=OneWay}">
       <ListBox.ItemTemplate>
@@ -21,23 +21,33 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding ResouceInfo.Name}"></TextBlock>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ResouceInfo.Desc}"></TextBlock>
 
-            <TextBlock Grid.Row="0" Grid.Column="1" IsVisible="{Binding IsInstalled}">已安装</TextBlock>
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-              <Button IsVisible="{Binding IsInstallButtonShown}">
-                <Grid>
-                  <TextBlock IsVisible="{Binding IsInstallButtonUpdate}">更新</TextBlock>
-                  <TextBlock IsVisible="{Binding !IsInstallButtonUpdate}">安装</TextBlock>
-                </Grid>
-              </Button>
-              <Button IsVisible="{Binding IsPauseButtonShown}">暂停</Button>
-              <Button IsVisible="{Binding IsUninstallButtonShown}">移除</Button>
+            <TextBlock Grid.Row="0" Grid.Column="1" IsVisible="{Binding IsInstalled}" HorizontalAlignment="Right"
+                       FontStyle="Italic">
+              已安装
+            </TextBlock>
+            <StackPanel Margin="0,0,-4,0" Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+              <Button IsVisible="{Binding IsInstallButtonShown}" Command="{Binding InstallCommand}"
+                      Content="{Binding InstallButtonText}" />
+              <Button IsVisible="{Binding IsPauseButtonShown}" Command="{Binding PauseCommand}">暂停</Button>
+              <Button IsVisible="{Binding IsUninstallButtonShown}" Command="{Binding UninstallCommand}">移除</Button>
             </StackPanel>
 
-            <ProgressBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                         IsVisible="{Binding IsProgressShown}"
-                         Maximum="100"
-                         Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}">
-            </ProgressBar>
+            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" IsVisible="{Binding IsProgressShown}">
+              <ProgressBar
+                Maximum="100"
+                Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}">
+              </ProgressBar>
+
+              <Grid IsVisible="{Binding !IsIndeterminate}" Margin="0,4">
+                <TextBlock Text="{Binding Speed}" HorizontalAlignment="Left"></TextBlock>
+                <TextBlock Text="{Binding Progress, StringFormat={}{0}%}" HorizontalAlignment="Right"></TextBlock>
+              </Grid>
+
+              <TextBlock IsVisible="{Binding IsFailed}" Foreground="Red"
+                         Text="{Binding FailReason}">
+              </TextBlock>
+
+            </StackPanel>
           </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>

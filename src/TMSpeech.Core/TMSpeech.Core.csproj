@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Downloader" Version="3.2.1" />
+    <PackageReference Include="SharpCompress" Version="0.38.0" />
   </ItemGroup>
 
 </Project>
