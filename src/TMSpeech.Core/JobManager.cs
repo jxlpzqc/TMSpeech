@@ -17,11 +17,11 @@ namespace TMSpeech.Core
 
     public static class JobControllerFactory
     {
-        private static Lazy<JobController> _instance = new(() => new JobControllerImpl());
-        public static JobController GetInstance() => _instance.Value;
+        private static Lazy<JobManager> _instance = new(() => new JobManagerImpl());
+        public static JobManager Instance => _instance.Value;
     }
 
-    public abstract class JobController
+    public abstract class JobManager
     {
         private JobStatus _status;
 
@@ -35,24 +35,28 @@ namespace TMSpeech.Core
             }
         }
 
+        public long RunningSeconds { get; protected set; }
+
         public event EventHandler<JobStatus> StatusChanged;
         public event EventHandler<SpeechEventArgs> TextChanged;
         public event EventHandler<SpeechEventArgs> SentenceDone;
+        public event EventHandler<long> RunningSecondsChanged;
 
         protected void OnTextChanged(SpeechEventArgs e) => TextChanged?.Invoke(this, e);
         protected void OnSentenceDone(SpeechEventArgs e) => SentenceDone?.Invoke(this, e);
+        protected void OnUpdateRunningSeconds(long seconds) => RunningSecondsChanged?.Invoke(this, seconds);
 
         public abstract void Start();
         public abstract void Pause();
         public abstract void Stop();
     }
 
-    public class JobControllerImpl : JobController
+    public class JobManagerImpl : JobManager
     {
         private readonly PluginManager _pluginManager;
 
 
-        internal JobControllerImpl()
+        internal JobManagerImpl()
         {
             _pluginManager = PluginManagerFactory.GetInstance();
         }
@@ -77,6 +81,9 @@ namespace TMSpeech.Core
                 _audioSource.DataAvailable += OnAudioSourceOnDataAvailable;
             }
         }
+
+        private Timer? _timer;
+
 
         private void OnAudioSourceOnDataAvailable(object? _, byte[] data)
         {
@@ -149,7 +156,18 @@ namespace TMSpeech.Core
                 return;
             }
 
+            if (Status == JobStatus.Stopped) RunningSeconds = 0;
+
             Status = JobStatus.Running;
+
+            _timer = new Timer(TimerCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        }
+
+
+        private void TimerCallback(object? state)
+        {
+            RunningSeconds++;
+            OnUpdateRunningSeconds(RunningSeconds);
         }
 
         private void StopRecognize()
@@ -180,12 +198,18 @@ namespace TMSpeech.Core
         {
             if (Status == JobStatus.Running) StopRecognize();
             Status = JobStatus.Paused;
+
+            _timer?.Dispose();
+            _timer = null;
         }
 
         public override void Stop()
         {
             if (Status == JobStatus.Running) StopRecognize();
             Status = JobStatus.Stopped;
+
+            _timer?.Dispose();
+            _timer = null;
         }
     }
 }

@@ -104,7 +104,7 @@ public class MainViewModel : ViewModelBase
     public bool HistroyPanelVisible { get; }
 
     [ObservableAsProperty]
-    public int RunningSeconds { get; }
+    public long RunningSeconds { get; }
 
     [ObservableAsProperty]
     public string RunningTimeDisplay { get; }
@@ -121,17 +121,17 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> StopCommand { get; }
     public ReactiveCommand<Unit, Unit> HistoryCommand { get; }
 
-    private readonly JobController _jobController;
+    private readonly JobManager _jobManager;
 
     public MainViewModel()
     {
-        _jobController = JobControllerFactory.GetInstance();
+        _jobManager = JobControllerFactory.Instance;
         Observable.FromEventPattern<JobStatus>(
-                p => { _jobController.StatusChanged += p; },
-                p => { _jobController.StatusChanged -= p; }
+                p => { _jobManager.StatusChanged += p; },
+                p => { _jobManager.StatusChanged -= p; }
             )
             .Select(x => x.EventArgs)
-            .Merge(Observable.Return(_jobController.Status))
+            .Merge(Observable.Return(_jobManager.Status))
             .ToPropertyEx(this, x => x.Status);
 
         this.WhenAnyValue(x => x.Status) // IObservable<JobStatus>
@@ -146,30 +146,29 @@ public class MainViewModel : ViewModelBase
             .Select(x => x == JobStatus.Running || x == JobStatus.Paused)
             .ToPropertyEx(this, x => x.StopButtonVisible);
 
-        this.PlayCommand = ReactiveCommand.Create(() => {
-            try
+        this.PlayCommand = ReactiveCommand.Create(() =>
             {
-                _jobController.Start();
-            }
-            catch (Exception e)
-            {
-                var box = MessageBoxManager
-                    .GetMessageBoxStandard("Error", e.ToString(), ButtonEnum.Ok);
+                try
+                {
+                    _jobManager.Start();
+                }
+                catch (Exception e)
+                {
+                    var box = MessageBoxManager
+                        .GetMessageBoxStandard("Error", e.ToString(), ButtonEnum.Ok);
 
-                var result = box.ShowAsync();
-            }
-        },
+                    var result = box.ShowAsync();
+                }
+            },
             this.WhenAnyValue(x => x.PlayButtonVisible));
-        this.PauseCommand = ReactiveCommand.Create(() => { _jobController.Pause(); },
+        this.PauseCommand = ReactiveCommand.Create(() => { _jobManager.Pause(); },
             this.WhenAnyValue(x => x.PauseButtonVisible));
-        this.StopCommand = ReactiveCommand.Create(() => { _jobController.Stop(); },
+        this.StopCommand = ReactiveCommand.Create(() => { _jobManager.Stop(); },
             this.WhenAnyValue(x => x.StopButtonVisible));
 
-        Observable.Interval(TimeSpan.FromSeconds(1))
-            .CombineLatest(this.WhenAnyValue(x => x.PlayButtonVisible))
-            .Where(x => x.Second == false)
-            .Select(x => Unit.Default)
-            .Scan(0, (x, _) => x + 1)
+        Observable.FromEventPattern<long>(x => _jobManager.RunningSecondsChanged += x,
+                x => _jobManager.RunningSecondsChanged -= x)
+            .Select(x => x.EventArgs)
             .ToPropertyEx(this, x => x.RunningSeconds);
 
         this.WhenAnyValue(x => x.RunningSeconds)
@@ -177,15 +176,15 @@ public class MainViewModel : ViewModelBase
             .ToPropertyEx(this, x => x.RunningTimeDisplay);
 
         Observable.FromEventPattern<SpeechEventArgs>(
-                p => _jobController.TextChanged += p,
-                p => _jobController.TextChanged -= p)
+                p => _jobManager.TextChanged += p,
+                p => _jobManager.TextChanged -= p)
             .Select(x => x.EventArgs.Text.Text)
             .Merge(Observable.Return("欢迎使用TMSpeech"))
             .ToPropertyEx(this, x => x.Text);
 
         Observable.FromEventPattern<SpeechEventArgs>(
-                p => _jobController.SentenceDone += p,
-                p => _jobController.SentenceDone -= p)
+                p => _jobManager.SentenceDone += p,
+                p => _jobManager.SentenceDone -= p)
             .Subscribe(x => HistoryTexts.Insert(0, DateTime.Now.ToString("[HH:mm:ss] ") + x.EventArgs.Text.Text));
     }
 }
