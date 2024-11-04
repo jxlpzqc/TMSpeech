@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.Media;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -132,6 +133,7 @@ public class MainViewModel : ViewModelBase
             )
             .Select(x => x.EventArgs)
             .Merge(Observable.Return(_jobManager.Status))
+            .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.Status);
 
         this.WhenAnyValue(x => x.Status) // IObservable<JobStatus>
@@ -146,24 +148,14 @@ public class MainViewModel : ViewModelBase
             .Select(x => x == JobStatus.Running || x == JobStatus.Paused)
             .ToPropertyEx(this, x => x.StopButtonVisible);
 
-        this.PlayCommand = ReactiveCommand.Create(() =>
-            {
-                try
-                {
-                    _jobManager.Start();
-                }
-                catch (Exception e)
-                {
-                    var box = MessageBoxManager
-                        .GetMessageBoxStandard("Error", e.ToString(), ButtonEnum.Ok);
-
-                    var result = box.ShowAsync();
-                }
-            },
+        this.PlayCommand = ReactiveCommand.CreateFromTask(
+            async () => { await Task.Run(() => { _jobManager.Start(); }); },
             this.WhenAnyValue(x => x.PlayButtonVisible));
-        this.PauseCommand = ReactiveCommand.Create(() => { _jobManager.Pause(); },
+        this.PauseCommand = ReactiveCommand.CreateFromTask(
+            async () => { await Task.Run(() => { _jobManager.Pause(); }); },
             this.WhenAnyValue(x => x.PauseButtonVisible));
-        this.StopCommand = ReactiveCommand.Create(() => { _jobManager.Stop(); },
+        this.StopCommand = ReactiveCommand.CreateFromTask(
+            async () => { await Task.Run(() => { _jobManager.Stop(); }); },
             this.WhenAnyValue(x => x.StopButtonVisible));
 
         Observable.FromEventPattern<long>(x => _jobManager.RunningSecondsChanged += x,
@@ -179,6 +171,9 @@ public class MainViewModel : ViewModelBase
                 p => _jobManager.TextChanged += p,
                 p => _jobManager.TextChanged -= p)
             .Select(x => x.EventArgs.Text.Text)
+            .Merge(this.PlayCommand.ThrownExceptions.Select(e => $"启动失败！{e.Message}"))
+            .Merge(this.PauseCommand.ThrownExceptions.Select(e => $"暂停失败！{e.Message}"))
+            .Merge(this.StopCommand.ThrownExceptions.Select(e => $"停止失败！{e.Message}"))
             .Merge(Observable.Return("欢迎使用TMSpeech"))
             .ToPropertyEx(this, x => x.Text);
 
