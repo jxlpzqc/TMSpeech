@@ -16,6 +16,7 @@
         CanResize="True"
         Height="180"
         Width="800"
+        IsHitTestVisible="{Binding !IsLocked}"
         PointerPressed="Window_PointerPressed"
         PointerMoved="Window_PointerMoved">
   <Design.DataContext>
@@ -79,8 +80,11 @@
       <Button Click="HistoryButton_Click" Margin="16,0,0,0">
         <PathIcon Data="{StaticResource history_regular}"></PathIcon>
       </Button>
-      <Button>
-        <PathIcon Data="{StaticResource list_regular}"></PathIcon>
+      <!-- <Button> -->
+      <!--   <PathIcon Data="{StaticResource list_regular}"></PathIcon> -->
+      <!-- </Button> -->
+      <Button Command="{Binding LockCommand}">
+        <PathIcon Data="{StaticResource lock_regular}"></PathIcon>
       </Button>
       <Button Click="SettingsButton_Click">
         <PathIcon Data="{StaticResource settings_regular}"></PathIcon>

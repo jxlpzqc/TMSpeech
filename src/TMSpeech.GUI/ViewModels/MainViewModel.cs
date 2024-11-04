@@ -53,7 +53,7 @@ public class CaptionStyleViewModel : ViewModelBase
                     ));
     }
 
-    public CaptionStyleViewModel()
+    public CaptionStyleViewModel(MainViewModel mainViewModel)
     {
         GetPropObservable<int>("ShadowSize")
             .ToPropertyEx(this, x => x.ShadowSize);
@@ -83,6 +83,8 @@ public class CaptionStyleViewModel : ViewModelBase
 
         GetPropObservable<uint>("MouseHover")
             .Select(Color.FromUInt32)
+            .CombineLatest(mainViewModel.WhenAnyValue(x => x.IsLocked),
+                (color, locked) => locked ? Colors.Transparent : color)
             .ToPropertyEx(this, x => x.MouseHover);
     }
 }
@@ -110,16 +112,22 @@ public class MainViewModel : ViewModelBase
     [ObservableAsProperty]
     public string RunningTimeDisplay { get; }
 
-    public CaptionStyleViewModel CaptionStyle { get; } = new CaptionStyleViewModel();
+    public CaptionStyleViewModel CaptionStyle { get; }
 
     [ObservableAsProperty]
     public string Text { get; }
+
+    [Reactive]
+    public bool IsLocked { get; set; }
 
     public ObservableCollection<string> HistoryTexts { get; } = new();
 
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
     public ReactiveCommand<Unit, Unit> StopCommand { get; }
+    public ReactiveCommand<Unit, Unit> LockCommand { get; }
+
+
     public ReactiveCommand<Unit, Unit> HistoryCommand { get; }
 
     private readonly JobManager _jobManager;
@@ -127,6 +135,8 @@ public class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         _jobManager = JobManagerFactory.Instance;
+        CaptionStyle = new CaptionStyleViewModel(this);
+
         Observable.FromEventPattern<JobStatus>(
                 p => { _jobManager.StatusChanged += p; },
                 p => { _jobManager.StatusChanged -= p; }
@@ -147,6 +157,8 @@ public class MainViewModel : ViewModelBase
         this.WhenAnyValue(x => x.Status)
             .Select(x => x == JobStatus.Running || x == JobStatus.Paused)
             .ToPropertyEx(this, x => x.StopButtonVisible);
+
+        this.LockCommand = ReactiveCommand.Create(() => { IsLocked = true; });
 
         this.PlayCommand = ReactiveCommand.CreateFromTask(
             async () => { await Task.Run(() => { _jobManager.Start(); }); },

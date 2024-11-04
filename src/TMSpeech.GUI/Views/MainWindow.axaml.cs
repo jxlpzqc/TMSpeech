@@ -1,14 +1,25 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Reactive.Disposables;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.ReactiveUI;
+using ReactiveUI;
 using TMSpeech.GUI.ViewModels;
 
 namespace TMSpeech.GUI.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainViewModel>
 {
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainViewModel();
+        ViewModel = new MainViewModel();
+
+        this.WhenActivated(d =>
+        {
+            this.ViewModel.WhenAnyValue(x => x.IsLocked)
+                .Subscribe((_) => { (App.Current as App).UpdateTrayMenu(); }).DisposeWith(d);
+        });
     }
 
     #region Borderless Window Drag and Resize
@@ -63,8 +74,6 @@ public partial class MainWindow : Window
     }
 
     #endregion
-
-    MainViewModel ViewModel => (MainViewModel)DataContext;
 
     private void SettingsButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {

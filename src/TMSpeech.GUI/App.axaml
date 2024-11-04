@@ -1,6 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:TMSpeech.GUI.Controls"
              x:Class="TMSpeech.GUI.App"
+             x:Name="app"
              RequestedThemeVariant="Default">
   <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -15,9 +17,7 @@
       <TrayIcon Icon="/Assets/tmspeech-tray.ico"
                 ToolTipText="TMSpeech">
         <TrayIcon.Menu>
-          <NativeMenu>
-            <NativeMenuItem Header="退出" Click="miExit_Click"/>
-          </NativeMenu>
+          <controls:TrayMenu />
         </TrayIcon.Menu>
       </TrayIcon>
     </TrayIcons>

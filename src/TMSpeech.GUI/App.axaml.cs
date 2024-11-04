@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -18,16 +19,29 @@ public partial class App : Application
         ConfigManagerFactory.Init(DefaultConfig.GenerateConfig());
     }
 
+    private MainWindow _mainWindow;
+    public MainWindow MainWindow => _mainWindow;
+    
+    public void UpdateTrayMenu(bool locked = false)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            (TrayIcon.GetIcons(this).First().Menu as Controls.TrayMenu).UpdateItems();
+        }
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
-            desktop.MainWindow = new MainWindow();
+            _mainWindow = new MainWindow();
+            desktop.MainWindow = _mainWindow;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = new CaptionView();
+            // TODO: Implement single view platform initialization
+            // singleViewPlatform.MainView = new CaptionView();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -35,14 +49,6 @@ public partial class App : Application
         if (!Design.IsDesignMode)
         {
             Core.Plugins.PluginManagerFactory.GetInstance().LoadPlugins();
-        }
-    }
-
-    private void miExit_Click(object? sender, System.EventArgs e)
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
         }
     }
 }
