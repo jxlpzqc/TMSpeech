@@ -15,7 +15,7 @@ namespace TMSpeech.Core
         Paused,
     }
 
-    public static class JobControllerFactory
+    public static class JobManagerFactory
     {
         private static Lazy<JobManager> _instance = new(() => new JobManagerImpl());
         public static JobManager Instance => _instance.Value;

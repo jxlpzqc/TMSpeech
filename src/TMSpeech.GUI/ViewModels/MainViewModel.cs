@@ -126,7 +126,7 @@ public class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        _jobManager = JobControllerFactory.Instance;
+        _jobManager = JobManagerFactory.Instance;
         Observable.FromEventPattern<JobStatus>(
                 p => { _jobManager.StatusChanged += p; },
                 p => { _jobManager.StatusChanged -= p; }
