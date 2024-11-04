@@ -49,13 +49,16 @@ namespace TMSpeech.AudioSource.Windows
         {
         }
 
-        WasapiLoopbackCapture capture;
+        private WasapiLoopbackCapture capture;
 
         public void Start()
         {
             capture = new WasapiLoopbackCapture();
             capture.WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1);
-            capture.DataAvailable += (sender, data) => { DataAvailable?.Invoke(sender, data.Buffer); };
+            capture.DataAvailable += (sender, data) =>
+            {
+                DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
+            };
 
             capture.StartRecording();
             StatusChanged?.Invoke(this, SourceStatus.Ready);

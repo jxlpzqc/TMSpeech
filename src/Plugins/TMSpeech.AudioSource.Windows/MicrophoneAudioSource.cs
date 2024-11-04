@@ -52,7 +52,10 @@ public class MicrophoneAudioSource : IAudioSource
         {
             WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1)
         };
-        _waveIn.DataAvailable += (sender, data) => { DataAvailable?.Invoke(sender, data.Buffer); };
+        _waveIn.DataAvailable += (sender, data) =>
+        {
+            DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
+        };
         _waveIn.StartRecording();
 
         StatusChanged?.Invoke(this, SourceStatus.Ready);
