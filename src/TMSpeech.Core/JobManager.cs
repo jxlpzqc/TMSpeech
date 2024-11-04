@@ -79,6 +79,7 @@ namespace TMSpeech.Core
             {
                 _audioSource.LoadConfig(config);
                 _audioSource.DataAvailable += OnAudioSourceOnDataAvailable;
+                _audioSource.ExceptionOccured += OnPluginRunningExceptionOccurs;
             }
         }
 
@@ -96,6 +97,7 @@ namespace TMSpeech.Core
             {
                 _recognizer.TextChanged -= OnRecognizerOnTextChanged;
                 _recognizer.SentenceDone -= OnRecognizerOnSentenceDone;
+                _recognizer.ExceptionOccured -= OnPluginRunningExceptionOccurs;
             }
 
             var configRecognizer = ConfigManagerFactory.Instance.Get<string>("recognizer.source");
@@ -107,6 +109,7 @@ namespace TMSpeech.Core
                 _recognizer.LoadConfig(config);
                 _recognizer.TextChanged += OnRecognizerOnTextChanged;
                 _recognizer.SentenceDone += OnRecognizerOnSentenceDone;
+                _recognizer.ExceptionOccured += OnPluginRunningExceptionOccurs;
             }
         }
 
@@ -163,6 +166,13 @@ namespace TMSpeech.Core
             _timer = new Timer(TimerCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
 
+        private void OnPluginRunningExceptionOccurs(object? e, Exception ex)
+        {
+            NotificationManager.Instance.Notify($"插件运行异常 ({e?.GetType().Module.Name})：{ex.Message}",
+                "插件异常", NotificationType.Error);
+            Stop();
+        }
+
 
         private void TimerCallback(object? state)
         {
@@ -177,9 +187,9 @@ namespace TMSpeech.Core
                 _audioSource?.Stop();
                 _recognizer?.Stop();
             }
-            catch
+            catch (Exception ex)
             {
-                NotificationManager.Instance.Notify("停止失败！", "停止失败", NotificationType.Fatal);
+                NotificationManager.Instance.Notify($"停止失败：{ex.Message}", "停止失败", NotificationType.Fatal);
                 // TODO: exit or recover ?
                 return;
             }
