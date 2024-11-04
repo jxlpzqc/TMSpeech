@@ -66,11 +66,6 @@ namespace TMSpeech.Core
 
         private void InitAudioSource()
         {
-            if (_audioSource != null)
-            {
-                _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;
-            }
-
             var configAudioSource = ConfigManagerFactory.Instance.Get<string>("audio.source");
             var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configAudioSource}.config");
 
@@ -86,20 +81,14 @@ namespace TMSpeech.Core
         private Timer? _timer;
 
 
-        private void OnAudioSourceOnDataAvailable(object? _, byte[] data)
+        private void OnAudioSourceOnDataAvailable(object? o, byte[] data)
         {
-            _recognizer.Feed(data);
+            // Console.WriteLine(o?.GetHashCode().ToString("x8") ?? "<null>");
+            _recognizer?.Feed(data);
         }
 
         private void InitRecognizer()
         {
-            if (_recognizer != null)
-            {
-                _recognizer.TextChanged -= OnRecognizerOnTextChanged;
-                _recognizer.SentenceDone -= OnRecognizerOnSentenceDone;
-                _recognizer.ExceptionOccured -= OnPluginRunningExceptionOccurs;
-            }
-
             var configRecognizer = ConfigManagerFactory.Instance.Get<string>("recognizer.source");
             var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configRecognizer}.config");
             _recognizer = _pluginManager.Recognizers.FirstOrDefault(x => x.Name == configRecognizer);
@@ -193,6 +182,14 @@ namespace TMSpeech.Core
                 // TODO: exit or recover ?
                 return;
             }
+
+            _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;
+            _audioSource.ExceptionOccured -= OnPluginRunningExceptionOccurs;
+
+            _recognizer.TextChanged -= OnRecognizerOnTextChanged;
+            _recognizer.SentenceDone -= OnRecognizerOnSentenceDone;
+            _recognizer.ExceptionOccured -= OnPluginRunningExceptionOccurs;
+
 
             _audioSource = null;
             _recognizer = null;
