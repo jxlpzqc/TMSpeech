@@ -103,8 +103,21 @@ namespace TMSpeech.GUI.ViewModels
         public RecognizeSectionConfigViewModel RecognizeSectionConfig { get; } = new RecognizeSectionConfigViewModel();
         public NotificationConfigViewModel NotificationConfig { get; } = new NotificationConfigViewModel();
 
+        [ObservableAsProperty]
+        public bool IsNotRunning { get; }
+
         [Reactive]
         public int CurrentTab { get; set; } = 0;
+
+        public ConfigViewModel()
+        {
+            Observable.Return(JobManagerFactory.Instance.Status != JobStatus.Running).Merge(
+                Observable.FromEventPattern<JobStatus>(
+                    x => JobManagerFactory.Instance.StatusChanged += x,
+                    x => JobManagerFactory.Instance.StatusChanged -= x
+                ).Select(x => x.EventArgs != JobStatus.Running)
+            ).ToPropertyEx(this, x => x.IsNotRunning);
+        }
     }
 
     public class GeneralSectionConfigViewModel : SectionConfigViewModelBase

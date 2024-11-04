@@ -10,6 +10,7 @@
         Width="720"
         Icon="/Assets/tmspeech.ico"
         x:Class="TMSpeech.GUI.Views.ConfigWindow"
+        x:Name="winConfig"
         Title="配置"
         FontFamily="微软雅黑,Microsoft YaHei,苹方-简">
   <Design.DataContext>
@@ -19,6 +20,9 @@
     <converter:IntToColorConverter x:Key="IntToColorConverter"></converter:IntToColorConverter>
   </Window.Resources>
   <DockPanel>
+    <TextBlock IsVisible="{Binding !IsNotRunning}" DockPanel.Dock="Bottom" FontStyle="Italic" Margin="20">
+      * 当前工作正在运行，部分配置可能无法更改。
+    </TextBlock>
     <TabControl TabStripPlacement="Left" SelectedIndex="{Binding CurrentTab}">
       <TabControl.Styles>
         <Style Selector="Label,TextBox,ComboBox,Button,CheckBox,NumericUpDown">
@@ -138,9 +142,11 @@
             </ComboBox>
 
             <Label Grid.ColumnSpan="2">敏感词（使用逗号或换行分割）</Label>
-            <TextBox Height="100" TextWrapping="Wrap" AcceptsReturn="True"
+            <TextBox IsEnabled="{Binding #winConfig.ViewModel.IsNotRunning}" Height="100" TextWrapping="Wrap"
+                     AcceptsReturn="True"
                      AcceptsTab="True" Text="{Binding SensitiveWords}"
-                     MaxLines="8" Grid.ColumnSpan="2"></TextBox>
+                     MaxLines="8" Grid.ColumnSpan="2">
+            </TextBox>
 
           </controls:AutoGrid>
         </StackPanel>
@@ -152,7 +158,7 @@
             <TextBlock>音频源</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <StackPanel DataContext="{Binding AudioSectionConfig}">
+        <StackPanel IsEnabled="{Binding #winConfig.ViewModel.IsNotRunning}" DataContext="{Binding AudioSectionConfig}">
           <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
             <Label>音频源</Label>
             <DockPanel>
@@ -186,7 +192,8 @@
             <TextBlock>语音识别</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <StackPanel DataContext="{Binding RecognizeSectionConfig}">
+        <StackPanel DataContext="{Binding RecognizeSectionConfig}"
+                    IsEnabled="{Binding #winConfig.ViewModel.IsNotRunning}">
           <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*">
             <Label>语音识别器</Label>
             <DockPanel>
