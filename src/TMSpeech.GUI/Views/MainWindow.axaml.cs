@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Disposables;
+using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
@@ -18,8 +19,43 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         this.WhenActivated(d =>
         {
             this.ViewModel.WhenAnyValue(x => x.IsLocked)
-                .Subscribe((_) => { (App.Current as App).UpdateTrayMenu(); }).DisposeWith(d);
+                .Subscribe((l) =>
+                {
+                    SetCaptionLock(l);
+                    (App.Current as App).UpdateTrayMenu();
+                }).DisposeWith(d);
         });
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern UInt32 GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll")]
+    static extern int SetWindowLong(IntPtr hWnd, int nIndex, UInt32 dwNewLong);
+
+    const uint WS_EX_TRANSPARENT = 0x20;
+    const uint WS_EX_LAYERED = 0x80000;
+    const int GWL_EXSTYLE = -20;
+
+    public void SetCaptionLock(bool locked)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var hwnd = this.TryGetPlatformHandle().Handle;
+            var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            if (locked)
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+            }
+            else
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT & ~WS_EX_LAYERED);
+            }
+        }
+        else
+        {
+            // TODO: Implement for other platforms
+        }
     }
 
     #region Borderless Window Drag and Resize
