@@ -107,7 +107,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             config.EnableEndpoint = 1;
             config.Rule1MinTrailingSilence = 2.4f;
             config.Rule2MinTrailingSilence = 1.2f;
-            config.Rule3MinUtteranceLength = 300;
+            config.Rule3MinUtteranceLength = 20;
 
             recognizer = new OnlineRecognizer(config);
             stream = recognizer.CreateStream();
@@ -125,6 +125,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 if (!string.IsNullOrEmpty(text))
                 {
                     var item = new TextInfo(text);
+                    // Console.WriteLine($"{is_endpoint}: {text}");
                     TextChanged?.Invoke(this, new SpeechEventArgs()
                     {
                         Text = item,
