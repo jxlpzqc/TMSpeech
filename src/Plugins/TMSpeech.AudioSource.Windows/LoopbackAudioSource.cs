@@ -68,5 +68,7 @@ namespace TMSpeech.AudioSource.Windows
             capture = null;
             StatusChanged?.Invoke(this, SourceStatus.Unavailable);
         }
+
+        public event EventHandler<Exception>? ExceptionOccured;
     }
 }

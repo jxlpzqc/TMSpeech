@@ -75,18 +75,8 @@ public class ResourceManager
     {
         if (_localCache == null || dismissCache)
         {
-            try
-            {
-                Monitor.Enter(this);
-                if (_localCache == null || dismissCache)
-                {
-                    await RealGetLocalResources();
-                }
-            }
-            finally
-            {
-                Monitor.Exit(this);
-            }
+            // TODO: concurrency problem?
+            await RealGetLocalResources();
         }
 
         return _localCache;

@@ -67,6 +67,8 @@ public class MicrophoneAudioSource : IAudioSource
         StatusChanged?.Invoke(this, SourceStatus.Unavailable);
     }
 
+    public event EventHandler<Exception>? ExceptionOccured;
+
     public event EventHandler<SourceStatus>? StatusChanged;
     public event EventHandler<byte[]>? DataAvailable;
 }

@@ -158,7 +158,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 catch (Exception e)
                 {
                     Trace.TraceError("{0:HH:mm:ss.fff} Exception {1}", DateTime.Now, e);
-                    // TODO: how to notify user?
+                    ExceptionOccured?.Invoke(this, e);
+                }
+                finally
+                {
                     stop = true;
                     thread = null;
                 }
@@ -168,12 +171,9 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void Stop()
         {
-            if (thread == null)
-                throw new InvalidOperationException("The recognizer is not running.");
-
             stream?.InputFinished();
             stop = true;
-            thread.Join();
+            thread?.Join();
 
             stream?.Dispose();
             recognizer?.Dispose();
@@ -181,6 +181,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             stream = null;
             thread = null;
         }
+
+        public event EventHandler<Exception>? ExceptionOccured;
 
         public void Init()
         {

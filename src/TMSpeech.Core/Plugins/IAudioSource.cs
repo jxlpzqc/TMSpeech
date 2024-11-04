@@ -11,11 +11,9 @@ namespace TMSpeech.Core.Plugins
         Unavailable, Ready, Busy
     }
 
-    public interface IAudioSource : IPlugin
+    public interface IAudioSource : IPlugin, IRunable
     {
 
-        void Start();
-        void Stop();
         event EventHandler<SourceStatus> StatusChanged;
         event EventHandler<byte[]> DataAvailable;
     }

@@ -23,7 +23,7 @@ namespace TMSpeech.Core.Plugins
         public TextInfo Text { get; set; }
     }
 
-    public interface IRecognizer : IPlugin
+    public interface IRecognizer : IPlugin, IRunable
     {
         event EventHandler<SpeechEventArgs> TextChanged;
         event EventHandler<SpeechEventArgs> SentenceDone;
@@ -33,11 +33,5 @@ namespace TMSpeech.Core.Plugins
         /// </summary>
         /// <param name="data"></param>
         void Feed(byte[] data);
-        void Start();
-
-        /// <summary>
-        /// Stop and free unmanaged resources
-        /// </summary>
-        void Stop();
     }
 }
