@@ -63,6 +63,8 @@ namespace TMSpeech.Core
 
         private IAudioSource? _audioSource;
         private IRecognizer? _recognizer;
+        private HashSet<string> _sensitiveWords;
+        private bool _disableInThisSentence = false;
 
         private void InitAudioSource()
         {
@@ -104,16 +106,28 @@ namespace TMSpeech.Core
 
         private void OnRecognizerOnSentenceDone(object? sender, SpeechEventArgs args)
         {
+            _disableInThisSentence = false;
             OnSentenceDone(args);
         }
 
         private void OnRecognizerOnTextChanged(object? sender, SpeechEventArgs args)
         {
+            if (!_disableInThisSentence)
+            {
+                var s = _sensitiveWords.FirstOrDefault(x => args.Text.Text.Contains(x));
+                if (!string.IsNullOrEmpty(s))
+                {
+                    NotificationManager.Instance.Notify($"检测到敏感词：{s}", "敏感词", NotificationType.Warning);
+                    _disableInThisSentence = true;
+                }
+            }
+
             OnTextChanged(args);
         }
 
         private void StartRecognize()
         {
+            InitSensitiveWords();
             InitAudioSource();
             InitRecognizer();
 
@@ -153,6 +167,19 @@ namespace TMSpeech.Core
             Status = JobStatus.Running;
 
             _timer = new Timer(TimerCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        }
+
+        private void InitSensitiveWords()
+        {
+            var sensitiveWords = ConfigManagerFactory.Instance.Get<string>("notification.SensitiveWords");
+            if (string.IsNullOrWhiteSpace(sensitiveWords))
+            {
+                _sensitiveWords = new HashSet<string>();
+                return;
+            }
+
+            _sensitiveWords = new HashSet<string>(sensitiveWords.Split(new[] { ',', '，', '\n' },
+                StringSplitOptions.RemoveEmptyEntries));
         }
 
         private void OnPluginRunningExceptionOccurs(object? e, Exception ex)
