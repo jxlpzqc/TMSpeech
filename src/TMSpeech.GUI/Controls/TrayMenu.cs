@@ -29,10 +29,7 @@ public class TrayMenu : NativeMenu
 
     private void Exit()
     {
-        if (App.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
-        }
+        Environment.Exit(0);
     }
 
     private void UnlockCaption()
