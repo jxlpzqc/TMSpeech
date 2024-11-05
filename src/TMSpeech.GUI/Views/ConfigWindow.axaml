@@ -38,7 +38,7 @@
         </Style>
       </TabControl.Styles>
 
-      <TabItem>
+      <TabItem IsVisible="False">
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>通用</TextBlock>
@@ -258,7 +258,7 @@
               <LineBreak />
             </TextBlock>
 
-            <Button Margin="0,0,0,24">检查更新</Button>
+            <Button Margin="0,0,0,24" IsVisible="False">检查更新</Button>
 
             <TextBlock xml:space="preserve">A simple tool for recognize system audio.
 

@@ -126,7 +126,7 @@ namespace TMSpeech.GUI.ViewModels
         public bool IsNotRunning { get; }
 
         [Reactive]
-        public int CurrentTab { get; set; } = 0;
+        public int CurrentTab { get; set; } = 1;
 
         public ConfigViewModel()
         {
