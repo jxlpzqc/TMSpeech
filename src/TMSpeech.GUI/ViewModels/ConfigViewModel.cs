@@ -141,7 +141,7 @@ namespace TMSpeech.GUI.ViewModels
 
     public class GeneralSectionConfigViewModel : SectionConfigViewModelBase
     {
-        protected override string SectionName => "general";
+        protected override string SectionName => GeneralConfigTypes.SectionName;
 
         [Reactive]
         [ConfigJsonValue]
@@ -172,7 +172,7 @@ namespace TMSpeech.GUI.ViewModels
 
     public class AppearanceSectionConfigViewModel : SectionConfigViewModelBase
     {
-        protected override string SectionName => "appearance";
+        protected override string SectionName => AppearanceConfigTypes.SectionName;
 
         public List<FontFamily> FontsAvailable { get; private set; }
 
@@ -222,7 +222,7 @@ namespace TMSpeech.GUI.ViewModels
 
     public class NotificationConfigViewModel : SectionConfigViewModelBase
     {
-        protected override string SectionName => "notification";
+        protected override string SectionName => NotificationConfigTypes.SectionName;
 
 
         public List<KeyValuePair<int, string>> NotificaitonTypes { get; } =
@@ -311,7 +311,7 @@ namespace TMSpeech.GUI.ViewModels
                 .Select(x =>
                 {
                     var editor = x?.CreateConfigEditor();
-                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config");
+                    var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
                     editor?.LoadConfigString(config);
                     return x?.CreateConfigEditor();
                 })
@@ -321,7 +321,7 @@ namespace TMSpeech.GUI.ViewModels
             this.WhenAnyValue(x => x.ConfigEditor)
                 .Subscribe(x =>
                 {
-                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{AudioSource}.config");
+                    var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
                     PluginConfig = config;
                 });
         }
@@ -403,7 +403,7 @@ namespace TMSpeech.GUI.ViewModels
             this.WhenAnyValue(x => x.ConfigEditor)
                 .Subscribe(x =>
                 {
-                    var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{Recognizer}.config");
+                    var config = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.GetPluginConfigKey(Recognizer));
                     PluginConfig = config;
                 });
         }

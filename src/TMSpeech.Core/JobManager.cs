@@ -68,8 +68,8 @@ namespace TMSpeech.Core
 
         private void InitAudioSource()
         {
-            var configAudioSource = ConfigManagerFactory.Instance.Get<string>("audio.source");
-            var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configAudioSource}.config");
+            var configAudioSource = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.AudioSource);
+            var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(configAudioSource));
 
             _audioSource = _pluginManager.AudioSources.FirstOrDefault(x => x.Name == configAudioSource);
             if (_audioSource != null)
@@ -91,8 +91,8 @@ namespace TMSpeech.Core
 
         private void InitRecognizer()
         {
-            var configRecognizer = ConfigManagerFactory.Instance.Get<string>("recognizer.source");
-            var config = ConfigManagerFactory.Instance.Get<string>($"plugin.{configRecognizer}.config");
+            var configRecognizer = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.Recognizer);
+            var config = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.GetPluginConfigKey(configRecognizer));
             _recognizer = _pluginManager.Recognizers.FirstOrDefault(x => x.Name == configRecognizer);
 
             if (_recognizer != null)
@@ -171,7 +171,7 @@ namespace TMSpeech.Core
 
         private void InitSensitiveWords()
         {
-            var sensitiveWords = ConfigManagerFactory.Instance.Get<string>("notification.SensitiveWords");
+            var sensitiveWords = ConfigManagerFactory.Instance.Get<string>(NotificationConfigTypes.SensitiveWords);
             if (string.IsNullOrWhiteSpace(sensitiveWords))
             {
                 _sensitiveWords = new HashSet<string>();

@@ -24,6 +24,7 @@ public static class GeneralConfigTypes
 public static class AppearanceConfigTypes
 {
     public const string SectionName = "appearance";
+
     public const string ShadowColor = "appearance.ShadowColor";
     public const string ShadowSize = "appearance.ShadowSize";
     public const string FontFamily = "appearance.FontFamily";
@@ -58,6 +59,7 @@ public static class AppearanceConfigTypes
 public static class NotificationConfigTypes
 {
     public const string SectionName = "notification";
+
     public const string NotificationType = "notification.NotificationType";
     public const string SensitiveWords = "notification.SensitiveWords";
 
@@ -67,13 +69,36 @@ public static class NotificationConfigTypes
         public const int System = 1;
         public const int Custom = 2;
     }
-    
-    private static Dictionary<string,object> _defaultConfig => new()
+
+    private static Dictionary<string, object> _defaultConfig => new()
     {
         { NotificationType, NotificationTypeEnum.System },
         { SensitiveWords, "" }
     };
-    
-    public static Dictionary<string,object> DefaultConfig => _defaultConfig;
-    
+
+    public static Dictionary<string, object> DefaultConfig => _defaultConfig;
+}
+
+public static class AudioSourceConfigTypes
+{
+    public const string SectionName = "audio";
+
+    public const string AudioSource = "audio.source";
+
+    public static string GetPluginConfigKey(string pluginId)
+    {
+        return $"{SectionName}.{pluginId}.config";
+    }
+}
+
+public static class RecognizerConfigTypes
+{
+    public const string SectionName = "recognizer";
+
+    public const string Recognizer = "recognizer.source";
+
+    public static string GetPluginConfigKey(string pluginId)
+    {
+        return $"{SectionName}.{pluginId}.config";
+    }
 }

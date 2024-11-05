@@ -17,7 +17,7 @@ public class NotificationManager
 
     public void Notify(string content, string? title, NotificationType type = NotificationType.Info)
     {
-        if (ConfigManagerFactory.Instance.Get<int>("notification.NotificationType") == 0) return;
+        if (ConfigManagerFactory.Instance.Get<int>(NotificationConfigTypes.NotificationType) == NotificationConfigTypes.NotificationTypeEnum.None) return;
         if (type > _level)
         {
             foreach (var service in _services)

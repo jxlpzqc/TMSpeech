@@ -42,14 +42,14 @@ public class CaptionStyleViewModel : ViewModelBase
 
     private IObservable<T> GetPropObservable<T>(string key)
     {
-        return Observable.Return(ConfigManagerFactory.Instance.Get<T>($"appearance.{key}"))
+        return Observable.Return(ConfigManagerFactory.Instance.Get<T>($"{AppearanceConfigTypes.SectionName}.{key}"))
             .Merge(
                 Observable.FromEventPattern<ConfigChangedEventArgs>(
                         p => ConfigManagerFactory.Instance.ConfigChanged += p,
                         p => ConfigManagerFactory.Instance.ConfigChanged -= p)
                     .Where(x => x.EventArgs.Contains($"appearance.{key}"))
                     .Select(x =>
-                        ConfigManagerFactory.Instance.Get<T>($"appearance.{key}")
+                        ConfigManagerFactory.Instance.Get<T>($"{AppearanceConfigTypes.SectionName}.{key}")
                     ));
     }
 
