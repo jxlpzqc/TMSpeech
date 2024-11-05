@@ -38,35 +38,41 @@ public class CaptionStyleViewModel : ViewModelBase
     public Color MouseHover { get; }
 
     [ObservableAsProperty]
+    public Color BackgroundColor { get; }
+
+    [ObservableAsProperty]
     public string Text { get; }
 
     private IObservable<T> GetPropObservable<T>(string key)
     {
-        return Observable.Return(ConfigManagerFactory.Instance.Get<T>($"{AppearanceConfigTypes.SectionName}.{key}"))
+        return Observable.Return(ConfigManagerFactory.Instance.Get<T>(key))
             .Merge(
                 Observable.FromEventPattern<ConfigChangedEventArgs>(
                         p => ConfigManagerFactory.Instance.ConfigChanged += p,
                         p => ConfigManagerFactory.Instance.ConfigChanged -= p)
-                    .Where(x => x.EventArgs.Contains($"appearance.{key}"))
+                    .Where(x => x.EventArgs.Contains(key))
                     .Select(x =>
-                        ConfigManagerFactory.Instance.Get<T>($"{AppearanceConfigTypes.SectionName}.{key}")
+                        ConfigManagerFactory.Instance.Get<T>(key)
                     ));
     }
 
     public CaptionStyleViewModel(MainViewModel mainViewModel)
     {
-        GetPropObservable<int>("ShadowSize")
+        GetPropObservable<int>(AppearanceConfigTypes.ShadowSize)
             .ToPropertyEx(this, x => x.ShadowSize);
-        GetPropObservable<uint>("ShadowColor")
+        GetPropObservable<uint>(AppearanceConfigTypes.ShadowColor)
             .Select(Color.FromUInt32)
             .ToPropertyEx(this, x => x.ShadowColor);
-        GetPropObservable<int>("FontSize")
+        GetPropObservable<uint>(AppearanceConfigTypes.BackgroundColor)
+            .Select(Color.FromUInt32)
+            .ToPropertyEx(this, x => x.BackgroundColor);
+        GetPropObservable<int>(AppearanceConfigTypes.FontSize)
             .Select(x => { return x; })
             .ToPropertyEx(this, x => x.FontSize);
-        GetPropObservable<uint>("FontColor")
+        GetPropObservable<uint>(AppearanceConfigTypes.FontColor)
             .Select(Color.FromUInt32)
             .ToPropertyEx(this, x => x.FontColor);
-        GetPropObservable<int>("TextAlign")
+        GetPropObservable<int>(AppearanceConfigTypes.TextAlign)
             .Select(x => x switch
             {
                 AppearanceConfigTypes.TextAlignEnum.Left => TextAlignment.Left,
@@ -77,11 +83,11 @@ public class CaptionStyleViewModel : ViewModelBase
             })
             .ToPropertyEx(this, x => x.TextAlign);
 
-        GetPropObservable<string>("FontFamily")
+        GetPropObservable<string>(AppearanceConfigTypes.FontFamily)
             .Select(x => new FontFamily(x))
             .ToPropertyEx(this, x => x.FontFamily);
 
-        GetPropObservable<uint>("MouseHover")
+        GetPropObservable<uint>(AppearanceConfigTypes.MouseHover)
             .Select(Color.FromUInt32)
             .CombineLatest(mainViewModel.WhenAnyValue(x => x.IsLocked),
                 (color, locked) => locked ? Colors.Transparent : color)

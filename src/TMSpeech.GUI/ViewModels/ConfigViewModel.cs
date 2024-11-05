@@ -205,6 +205,10 @@ namespace TMSpeech.GUI.ViewModels
         [Reactive]
         [ConfigJsonValue]
         public int TextAlign { get; set; }
+        
+        [Reactive]
+        [ConfigJsonValue(AppearanceConfigTypes.BackgroundColor)]
+        public uint BackgroundColor { get; set; }
 
         public List<KeyValuePair<int, string>> TextAligns { get; } =
         [

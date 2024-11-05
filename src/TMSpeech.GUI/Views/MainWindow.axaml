@@ -32,7 +32,7 @@
   </Window.Resources>
   <Window.Styles>
     <Style Selector="Grid">
-      <Setter Property="Background" Value="#01FFFFFF" />
+      <Setter Property="Background" Value="{Binding CaptionStyle.BackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
     </Style>
     <Style Selector="Grid:pointerover">
       <!-- <Setter Property="Background" Value="#AAA9CEFF" /> -->

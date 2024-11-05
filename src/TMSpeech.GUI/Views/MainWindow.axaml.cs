@@ -27,6 +27,8 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         });
     }
 
+    #region Set Caption Lock Style
+
     [DllImport("user32.dll", SetLastError = true)]
     static extern UInt32 GetWindowLong(IntPtr hWnd, int nIndex);
 
@@ -57,6 +59,8 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
             // TODO: Implement for other platforms
         }
     }
+    
+    #endregion
 
     #region Borderless Window Drag and Resize
 

@@ -32,6 +32,7 @@ public static class AppearanceConfigTypes
     public const string FontColor = "appearance.FontColor";
     public const string MouseHover = "appearance.MouseHover";
     public const string TextAlign = "appearance.TextAlign";
+    public const string BackgroundColor = "appearance.BackgroundColor";
 
     public static class TextAlignEnum
     {
@@ -50,7 +51,8 @@ public static class AppearanceConfigTypes
         { FontSize, 48 },
         { FontColor, 0xFFFFFFFF },
         { MouseHover, 0x2709A9FF },
-        { TextAlign, TextAlignEnum.Left }
+        { TextAlign, TextAlignEnum.Left },
+        { BackgroundColor, 0x00000000 }
     };
 
     public static Dictionary<string, object> DefaultConfig => _defaultConfig;

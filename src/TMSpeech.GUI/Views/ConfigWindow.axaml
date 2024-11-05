@@ -105,6 +105,9 @@
 
           <Label>鼠标悬停背景</Label>
           <ColorPicker Color="{Binding MouseHover, Converter={StaticResource IntToColorConverter}}" />
+          
+          <Label>背景颜色</Label>
+          <ColorPicker Color="{Binding BackgroundColor, Converter={StaticResource IntToColorConverter}}" />
 
           <Label>文字对齐</Label>
           <ComboBox
