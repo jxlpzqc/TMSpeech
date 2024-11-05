@@ -8,6 +8,7 @@ namespace TMSpeech.Core.Plugins
 {
     public interface IPlugin
     {
+        string GUID { get; }
         string Name { get; }
         string Description { get; }
         string Version { get; }

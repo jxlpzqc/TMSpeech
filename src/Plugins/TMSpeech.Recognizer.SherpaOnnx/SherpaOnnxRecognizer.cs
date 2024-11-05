@@ -14,6 +14,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 {
     class SherpaOnnxRecognizer : IRecognizer
     {
+        public string GUID => "3002EE6C-9770-419F-A745-E3148747AF4C";
+        
         public string Name => "Sherpa-Onnx离线识别器";
 
         public string Description => "一款占用资源少，识别速度快的离线识别器";

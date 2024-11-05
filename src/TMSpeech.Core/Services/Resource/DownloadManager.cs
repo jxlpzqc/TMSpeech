@@ -263,8 +263,8 @@ public class DownloadManager
 
         await task.Resource.UpdateLocal();
         task._step = 0;
-        UpdateJobStatus(task, DownloadStatus.Idle);
         Directory.Delete(Path.Combine(GetPluginDirName(task.Resource), "downloading"), true);
+        UpdateJobStatus(task, DownloadStatus.Idle);
     }
 
     private Task DoDownload(DownloadItem task)

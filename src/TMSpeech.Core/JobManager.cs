@@ -71,7 +71,7 @@ namespace TMSpeech.Core
             var configAudioSource = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.AudioSource);
             var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(configAudioSource));
 
-            _audioSource = _pluginManager.AudioSources.FirstOrDefault(x => x.Name == configAudioSource);
+            _audioSource = _pluginManager.AudioSources[configAudioSource];
             if (_audioSource != null)
             {
                 _audioSource.LoadConfig(config);
@@ -93,7 +93,7 @@ namespace TMSpeech.Core
         {
             var configRecognizer = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.Recognizer);
             var config = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.GetPluginConfigKey(configRecognizer));
-            _recognizer = _pluginManager.Recognizers.FirstOrDefault(x => x.Name == configRecognizer);
+            _recognizer = _pluginManager.Recognizers[configRecognizer];
 
             if (_recognizer != null)
             {

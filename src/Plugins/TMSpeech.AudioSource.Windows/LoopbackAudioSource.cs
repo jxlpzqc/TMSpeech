@@ -11,6 +11,8 @@ namespace TMSpeech.AudioSource.Windows
 {
     public class LoopbackAudioSource : IAudioSource
     {
+        public string GUID => "F32B7F03-7030-4960-A8DF-96377C8B5FDD";
+        
         public string Name => "Windows 系统内录";
 
         public string Description => "录制系统内部声音";

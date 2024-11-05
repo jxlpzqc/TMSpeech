@@ -205,7 +205,7 @@ namespace TMSpeech.GUI.ViewModels
         [Reactive]
         [ConfigJsonValue]
         public int TextAlign { get; set; }
-        
+
         [Reactive]
         [ConfigJsonValue(AppearanceConfigTypes.BackgroundColor)]
         public uint BackgroundColor { get; set; }
@@ -252,8 +252,7 @@ namespace TMSpeech.GUI.ViewModels
         public string AudioSource { get; set; } = "";
 
         [ObservableAsProperty]
-        public IReadOnlyList<Core.Plugins.IAudioSource> AudioSourcesAvailable { get; } =
-            new List<Core.Plugins.IAudioSource>();
+        public IReadOnlyDictionary<string, Core.Plugins.IAudioSource> AudioSourcesAvailable { get; }
 
         [ObservableAsProperty]
         public IPluginConfigEditor? ConfigEditor { get; }
@@ -264,11 +263,11 @@ namespace TMSpeech.GUI.ViewModels
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
-        public IReadOnlyList<Core.Plugins.IAudioSource> Refresh()
+        public IReadOnlyDictionary<string, Core.Plugins.IAudioSource> Refresh()
         {
             var plugins = Core.Plugins.PluginManagerFactory.GetInstance().AudioSources;
             if (AudioSource == "" && plugins.Count >= 1)
-                AudioSource = plugins[0].Name;
+                AudioSource = plugins.First().Key;
             return plugins;
         }
 
@@ -311,13 +310,15 @@ namespace TMSpeech.GUI.ViewModels
                 .Select(u => u.Item1)
                 .Where(x => !string.IsNullOrEmpty(x))
                 .DistinctUntilChanged()
-                .Select(x => AudioSourcesAvailable.FirstOrDefault(u => u.Name == x))
+                .Select(x => AudioSourcesAvailable.FirstOrDefault(u => u.Key == x))
                 .Select(x =>
                 {
-                    var editor = x?.CreateConfigEditor();
-                    var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
+                    var plugin = x.Value;
+                    var editor = plugin?.CreateConfigEditor();
+                    var config = ConfigManagerFactory.Instance.Get<string>(
+                        AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
                     editor?.LoadConfigString(config);
-                    return x?.CreateConfigEditor();
+                    return editor;
                 })
                 .ToPropertyEx(this, x => x.ConfigEditor);
 
@@ -325,7 +326,9 @@ namespace TMSpeech.GUI.ViewModels
             this.WhenAnyValue(x => x.ConfigEditor)
                 .Subscribe(x =>
                 {
-                    var config = ConfigManagerFactory.Instance.Get<string>(AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
+                    var config =
+                        ConfigManagerFactory.Instance.Get<string>(
+                            AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
                     PluginConfig = config;
                 });
         }
@@ -341,8 +344,7 @@ namespace TMSpeech.GUI.ViewModels
         public string Recognizer { get; set; } = "";
 
         [ObservableAsProperty]
-        public IReadOnlyList<Core.Plugins.IRecognizer> RecognizersAvailable { get; } =
-            new List<Core.Plugins.IRecognizer>();
+        public IReadOnlyDictionary<string, Core.Plugins.IRecognizer> RecognizersAvailable { get; }
 
         [ObservableAsProperty]
         public IPluginConfigEditor? ConfigEditor { get; }
@@ -353,11 +355,11 @@ namespace TMSpeech.GUI.ViewModels
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
-        public IReadOnlyList<Core.Plugins.IRecognizer> Refresh()
+        public IReadOnlyDictionary<string, Core.Plugins.IRecognizer> Refresh()
         {
             var plugins = Core.Plugins.PluginManagerFactory.GetInstance().Recognizers;
             if (Recognizer == "" && plugins.Count >= 1)
-                Recognizer = plugins[0].Name;
+                Recognizer = plugins.First().Key;
             return plugins;
         }
 
@@ -400,14 +402,23 @@ namespace TMSpeech.GUI.ViewModels
                 .Select(u => u.Item1)
                 .Where(x => !string.IsNullOrEmpty(x))
                 .DistinctUntilChanged()
-                .Select(x => RecognizersAvailable.FirstOrDefault(u => u.Name == x))
-                .Select(x => x?.CreateConfigEditor())
+                .Select(x => RecognizersAvailable.FirstOrDefault(u => u.Key == x))
+                .Select(x =>
+                {
+                    var plugin = x.Value;
+                    var editor = plugin?.CreateConfigEditor();
+                    var config = ConfigManagerFactory.Instance.Get<string>(
+                        RecognizerConfigTypes.GetPluginConfigKey(Recognizer));
+                    editor?.LoadConfigString(config);
+                    return editor;
+                })
                 .ToPropertyEx(this, x => x.ConfigEditor);
 
             this.WhenAnyValue(x => x.ConfigEditor)
                 .Subscribe(x =>
                 {
-                    var config = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.GetPluginConfigKey(Recognizer));
+                    var config = ConfigManagerFactory.Instance.Get<string>(
+                        RecognizerConfigTypes.GetPluginConfigKey(Recognizer));
                     PluginConfig = config;
                 });
         }

@@ -168,7 +168,7 @@
               <Button DockPanel.Dock="Right">刷新</Button>
               <ComboBox ItemsSource="{Binding AudioSourcesAvailable}"
                         SelectedValue="{Binding AudioSource}"
-                        SelectedValueBinding="{Binding Name}">
+                        SelectedValueBinding="{Binding Key}">
                 <ComboBox.Styles>
                   <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
                     <Setter Property="IsVisible" Value="False"></Setter>
@@ -177,8 +177,8 @@
                 <ComboBox.ItemTemplate>
                   <DataTemplate>
                     <StackPanel>
-                      <TextBlock Text="{Binding Name}"></TextBlock>
-                      <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
+                      <TextBlock Text="{Binding Value.Name}"></TextBlock>
+                      <TextBlock Text="{Binding Value.Description}" Classes="OnlyInPopup"></TextBlock>
                     </StackPanel>
                   </DataTemplate>
                 </ComboBox.ItemTemplate>
@@ -203,7 +203,7 @@
               <Button DockPanel.Dock="Right">刷新</Button>
               <ComboBox ItemsSource="{Binding RecognizersAvailable}"
                         SelectedValue="{Binding Recognizer}"
-                        SelectedValueBinding="{Binding Name}">
+                        SelectedValueBinding="{Binding Key}">
                 <ComboBox.Styles>
                   <Style Selector="ComboBox /template/ ContentControl#ContentPresenter TextBlock.OnlyInPopup">
                     <Setter Property="IsVisible" Value="False"></Setter>
@@ -212,8 +212,8 @@
                 <ComboBox.ItemTemplate>
                   <DataTemplate>
                     <StackPanel>
-                      <TextBlock Text="{Binding Name}"></TextBlock>
-                      <TextBlock Text="{Binding Description}" Classes="OnlyInPopup"></TextBlock>
+                      <TextBlock Text="{Binding Value.Name}"></TextBlock>
+                      <TextBlock Text="{Binding Value.Description}" Classes="OnlyInPopup"></TextBlock>
                     </StackPanel>
                   </DataTemplate>
                 </ComboBox.ItemTemplate>

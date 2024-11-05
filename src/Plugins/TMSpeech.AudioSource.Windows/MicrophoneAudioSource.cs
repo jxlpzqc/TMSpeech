@@ -6,6 +6,7 @@ namespace TMSpeech.AudioSource.Windows;
 
 public class MicrophoneAudioSource : IAudioSource
 {
+    public string GUID => "3746756F-07D8-4972-BBF7-C443DF1E7E24";
     public string Name => "Windows 麦克风输入";
     public string Description => "从系统录制输入";
     public string Version => "0.0.1";

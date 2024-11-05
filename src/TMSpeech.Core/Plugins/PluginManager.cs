@@ -17,10 +17,10 @@ namespace TMSpeech.Core.Plugins
     public abstract class PluginManager
     {
         public abstract void LoadPlugins();
-        public abstract IReadOnlyList<IPlugin> Plugins { get; }
-        public abstract IReadOnlyList<IAudioSource> AudioSources { get; }
-        public abstract IReadOnlyList<IRecognizer> Recognizers { get; }
-        public abstract IReadOnlyList<ITranslator> Translators { get; }
+        public abstract IReadOnlyDictionary<string, IPlugin> Plugins { get; }
+        public abstract IReadOnlyDictionary<string, IAudioSource> AudioSources { get; }
+        public abstract IReadOnlyDictionary<string, IRecognizer> Recognizers { get; }
+        public abstract IReadOnlyDictionary<string, ITranslator> Translators { get; }
     }
 
     class PluginManagerImpl : PluginManager
@@ -29,26 +29,35 @@ namespace TMSpeech.Core.Plugins
         {
         }
 
-        private record PluginLoadInfo(IPlugin Plugin, Assembly Assembly);
+        private record PluginLoadInfo(IPlugin Plugin, Assembly Assembly, ModuleInfo module);
 
         private List<PluginLoadInfo> _plugins = new List<PluginLoadInfo>();
 
-        public override IReadOnlyList<IPlugin> Plugins => _plugins.Select(u => u.Plugin).ToList();
+        private string GetFullKey(PluginLoadInfo info)
+        {
+            var moduleID = info.module.ID;
+            var pluginID = info.Plugin.GUID;
+            var key = $"{moduleID}!{pluginID}";
+            // escape "." in key
+            key = key.Replace(":", "::");
+            key = key.Replace(".", ":");
+            return key;
+        }
 
-        public override IReadOnlyList<IAudioSource> AudioSources =>
-            _plugins.Select(u => u.Plugin)
-                .Where(u => u.GetType().IsAssignableTo(typeof(IAudioSource)))
-                .Select(u => (IAudioSource)u).ToList();
+        public override IReadOnlyDictionary<string, IPlugin> Plugins =>
+            _plugins.ToDictionary(GetFullKey, u => u.Plugin);
 
-        public override IReadOnlyList<IRecognizer> Recognizers =>
-            _plugins.Select(u => u.Plugin)
-                .Where(u => u.GetType().IsAssignableTo(typeof(IRecognizer)))
-                .Select(u => (IRecognizer)u).ToList();
+        public override IReadOnlyDictionary<string, IAudioSource> AudioSources =>
+            _plugins.Where(u => u.Plugin.GetType().IsAssignableTo(typeof(IAudioSource)))
+                .ToDictionary(GetFullKey, u => (IAudioSource)u.Plugin);
 
-        public override IReadOnlyList<ITranslator> Translators =>
-            _plugins.Select(u => u.Plugin)
-                .Where(u => u.GetType().IsAssignableTo(typeof(ITranslator)))
-                .Select(u => (ITranslator)u).ToList();
+        public override IReadOnlyDictionary<string, IRecognizer> Recognizers =>
+            _plugins.Where(u => u.Plugin.GetType().IsAssignableTo(typeof(IRecognizer)))
+                .ToDictionary(GetFullKey, u => (IRecognizer)u.Plugin);
+
+        public override IReadOnlyDictionary<string, ITranslator> Translators =>
+            _plugins.Where(u => u.Plugin.GetType().IsAssignableTo(typeof(ITranslator)))
+                .ToDictionary(GetFullKey, u => (ITranslator)u.Plugin);
 
         private void RegistErrorHandlers()
         {
@@ -73,7 +82,7 @@ namespace TMSpeech.Core.Plugins
             };
         }
 
-        private void LoadPlugin(string pluginFile)
+        private void LoadPlugin(string pluginFile, ModuleInfo module)
         {
             RegistErrorHandlers();
             Assembly assembly;
@@ -103,7 +112,7 @@ namespace TMSpeech.Core.Plugins
                 }
 
                 plugin.Init();
-                _plugins.Add(new PluginLoadInfo(plugin, assembly));
+                _plugins.Add(new PluginLoadInfo(plugin, assembly, module));
             }
         }
 
@@ -132,7 +141,8 @@ namespace TMSpeech.Core.Plugins
             public PluginLoadContext(string pluginPath)
             {
                 _resolver = new AssemblyDependencyResolver(pluginPath);
-                var nativeRuntimes = Path.Combine(Path.GetDirectoryName(pluginPath), "runtimes", GetRuntimeIdentifier(), "native");
+                var nativeRuntimes = Path.Combine(Path.GetDirectoryName(pluginPath), "runtimes", GetRuntimeIdentifier(),
+                    "native");
                 if (!Directory.Exists(nativeRuntimes)) _runtimesNativePath = nativeRuntimes;
             }
 
@@ -203,12 +213,12 @@ namespace TMSpeech.Core.Plugins
                         Debug.WriteLine($"Error deserialize module info: {e}");
                         continue;
                     }
-                    
+
                     foreach (var assembly in moduleInfo.Assemblies)
                     {
                         try
                         {
-                            LoadPlugin(Path.Combine(dir, assembly));
+                            LoadPlugin(Path.Combine(dir, assembly), moduleInfo);
                         }
                         catch (Exception e)
                         {
