@@ -69,10 +69,10 @@ public class CaptionStyleViewModel : ViewModelBase
         GetPropObservable<int>("TextAlign")
             .Select(x => x switch
             {
-                AppearanceSectionConfigViewModel.TextAlignEnum.Left => TextAlignment.Left,
-                AppearanceSectionConfigViewModel.TextAlignEnum.Center => TextAlignment.Center,
-                AppearanceSectionConfigViewModel.TextAlignEnum.Right => TextAlignment.Right,
-                AppearanceSectionConfigViewModel.TextAlignEnum.Justify => TextAlignment.Right,
+                AppearanceConfigTypes.TextAlignEnum.Left => TextAlignment.Left,
+                AppearanceConfigTypes.TextAlignEnum.Center => TextAlignment.Center,
+                AppearanceConfigTypes.TextAlignEnum.Right => TextAlignment.Right,
+                AppearanceConfigTypes.TextAlignEnum.Justify => TextAlignment.Right,
                 _ => TextAlignment.Left
             })
             .ToPropertyEx(this, x => x.TextAlign);

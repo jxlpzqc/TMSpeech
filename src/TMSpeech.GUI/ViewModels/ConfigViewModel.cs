@@ -206,20 +206,12 @@ namespace TMSpeech.GUI.ViewModels
         [ConfigJsonValue]
         public int TextAlign { get; set; }
 
-        public static class TextAlignEnum
-        {
-            public const int Left = 0;
-            public const int Center = 1;
-            public const int Right = 2;
-            public const int Justify = 3;
-        }
-
         public List<KeyValuePair<int, string>> TextAligns { get; } =
         [
-            new KeyValuePair<int, string>(TextAlignEnum.Left, "左对齐"),
-            new KeyValuePair<int, string>(TextAlignEnum.Center, "居中对齐"),
-            new KeyValuePair<int, string>(TextAlignEnum.Right, "右对齐"),
-            new KeyValuePair<int, string>(TextAlignEnum.Justify, "两端对齐"),
+            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Left, "左对齐"),
+            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Center, "居中对齐"),
+            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Right, "右对齐"),
+            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Justify, "两端对齐"),
         ];
 
         public AppearanceSectionConfigViewModel()
@@ -232,23 +224,17 @@ namespace TMSpeech.GUI.ViewModels
     {
         protected override string SectionName => "notification";
 
-        public static class NotificationTypeEnum
-        {
-            public const int None = 0;
-            public const int System = 1;
-            public const int Custom = 2;
-        }
 
         public List<KeyValuePair<int, string>> NotificaitonTypes { get; } =
         [
-            new KeyValuePair<int, string>(NotificationTypeEnum.None, "关闭通知"),
-            new KeyValuePair<int, string>(NotificationTypeEnum.System, "系统通知 (暂不支持 macOS)"),
+            new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.None, "关闭通知"),
+            new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.System, "系统通知 (暂不支持 macOS)"),
             // new KeyValuePair<int, string>(NotificationTypeEnum.Custom, "TMSpeech 通知"),
         ];
 
         [Reactive]
         [ConfigJsonValue]
-        public int NotificationType { get; set; } = NotificationTypeEnum.System;
+        public int NotificationType { get; set; } = NotificationConfigTypes.NotificationTypeEnum.System;
 
         [Reactive]
         [ConfigJsonValue]
