@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -19,11 +20,34 @@ using TMSpeech.Core.Plugins;
 
 namespace TMSpeech.GUI.ViewModels
 {
-    class ConfigJsonValueAttribute : Attribute;
+    class ConfigJsonValueAttribute : Attribute
+    {
+        public string Key { get; }
+
+        public ConfigJsonValueAttribute(string key)
+        {
+            Key = key;
+        }
+
+        public ConfigJsonValueAttribute()
+        {
+        }
+    }
+
 
     public abstract class SectionConfigViewModelBase : ViewModelBase
     {
         protected virtual string SectionName => "";
+
+        private string PropertyToKey(PropertyInfo prop)
+        {
+            var key = prop.GetCustomAttributes(typeof(ConfigJsonValueAttribute), false)
+                .Select(u => u as ConfigJsonValueAttribute)
+                .FirstOrDefault()?.Key;
+
+            if (key != null) return key;
+            return $"{SectionName}.{prop.Name}";
+        }
 
         public virtual Dictionary<string, object> Serialize()
         {
@@ -34,7 +58,7 @@ namespace TMSpeech.GUI.ViewModels
                 .ForEach(p =>
                 {
                     var value = p.GetValue(this);
-                    ret[p.Name] = value;
+                    ret[PropertyToKey(p)] = value;
                 });
             return ret;
         }
@@ -46,8 +70,8 @@ namespace TMSpeech.GUI.ViewModels
                 .ToList()
                 .ForEach(p =>
                 {
-                    if (!dict.ContainsKey(p.Name)) return;
-                    var value = dict[p.Name];
+                    if (!dict.ContainsKey(PropertyToKey(p))) return;
+                    var value = dict[PropertyToKey(p)];
                     var type = p.PropertyType;
                     p.SetValue(this, Convert.ChangeType(value, type));
                 });
@@ -58,20 +82,15 @@ namespace TMSpeech.GUI.ViewModels
             var dict = ConfigManagerFactory.Instance.GetAll();
             Deserialize(
                 dict.Where(x => ConfigManager.IsInSection(x.Key, SectionName))
-                    .ToDictionary(
-                        x => string.IsNullOrEmpty(SectionName) ? x.Key : x.Key.Substring(SectionName.Length + 1),
-                        x => x.Value
-                    )
+                    .ToDictionary(x => x.Key, x => x.Value)
             );
         }
 
         public void Apply()
         {
             var dict = Serialize();
-            ConfigManagerFactory.Instance.BatchApply(dict.Where(u => u.Value != null).ToDictionary(
-                x => (SectionName != "" ? $"{SectionName}." : "") + x.Key,
-                x => x.Value
-            ));
+            ConfigManagerFactory.Instance.BatchApply(dict.Where(u => u.Value != null)
+                .ToDictionary(x => x.Key, x => x.Value));
         }
 
         public SectionConfigViewModelBase()
@@ -126,7 +145,7 @@ namespace TMSpeech.GUI.ViewModels
 
         [Reactive]
         [ConfigJsonValue]
-        public string Language { get; set; } = "zh-cn";
+        public string Language { get; set; }
 
         public ObservableCollection<KeyValuePair<string, string>> LanguagesAvailable { get; } =
         [
@@ -140,15 +159,15 @@ namespace TMSpeech.GUI.ViewModels
 
         [Reactive]
         [ConfigJsonValue]
-        public bool LaunchOnStartup { get; set; } = false;
+        public bool LaunchOnStartup { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public bool StartOnLaunch { get; set; } = false;
+        public bool StartOnLaunch { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public bool AutoUpdate { get; set; } = true;
+        public bool AutoUpdate { get; set; }
     }
 
     public class AppearanceSectionConfigViewModel : SectionConfigViewModelBase
@@ -159,33 +178,33 @@ namespace TMSpeech.GUI.ViewModels
 
         [Reactive]
         [ConfigJsonValue]
-        public uint ShadowColor { get; set; } = 0xFF000000;
+        public uint ShadowColor { get; set; }
 
 
         [Reactive]
         [ConfigJsonValue]
-        public int ShadowSize { get; set; } = 10;
+        public int ShadowSize { get; set; }
 
 
         [Reactive]
         [ConfigJsonValue]
-        public string FontFamily { get; set; } = "Arial";
+        public string FontFamily { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public int FontSize { get; set; } = 24;
+        public int FontSize { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public uint FontColor { get; set; } = 0xFFFF0000;
+        public uint FontColor { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public uint MouseHover { get; set; } = 0xFFFF0000;
+        public uint MouseHover { get; set; }
 
         [Reactive]
         [ConfigJsonValue]
-        public int TextAlign { get; set; } = TextAlignEnum.Left;
+        public int TextAlign { get; set; }
 
         public static class TextAlignEnum
         {
