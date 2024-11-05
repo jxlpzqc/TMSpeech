@@ -249,7 +249,7 @@ namespace TMSpeech.GUI.ViewModels
     {
         [Reactive]
         [ConfigJsonValue]
-        public string AudioSource { get; set; } = "";
+        public string AudioSource { get; set; }
 
         [ObservableAsProperty]
         public IReadOnlyDictionary<string, Core.Plugins.IAudioSource> AudioSourcesAvailable { get; }
@@ -287,14 +287,14 @@ namespace TMSpeech.GUI.ViewModels
 
         public override void Deserialize(IReadOnlyDictionary<string, object> dict)
         {
-            if (dict.ContainsKey("audio.source"))
+            if (dict.ContainsKey(AudioSourceConfigTypes.AudioSource))
             {
-                AudioSource = dict["audio.source"]?.ToString() ?? "";
+                AudioSource = dict[AudioSourceConfigTypes.AudioSource]?.ToString() ?? "";
             }
 
-            if (dict.ContainsKey($"plugin.{AudioSource}.config"))
+            if (dict.ContainsKey(AudioSourceConfigTypes.GetPluginConfigKey(AudioSource)))
             {
-                PluginConfig = dict[$"plugin.{AudioSource}.config"]?.ToString() ?? "";
+                PluginConfig = dict[AudioSourceConfigTypes.GetPluginConfigKey(AudioSource)]?.ToString() ?? "";
             }
         }
 
@@ -367,11 +367,11 @@ namespace TMSpeech.GUI.ViewModels
         {
             var ret = new Dictionary<string, object>
             {
-                { "recognizer.source", Recognizer },
+                { RecognizerConfigTypes.Recognizer, Recognizer },
             };
             if (!string.IsNullOrEmpty(Recognizer))
             {
-                ret.Add($"plugin.{Recognizer}.config", PluginConfig);
+                ret.Add(RecognizerConfigTypes.GetPluginConfigKey(Recognizer), PluginConfig);
             }
 
             return ret;
@@ -379,14 +379,14 @@ namespace TMSpeech.GUI.ViewModels
 
         public override void Deserialize(IReadOnlyDictionary<string, object> dict)
         {
-            if (dict.ContainsKey("recognizer.source"))
+            if (dict.ContainsKey(RecognizerConfigTypes.Recognizer))
             {
-                Recognizer = dict["recognizer.source"]?.ToString() ?? "";
+                Recognizer = dict[RecognizerConfigTypes.Recognizer]?.ToString() ?? "";
             }
 
-            if (dict.ContainsKey($"plugin.{Recognizer}.config"))
+            if (dict.ContainsKey(RecognizerConfigTypes.GetPluginConfigKey(Recognizer)))
             {
-                PluginConfig = dict[$"plugin.{Recognizer}.config"]?.ToString() ?? "";
+                PluginConfig = dict[RecognizerConfigTypes.GetPluginConfigKey(Recognizer)]?.ToString() ?? "";
             }
         }
 

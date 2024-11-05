@@ -89,7 +89,7 @@ public static class AudioSourceConfigTypes
 
     public static string GetPluginConfigKey(string pluginId)
     {
-        return $"{SectionName}.{pluginId}.config";
+        return $"plugin.{pluginId}.config";
     }
 }
 
@@ -101,6 +101,6 @@ public static class RecognizerConfigTypes
 
     public static string GetPluginConfigKey(string pluginId)
     {
-        return $"{SectionName}.{pluginId}.config";
+        return $"plugin.{pluginId}.config";
     }
 }
