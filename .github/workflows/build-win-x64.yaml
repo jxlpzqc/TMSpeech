@@ -8,6 +8,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions: 
+  contents: write
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -44,11 +47,12 @@ jobs:
         with:
           name: TMSpeech.win-x64
           path: app
+      - name: Create ZIP
+        run: Compress-Archive -Path app/* -DestinationPath TMSpeech.win-x64.zip
           
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: app/**
+          files: |
+            TMSPeech.win-x64.zip
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
