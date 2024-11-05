@@ -92,4 +92,16 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)"/>
   </Target>
+  
+  <Target Name="PublishPlugins" AfterTargets="PrepareForPublish" Condition="'$(BuildPlugins)'=='true'">
+    <ConvertToAbsolutePath Paths="$(OutDir)$(PluginsOutputDir)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="BuildPluginDir" />
+    </ConvertToAbsolutePath>
+    <ConvertToAbsolutePath Paths="$(PublishDir)$(PluginsOutputDir)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PublishPluginDir" />
+    </ConvertToAbsolutePath>
+    <Message Importance="high" Text="Copy plugins..." />
+    <Exec Command="xcopy &quot;$(BuildPluginDir)&quot; &quot;$(PublishPluginDir)&quot; /E /Y /I /Q" />
+  </Target>
+    
 </Project>
