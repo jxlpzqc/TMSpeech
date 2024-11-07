@@ -12,7 +12,7 @@
         x:Class="TMSpeech.GUI.Views.ConfigWindow"
         x:Name="winConfig"
         Title="配置"
-        FontFamily="微软雅黑,Microsoft YaHei,苹方-简">
+        FontFamily="{StaticResource GlobalFontFamily}">
   <Design.DataContext>
     <vm:ConfigViewModel />
   </Design.DataContext>

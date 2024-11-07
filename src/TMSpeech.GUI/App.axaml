@@ -10,6 +10,9 @@
     <FluentTheme />
     <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
   </Application.Styles>
+  <Application.Resources>
+    <FontFamily x:Key="GlobalFontFamily">微软雅黑,Microsoft YaHei,苹方-简</FontFamily>
+  </Application.Resources>
 
 
   <TrayIcon.Icons>
