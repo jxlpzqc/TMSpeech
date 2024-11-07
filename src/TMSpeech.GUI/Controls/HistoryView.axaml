@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             Name="view"
+             x:Class="TMSpeech.GUI.Controls.HistoryView">
+  <ItemsControl ItemsSource="{Binding #view.ItemsSource}" Name="list">
+    <ItemsControl.ContextMenu>
+      <ContextMenu>
+        <MenuItem Header="复制" Click="Copy_OnClick"></MenuItem>
+        <MenuItem Header="全选" Click="SelectAll_OnClick"></MenuItem>
+      </ContextMenu>
+    </ItemsControl.ContextMenu>
+    <ItemsControl.ItemTemplate>
+      <DataTemplate>
+        <DockPanel IsHitTestVisible="True" Background="#01FFFFFF" 
+                   PointerPressed="InputElement_OnPointerPressed"
+                   PointerReleased="InputElement_OnPointerReleased"
+                   Cursor="IBeam"
+                   Margin="8,4"
+                   PointerMoved="InputElement_OnPointerMoved">
+          <TextBlock IsHitTestVisible="False" Text="{Binding TimeStr}" Width="100"></TextBlock>
+          <SelectableTextBlock IsHitTestVisible="False" Text="{Binding Text}" TextWrapping="Wrap"></SelectableTextBlock>
+        </DockPanel>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>
