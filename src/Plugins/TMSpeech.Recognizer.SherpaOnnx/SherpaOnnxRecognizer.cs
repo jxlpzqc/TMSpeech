@@ -37,7 +37,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         public void LoadConfig(string config)
         {
-            if (config.Length != 0)
+            if (config != null && config.Length != 0)
             {
                 _userConfig = JsonSerializer.Deserialize<SherpaOnnxConfig>(config);
             }

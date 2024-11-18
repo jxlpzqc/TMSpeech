@@ -93,6 +93,11 @@ namespace TMSpeech.Core
         {
             var configRecognizer = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.Recognizer);
             var config = ConfigManagerFactory.Instance.Get<string>(RecognizerConfigTypes.GetPluginConfigKey(configRecognizer));
+            // default config
+            if ((configRecognizer == null || configRecognizer.Length == 0) && _pluginManager.Recognizers.Count > 0)
+            {
+                configRecognizer = _pluginManager.Recognizers.Keys.First();
+            }
             _recognizer = _pluginManager.Recognizers[configRecognizer];
 
             if (_recognizer != null)

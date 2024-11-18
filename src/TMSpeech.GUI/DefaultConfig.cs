@@ -16,7 +16,7 @@ namespace TMSpeech.GUI
                 .Union(AppearanceConfigTypes.DefaultConfig)
                 .Union(NotificationConfigTypes.DefaultConfig)
                 .ToDictionary(x => x.Key, x => x.Value);
-
+            ret["audio.source"] = "TMSpeech:AudioSource:Windows!F32B7F03-7030-4960-A8DF-96377C8B5FDD";
             var fonts = FontManager.Current.SystemFonts.ToList();
             if (fonts.Any(x => x.Name == "黑体")) ret["appearance.FontFamily"] = "黑体";
             return ret;
