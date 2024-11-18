@@ -225,6 +225,9 @@ namespace TMSpeech.Core
 
             _audioSource = null;
             _recognizer = null;
+
+            OnSentenceDone(new SpeechEventArgs());
+            OnTextChanged(new SpeechEventArgs());
         }
 
         public override void Start()

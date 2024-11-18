@@ -64,6 +64,7 @@ public static class NotificationConfigTypes
 
     public const string NotificationType = "notification.NotificationType";
     public const string SensitiveWords = "notification.SensitiveWords";
+    public const string HasShownLockUsage = "notification.ShownLockUsage";
 
     public static class NotificationTypeEnum
     {
