@@ -225,9 +225,6 @@ namespace TMSpeech.Core
 
             _audioSource = null;
             _recognizer = null;
-
-            OnSentenceDone(new SpeechEventArgs());
-            OnTextChanged(new SpeechEventArgs());
         }
 
         public override void Start()
@@ -249,6 +246,12 @@ namespace TMSpeech.Core
         {
             if (Status == JobStatus.Running) StopRecognize();
             Status = JobStatus.Stopped;
+
+            // Clear text when stopped
+            var emptyTextArg = new SpeechEventArgs();
+            emptyTextArg.Text = new TextInfo(string.Empty);
+            // OnSentenceDone(emptyTextArg); // TODO unable to save existing text.
+            OnTextChanged(emptyTextArg);
 
             _timer?.Dispose();
             _timer = null;
