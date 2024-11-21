@@ -9,6 +9,7 @@ public static class GeneralConfigTypes
     public const string StartOnLaunch = "general.StartOnLaunch";
     public const string AutoUpdate = "general.AutoUpdate";
     public const string ResultLogPath = "general.ResultLogPath";
+    public const string MainWindowLocation = "general.MainWindowLocation";
 
 
     private static Dictionary<string, object> _defaultConfig => new()
@@ -17,7 +18,8 @@ public static class GeneralConfigTypes
         { LaunchOnStartup, false },
         { StartOnLaunch, true },
         { AutoUpdate, true },
-        { ResultLogPath, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TMSpeechLogs") }
+        { ResultLogPath, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TMSpeechLogs") },
+        { MainWindowLocation, new List<int>() }
     };
 
     public static Dictionary<string, object> DefaultConfig => _defaultConfig;

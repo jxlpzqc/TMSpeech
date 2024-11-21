@@ -172,6 +172,11 @@ namespace TMSpeech.GUI.ViewModels
         [Reactive]
         [ConfigJsonValue]
         public bool AutoUpdate { get; set; }
+
+        // Left, Top, Width, Height
+        [Reactive]
+        [ConfigJsonValue]
+        public List<int> MainWindowLocation { get; set; } = [];
     }
 
     public class AppearanceSectionConfigViewModel : SectionConfigViewModelBase
