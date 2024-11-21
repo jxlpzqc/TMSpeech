@@ -38,15 +38,15 @@
         </Style>
       </TabControl.Styles>
 
-      <TabItem IsVisible="False">
+      <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal">
             <TextBlock>通用</TextBlock>
           </StackPanel>
         </TabItem.Header>
-        <controls:AutoGrid RowCount="100" ColumnDefinitions="100,*" DataContext="{Binding GeneralSectionConfig}">
-          <Label>语言</Label>
-          <ComboBox SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language,Mode=TwoWay}"
+        <controls:AutoGrid RowCount="100" ColumnDefinitions="115,*" DataContext="{Binding GeneralSectionConfig}">
+          <Label IsVisible="False">语言</Label>
+          <ComboBox IsVisible="False" SelectedValueBinding="{Binding Key}" SelectedValue="{Binding  Language,Mode=TwoWay}"
                     Name="comboLanguage" ItemsSource="{Binding LanguagesAvailable}">
             <ComboBox.ItemTemplate>
               <DataTemplate>
@@ -58,13 +58,16 @@
           <Label>用户数据目录</Label>
           <controls:FilePicker Text="{Binding UserDir,Mode=TwoWay}" ExtendedOptions="True" Type="Folder" />
            -->
-          <Label>开机启动</Label>
-          <CheckBox IsChecked="{Binding LaunchOnStartup,Mode=TwoWay}" />
+          <Label IsVisible="False">开机启动</Label>
+          <CheckBox IsVisible="False" IsChecked="{Binding LaunchOnStartup,Mode=TwoWay}" />
           <Label>启动开始识别</Label>
           <CheckBox IsChecked="{Binding StartOnLaunch,Mode=TwoWay}" />
-          <Label>自动更新</Label>
-          <CheckBox IsChecked="{Binding AutoUpdate,Mode=TwoWay}" />
+          <Label>识别日志文件夹</Label>
+          <TextBox Text="{Binding ResultLogPath,Mode=TwoWay}"></TextBox>
+          <Label IsVisible="False">自动更新</Label>
+          <CheckBox IsVisible="False" IsChecked="{Binding AutoUpdate,Mode=TwoWay}" />
         </controls:AutoGrid>
+       
 
       </TabItem>
       <TabItem>

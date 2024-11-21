@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TMSpeech.Core.Plugins;
@@ -65,6 +66,7 @@ namespace TMSpeech.Core
         private IRecognizer? _recognizer;
         private HashSet<string> _sensitiveWords;
         private bool _disableInThisSentence = false;
+        private string logFile;
 
         private void InitAudioSource()
         {
@@ -111,6 +113,12 @@ namespace TMSpeech.Core
 
         private void OnRecognizerOnSentenceDone(object? sender, SpeechEventArgs args)
         {
+            // Save the sentense to log
+            if (logFile != null && logFile.Length > 0)
+            {
+                File.AppendAllText(logFile, string.Format("{0:T}: {1}\n", DateTime.Now, args.Text.Text));
+            }
+
             _disableInThisSentence = false;
             OnSentenceDone(args);
         }
@@ -165,6 +173,16 @@ namespace TMSpeech.Core
                 NotificationManager.Instance.Notify($"语音源启动失败 {ex.Message}", "启动失败",
                     NotificationType.Error);
                 return;
+            }
+
+            var logPath = ConfigManagerFactory.Instance.Get<string>(GeneralConfigTypes.ResultLogPath).Trim();
+            if (logPath.Length > 0)
+            {
+                Directory.CreateDirectory(logPath);
+                logFile = Path.Combine(logPath, string.Format("{0:yy-MM-dd-HH-mm-ss}.txt", DateTime.Now));
+            } else
+            {
+                logFile = "";
             }
 
             if (Status == JobStatus.Stopped) RunningSeconds = 0;

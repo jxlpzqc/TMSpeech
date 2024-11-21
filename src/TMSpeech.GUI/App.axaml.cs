@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using ReactiveUI;
 using TMSpeech.Core;
 using TMSpeech.GUI.ViewModels;
 using TMSpeech.GUI.Views;
@@ -49,6 +53,12 @@ public partial class App : Application
         if (!Design.IsDesignMode)
         {
             Core.Plugins.PluginManagerFactory.GetInstance().LoadPlugins();
+
+            // Run recognizer if config is set.
+            if (ConfigManagerFactory.Instance.Get<bool>(GeneralConfigTypes.StartOnLaunch))
+            {
+                Dispatcher.UIThread.Post(() => { _mainWindow.ViewModel.PlayCommand.Execute(); });
+            }
         }
     }
 }

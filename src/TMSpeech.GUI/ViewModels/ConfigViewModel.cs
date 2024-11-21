@@ -159,6 +159,10 @@ namespace TMSpeech.GUI.ViewModels
 
         [Reactive]
         [ConfigJsonValue]
+        public string ResultLogPath { get; set; }
+
+        [Reactive]
+        [ConfigJsonValue]
         public bool LaunchOnStartup { get; set; }
 
         [Reactive]

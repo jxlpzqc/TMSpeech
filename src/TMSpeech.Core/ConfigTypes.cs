@@ -8,14 +8,16 @@ public static class GeneralConfigTypes
     public const string LaunchOnStartup = "general.LaunchOnStartup";
     public const string StartOnLaunch = "general.StartOnLaunch";
     public const string AutoUpdate = "general.AutoUpdate";
+    public const string ResultLogPath = "general.ResultLogPath";
 
 
     private static Dictionary<string, object> _defaultConfig => new()
     {
         { Language, "zh-cn" },
         { LaunchOnStartup, false },
-        { StartOnLaunch, false },
-        { AutoUpdate, true }
+        { StartOnLaunch, true },
+        { AutoUpdate, true },
+        { ResultLogPath, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TMSpeechLogs") }
     };
 
     public static Dictionary<string, object> DefaultConfig => _defaultConfig;
