@@ -1,6 +1,6 @@
 # TMSpeech
 
-视频演示：https://www.bilibili.com/video/BV1rX4y1p7Nx/
+(旧版)视频演示：https://www.bilibili.com/video/BV1rX4y1p7Nx/
 
 关键词：语音转文字，实时字幕，会议语音识别，歌词字幕展示，识别历史记录查看
 
@@ -18,9 +18,15 @@
 
 无边框窗口，可任意拖动和调整大小
 
-![正常识别窗口](imgs/normal.PNG)
+![正常识别窗口](imgs/main.png)
 
-![鼠标悬浮时的窗口](imgs/hover.PNG)
+历史记录页面（双击可复制）：
+
+![历史记录页面](imgs/history.png)
+
+设置页面：
+
+![设置页面](imgs/settings.png)
 
 ## 使用
 
@@ -37,12 +43,8 @@
     - 请点击这里[创建issue](https://github.com/jxlpzqc/TMSpeech/issues/new)告诉我们！
     - 如果你懂Windows/C#开发，欢迎提交pull request，开发的过程中遇到任何问题可以创建issue和我们讨论。
 
-## Release 流程
+## 带模型的Release打包流程
 
-- VisualStudio中右键项目，选择Publish，增加publish到文件夹的配置。
-- 点击`Show all settings`修改Publish配置，
-    - `Configuration`为Release，
-    - 选择`Deployment mode`为`self-contained`，
-    - 设置`target runtime`为`win-x64`。
+- 在github actions中下载构建好的安装包
 - 将模型文件夹复制到publish的文件夹内，重命名为models，打包为zip文件。
 - 在开发电脑，和另外一台电脑上测试各种功能。
