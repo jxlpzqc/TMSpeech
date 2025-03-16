@@ -59,7 +59,7 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
             // TODO: Implement for other platforms
         }
     }
-    
+
     #endregion
 
     #region Borderless Window Drag and Resize

@@ -126,15 +126,12 @@ public class MainViewModel : ViewModelBase
     [Reactive]
     public bool IsLocked { get; set; }
 
-    public ObservableCollection<string> HistoryTexts { get; } = new();
+    public ObservableCollection<TextInfo> HistoryTexts { get; } = new();
 
     public ReactiveCommand<Unit, Unit> PlayCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
     public ReactiveCommand<Unit, Unit> StopCommand { get; }
     public ReactiveCommand<Unit, Unit> LockCommand { get; }
-
-
-    public ReactiveCommand<Unit, Unit> HistoryCommand { get; }
 
     private readonly JobManager _jobManager;
 
@@ -198,6 +195,7 @@ public class MainViewModel : ViewModelBase
         Observable.FromEventPattern<SpeechEventArgs>(
                 p => _jobManager.SentenceDone += p,
                 p => _jobManager.SentenceDone -= p)
-            .Subscribe(x => HistoryTexts.Insert(0, DateTime.Now.ToString("[HH:mm:ss] ") + x.EventArgs.Text.Text));
+            .Select(x => x.EventArgs.Text)
+            .Subscribe(x => { this.HistoryTexts.Add(x); });
     }
 }
