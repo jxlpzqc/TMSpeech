@@ -147,6 +147,35 @@ class LocalConfigManagerImpl : ConfigManager
         {
         }
 
+        // Read default config and merge.
+        try
+        {
+            var defaultConfig = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default_config.json");
+            if (File.Exists(defaultConfig))
+            {
+                var config = File.ReadAllText(ConfigFile);
+                var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
+                    new JsonSerializerOptions
+                    {
+                        Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
+                    });
+                if (value != null)
+                {
+                    // merge config with default config
+                    for (var i = 0; i < value.Count; i++)
+                    {
+                        if (!_config.ContainsKey(value.ElementAt(i).Key))
+                        {
+                            _config.Add(value.ElementAt(i).Key, value.ElementAt(i).Value);
+                        }
+                    }
+                }
+            }
+        }
+        catch (FileNotFoundException)
+        {
+        }
+
         OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));
     }
 

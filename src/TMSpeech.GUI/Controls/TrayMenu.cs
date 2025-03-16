@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
+using TMSpeech.Core;
 using TMSpeech.GUI.Views;
 
 namespace TMSpeech.GUI.Controls;
@@ -29,6 +31,12 @@ public class TrayMenu : NativeMenu
 
     private void Exit()
     {
+        // Save window location and size.
+        var left = _mainWindow.Position.X;
+        var top = _mainWindow.Position.Y;
+        var width = (int)_mainWindow.Width;
+        var height = (int)_mainWindow.Height;
+        ConfigManagerFactory.Instance.Apply<List<int>>(GeneralConfigTypes.MainWindowLocation, [left, top, width, height]);
         Environment.Exit(0);
     }
 

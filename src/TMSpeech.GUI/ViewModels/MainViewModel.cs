@@ -11,6 +11,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using TMSpeech.Core;
 using TMSpeech.Core.Plugins;
+using TMSpeech.Core.Services.Notification;
 
 namespace TMSpeech.GUI.ViewModels;
 
@@ -161,7 +162,16 @@ public class MainViewModel : ViewModelBase
             .Select(x => x == JobStatus.Running || x == JobStatus.Paused)
             .ToPropertyEx(this, x => x.StopButtonVisible);
 
-        this.LockCommand = ReactiveCommand.Create(() => { IsLocked = true; });
+        this.LockCommand = ReactiveCommand.Create(() => { 
+            IsLocked = true;
+            // Inform user if user uses it for the first time.
+            var lockedShown = ConfigManagerFactory.Instance.Get<bool>(NotificationConfigTypes.HasShownLockUsage);
+            if (!lockedShown)
+            {
+                ConfigManagerFactory.Instance.Apply(NotificationConfigTypes.HasShownLockUsage, true);
+                NotificationManager.Instance.Notify("锁定成功", "右键托盘图标以解锁", NotificationType.Info);
+            }
+        });
 
         this.PlayCommand = ReactiveCommand.CreateFromTask(
             async () => { await Task.Run(() => { _jobManager.Start(); }); },
