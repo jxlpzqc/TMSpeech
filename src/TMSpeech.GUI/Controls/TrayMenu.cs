@@ -36,7 +36,8 @@ public class TrayMenu : NativeMenu
         var top = _mainWindow.Position.Y;
         var width = (int)_mainWindow.Width;
         var height = (int)_mainWindow.Height;
-        ConfigManagerFactory.Instance.Apply<List<int>>(GeneralConfigTypes.MainWindowLocation, [left, top, width, height]);
+        //ConfigManagerFactory.Instance.Apply<List<int>>(GeneralConfigTypes.MainWindowLocation, [left, top, width, height]);
+        ConfigManagerFactory.Instance.Apply<List<int>>(GeneralConfigTypes.MainWindowLocation, new List<int> { left, top, width, height });
         Environment.Exit(0);
     }
 

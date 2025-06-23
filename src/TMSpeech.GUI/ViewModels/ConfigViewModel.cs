@@ -63,7 +63,7 @@ namespace TMSpeech.GUI.ViewModels
             return ret;
         }
 
-        public virtual void Deserialize(IReadOnlyDictionary<string, object> dict)
+        /*public virtual void Deserialize(IReadOnlyDictionary<string, object> dict)
         {
             this.GetType().GetProperties()
                 .Where(p => p.GetCustomAttributes(typeof(ConfigJsonValueAttribute), false).Length > 0)
@@ -75,6 +75,61 @@ namespace TMSpeech.GUI.ViewModels
                     var type = p.PropertyType;
                     p.SetValue(this, Convert.ChangeType(value, type));
                 });
+        }*/
+
+        public virtual void Deserialize(IReadOnlyDictionary<string, object> dict)
+        {
+            var typeName = this.GetType().Name;
+
+            foreach (var p in this.GetType().GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(ConfigJsonValueAttribute), false).Length > 0))
+            {
+                var key = PropertyToKey(p);
+                if (!dict.ContainsKey(key))
+                {
+                    Console.WriteLine($"[DEBUG] ⏭️ Key '{key}' not found in config.");
+                    continue;
+                }
+
+                var value = dict[key];
+                var targetType = p.PropertyType;
+
+                try
+                {
+                    Console.WriteLine($"[DEBUG] Attempting to set {typeName}.{p.Name} (Key: '{key}')");
+                    Console.WriteLine($"        Value: {value}");
+                    Console.WriteLine($"        ValueType: {value?.GetType().Name}, TargetType: {targetType.Name}");
+
+                    // 如果是 JsonElement，尝试用 JsonSerializer 反序列化
+                    object? converted;
+                    if (value is JsonElement jsonElement)
+                    {
+                        converted = JsonSerializer.Deserialize(jsonElement.GetRawText(), targetType);
+                    }
+                    else if (targetType.IsEnum && value is string enumStr)
+                    {
+                        converted = Enum.Parse(targetType, enumStr);
+                    }
+                    else if (value is IConvertible)
+                    {
+                        converted = Convert.ChangeType(value, targetType);
+                    }
+                    else
+                    {
+                        var json = JsonSerializer.Serialize(value);
+                        converted = JsonSerializer.Deserialize(json, targetType);
+                    }
+
+                    p.SetValue(this, converted);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] ❌ Failed to deserialize {typeName}.{p.Name} (Key: '{key}')");
+                    Console.WriteLine($"        Value: {value}");
+                    Console.WriteLine($"        ValueType: {value?.GetType().Name}, TargetType: {targetType.Name}");
+                    Console.WriteLine($"        Error: {ex.GetType().Name}: {ex.Message}");
+                }
+            }
         }
 
         public void Load()
@@ -147,11 +202,11 @@ namespace TMSpeech.GUI.ViewModels
         [ConfigJsonValue]
         public string Language { get; set; }
 
-        public ObservableCollection<KeyValuePair<string, string>> LanguagesAvailable { get; } =
-        [
-            new KeyValuePair<string, string>("zh-cn", "简体中文"),
-            new KeyValuePair<string, string>("en-us", "English"),
-        ];
+        public ObservableCollection<KeyValuePair<string, string>> LanguagesAvailable { get; } = new()
+    {
+        new KeyValuePair<string, string>("zh-cn", "简体中文"),
+        new KeyValuePair<string, string>("en-us", "English"),
+    };
 
         //[Reactive]
         //[ConfigJsonValue]
@@ -176,7 +231,7 @@ namespace TMSpeech.GUI.ViewModels
         // Left, Top, Width, Height
         [Reactive]
         [ConfigJsonValue]
-        public List<int> MainWindowLocation { get; set; } = [];
+        public List<int> MainWindowLocation { get; set; } = new List<int>();
     }
 
     public class AppearanceSectionConfigViewModel : SectionConfigViewModelBase
@@ -219,13 +274,13 @@ namespace TMSpeech.GUI.ViewModels
         [ConfigJsonValue(AppearanceConfigTypes.BackgroundColor)]
         public uint BackgroundColor { get; set; }
 
-        public List<KeyValuePair<int, string>> TextAligns { get; } =
-        [
-            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Left, "左对齐"),
-            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Center, "居中对齐"),
-            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Right, "右对齐"),
-            new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Justify, "两端对齐"),
-        ];
+        public List<KeyValuePair<int, string>> TextAligns { get; } = new List<KeyValuePair<int, string>>
+    {
+        new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Left, "左对齐"),
+        new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Center, "居中对齐"),
+        new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Right, "右对齐"),
+        new KeyValuePair<int, string>(AppearanceConfigTypes.TextAlignEnum.Justify, "两端对齐"),
+    };
 
         public AppearanceSectionConfigViewModel()
         {
@@ -238,12 +293,12 @@ namespace TMSpeech.GUI.ViewModels
         protected override string SectionName => NotificationConfigTypes.SectionName;
 
 
-        public List<KeyValuePair<int, string>> NotificaitonTypes { get; } =
-        [
-            new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.None, "关闭通知"),
-            new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.System, "系统通知 (暂不支持 macOS)"),
-            // new KeyValuePair<int, string>(NotificationTypeEnum.Custom, "TMSpeech 通知"),
-        ];
+        public List<KeyValuePair<int, string>> NotificaitonTypes { get; } = new List<KeyValuePair<int, string>>
+    {
+        new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.None, "关闭通知"),
+        new KeyValuePair<int, string>(NotificationConfigTypes.NotificationTypeEnum.System, "系统通知 (暂不支持 macOS)"),
+        // new KeyValuePair<int, string>(NotificationTypeEnum.Custom, "TMSpeech 通知"),
+    };
 
         [Reactive]
         [ConfigJsonValue]

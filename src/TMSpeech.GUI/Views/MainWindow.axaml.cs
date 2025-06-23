@@ -16,15 +16,18 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
         InitializeComponent();
         ViewModel = new MainViewModel();
 
-        this.WhenActivated(d =>
+        if (!Design.IsDesignMode)
         {
-            this.ViewModel.WhenAnyValue(x => x.IsLocked)
-                .Subscribe((l) =>
-                {
-                    SetCaptionLock(l);
-                    (App.Current as App).UpdateTrayMenu();
-                }).DisposeWith(d);
-        });
+            this.WhenActivated(d =>
+            {
+                this.ViewModel.WhenAnyValue(x => x.IsLocked)
+                    .Subscribe((l) =>
+                    {
+                        SetCaptionLock(l);
+                        (App.Current as App)?.UpdateTrayMenu();
+                    }).DisposeWith(d);
+            });
+        }
     }
 
     #region Set Caption Lock Style
