@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.Recognizer.SherpaO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.AudioSource.Windows", "src\Plugins\TMSpeech.AudioSource.Windows\TMSpeech.AudioSource.Windows.csproj", "{8BD17489-0EFE-4FF2-B9A0-829C9F047825}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TMSpeech.Recognizer.Command", "src\Plugins\TMSpeech.Recognizer.Command\TMSpeech.Recognizer.Command.csproj", "{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BD17489-0EFE-4FF2-B9A0-829C9F047825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1FE33713-1560-4CD5-8CB0-FA7181D3559C} = {067D976B-853C-432D-B522-9DA758808BCD}
 		{8BD17489-0EFE-4FF2-B9A0-829C9F047825} = {067D976B-853C-432D-B522-9DA758808BCD}
+		{2BC5E9A7-4D3C-4A1E-9B7F-8E6D5C4F3A2B} = {067D976B-853C-432D-B522-9DA758808BCD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F0F1C03-F420-4F93-919B-49FFB10ED58F}
