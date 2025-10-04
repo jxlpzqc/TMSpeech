@@ -16,6 +16,7 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
         _values["Command"] = "";
         _values["Arguments"] = "";
         _values["WorkingDirectory"] = "";
+        _values["LogFile"] = "";
 
         _formItems.Add(new PluginConfigFormItemFile
         {
@@ -35,6 +36,13 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
             Key = "WorkingDirectory",
             Name = "工作目录",
             Type = PluginConfigFormItemFileType.Folder
+        });
+
+        _formItems.Add(new PluginConfigFormItemFile
+        {
+            Key = "LogFile",
+            Name = "日志文件（stderr输出）",
+            Type = PluginConfigFormItemFileType.File
         });
     }
 
@@ -65,7 +73,8 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
         {
             Command = _values.TryGetValue("Command", out var cmd) ? cmd?.ToString() ?? "" : "",
             Arguments = _values.TryGetValue("Arguments", out var args) ? args?.ToString() ?? "" : "",
-            WorkingDirectory = _values.TryGetValue("WorkingDirectory", out var wd) ? wd?.ToString() ?? "" : ""
+            WorkingDirectory = _values.TryGetValue("WorkingDirectory", out var wd) ? wd?.ToString() ?? "" : "",
+            LogFile = _values.TryGetValue("LogFile", out var lf) ? lf?.ToString() ?? "" : ""
         };
 
         return JsonSerializer.Serialize(config);
@@ -83,6 +92,7 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
                 _values["Command"] = cfg.Command;
                 _values["Arguments"] = cfg.Arguments;
                 _values["WorkingDirectory"] = cfg.WorkingDirectory;
+                _values["LogFile"] = cfg.LogFile;
             }
         }
         catch

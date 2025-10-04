@@ -10,6 +10,7 @@ public class CommandRecognizerConfig
     public string Command { get; set; } = "";
     public string Arguments { get; set; } = "";
     public string WorkingDirectory { get; set; } = "";
+    public string LogFile { get; set; } = "";
 }
 
 public class CommandRecognizer : IRecognizer
@@ -33,9 +34,11 @@ public class CommandRecognizer : IRecognizer
     private CommandRecognizerConfig _config = new();
     private Process? _process;
     private Thread? _readThread;
+    private Thread? _errorReadThread;
     private bool _isRunning;
     private readonly StringBuilder _currentLine = new();
     private readonly object _lockObject = new();
+    private StreamWriter? _logWriter;
 
     public IPluginConfigEditor CreateConfigEditor() => new CommandRecognizerConfigEditor();
 
@@ -86,6 +89,28 @@ public class CommandRecognizer : IRecognizer
         {
             _isRunning = true;
 
+            // 打开日志文件（如果配置了）
+            if (!string.IsNullOrWhiteSpace(_config.LogFile))
+            {
+                try
+                {
+                    var logDir = Path.GetDirectoryName(_config.LogFile);
+                    if (!string.IsNullOrEmpty(logDir) && !Directory.Exists(logDir))
+                    {
+                        Directory.CreateDirectory(logDir);
+                    }
+                    _logWriter = new StreamWriter(_config.LogFile, append: true, Encoding.UTF8)
+                    {
+                        AutoFlush = true
+                    };
+                }
+                catch (Exception ex)
+                {
+                    // 日志文件打开失败不影响主功能
+                    System.Diagnostics.Debug.WriteLine($"无法打开日志文件: {ex.Message}");
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = _config.Command,
@@ -106,12 +131,22 @@ public class CommandRecognizer : IRecognizer
             _process = new Process { StartInfo = startInfo };
             _process.Start();
 
-            // 启动读取线程
+            // 启动标准输出读取线程
             _readThread = new Thread(ReadOutputLoop)
             {
                 IsBackground = true
             };
             _readThread.Start();
+
+            // 启动标准错误读取线程（如果配置了日志文件）
+            if (_logWriter != null)
+            {
+                _errorReadThread = new Thread(ReadErrorLoop)
+                {
+                    IsBackground = true
+                };
+                _errorReadThread.Start();
+            }
         }
         catch (Exception ex)
         {
@@ -138,6 +173,12 @@ public class CommandRecognizer : IRecognizer
 
         _readThread?.Join(1000);
         _readThread = null;
+
+        _errorReadThread?.Join(1000);
+        _errorReadThread = null;
+
+        _logWriter?.Dispose();
+        _logWriter = null;
 
         lock (_lockObject)
         {
@@ -199,6 +240,29 @@ public class CommandRecognizer : IRecognizer
             {
                 ExceptionOccured?.Invoke(this, ex);
             }
+        }
+    }
+
+    private void ReadErrorLoop()
+    {
+        try
+        {
+            if (_process?.StandardError == null || _logWriter == null) return;
+
+            var buffer = new char[256];
+            while (_isRunning && !_process.HasExited)
+            {
+                var readCount = _process.StandardError.Read(buffer, 0, buffer.Length);
+                if (readCount <= 0) continue;
+
+                var text = new string(buffer, 0, readCount);
+                _logWriter.Write(text);
+            }
+        }
+        catch (Exception ex)
+        {
+            // stderr 读取失败不影响主功能
+            System.Diagnostics.Debug.WriteLine($"stderr 读取失败: {ex.Message}");
         }
     }
 }
