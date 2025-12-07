@@ -19,31 +19,31 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
         _values["LogFile"] = "";
 
         _formItems.Add(new PluginConfigFormItemFile
-        {
-            Key = "Command",
-            Name = "命令路径",
-            Type = PluginConfigFormItemFileType.File
-        });
+        (
+            Key: "Command",
+            Name: "命令路径",
+            Type: PluginConfigFormItemFileType.File
+        ));
 
         _formItems.Add(new PluginConfigFormItemText
-        {
-            Key = "Arguments",
-            Name = "命令参数"
-        });
+        (
+            Key: "Arguments",
+            Name: "命令参数"
+        ));
 
         _formItems.Add(new PluginConfigFormItemFile
-        {
-            Key = "WorkingDirectory",
-            Name = "工作目录",
-            Type = PluginConfigFormItemFileType.Folder
-        });
+        (
+            Key: "WorkingDirectory",
+            Name: "工作目录",
+            Type: PluginConfigFormItemFileType.Folder
+        ));
 
         _formItems.Add(new PluginConfigFormItemFile
-        {
-            Key = "LogFile",
-            Name = "日志文件（stderr输出）",
-            Type = PluginConfigFormItemFileType.File
-        });
+        (
+            Key: "LogFile",
+            Name: "日志文件（stderr输出）",
+            Type: PluginConfigFormItemFileType.File
+        ));
     }
 
     public IReadOnlyList<PluginConfigFormItem> GetFormItems()
