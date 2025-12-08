@@ -1,0 +1,11 @@
+{
+    "id": "TMSpeech.Recognizer.SherpaNcnn",
+    "version": 1,
+    "desc": "",
+    "displayVersion": "0.1",
+    "name": "SherpaNcnn Ê¶±ðÆ÷",
+    "apiLevel": 1,
+    "assemblies": [
+        "TMSpeech.Recognizer.SherpaNcnn.dll"
+    ]
+}
