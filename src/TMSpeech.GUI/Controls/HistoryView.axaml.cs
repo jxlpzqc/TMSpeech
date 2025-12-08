@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
@@ -17,6 +18,26 @@ public partial class HistoryView : UserControl
     public HistoryView()
     {
         InitializeComponent();
+        CopyCommand = new RelayCommand(_ => Copy());
+        SelectAllCommand = new RelayCommand(_ => SelectAll());
+    }
+
+    public static readonly StyledProperty<ICommand> CopyCommandProperty =
+        AvaloniaProperty.Register<HistoryView, ICommand>(nameof(CopyCommand));
+
+    public ICommand CopyCommand
+    {
+        get => GetValue(CopyCommandProperty);
+        set => SetValue(CopyCommandProperty, value);
+    }
+
+    public static readonly StyledProperty<ICommand> SelectAllCommandProperty =
+        AvaloniaProperty.Register<HistoryView, ICommand>(nameof(SelectAllCommand));
+
+    public ICommand SelectAllCommand
+    {
+        get => GetValue(SelectAllCommandProperty);
+        set => SetValue(SelectAllCommandProperty, value);
     }
 
     public static readonly StyledProperty<IEnumerable<TextInfo>> ItemsSourceProperty =
@@ -160,7 +181,8 @@ public partial class HistoryView : UserControl
             if (textblock.Text == null) continue;
             var start = i == less.Item1 ? less.Item2 : 0;
             var end = i == greater.Item1 ? greater.Item2 : textblock.Text.Length;
-            copyText += textblock.Text.Substring(start, end - start) + "\n";
+            copyText += textblock.Text.Substring(start, end - start);
+            if (i < greater.Item1) copyText += "\n";
         }
 
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
@@ -183,4 +205,24 @@ public partial class HistoryView : UserControl
     {
         SelectAll();
     }
+}
+
+internal class RelayCommand : ICommand
+{
+    private readonly Action<object?> _execute;
+    private readonly Func<object?, bool>? _canExecute;
+
+    public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
+
+    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+
+    public void Execute(object? parameter) => _execute(parameter);
+
+    public event EventHandler? CanExecuteChanged;
+
+    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

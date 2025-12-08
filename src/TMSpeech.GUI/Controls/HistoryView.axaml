@@ -4,12 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              Name="view"
+             Focusable="True"
              x:Class="TMSpeech.GUI.Controls.HistoryView">
+  <UserControl.KeyBindings>
+    <KeyBinding Gesture="Ctrl+C" Command="{Binding #view.CopyCommand}" />
+    <KeyBinding Gesture="Ctrl+A" Command="{Binding #view.SelectAllCommand}" />
+  </UserControl.KeyBindings>
   <ItemsControl ItemsSource="{Binding #view.ItemsSource}" Name="list">
     <ItemsControl.ContextMenu>
       <ContextMenu>
-        <MenuItem Header="复制" Click="Copy_OnClick" HotKey="Ctrl+C"></MenuItem>
-        <MenuItem Header="全选" Click="SelectAll_OnClick" HotKey="Ctrl+A"></MenuItem>
+        <MenuItem Header="复制" Click="Copy_OnClick"></MenuItem>
+        <MenuItem Header="全选" Click="SelectAll_OnClick"></MenuItem>
       </ContextMenu>
     </ItemsControl.ContextMenu>
     <ItemsControl.ItemTemplate>
