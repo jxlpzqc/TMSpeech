@@ -157,8 +157,10 @@ public partial class HistoryView : UserControl
             if (list.ContainerFromIndex(i) is not ContentPresenter cp) continue;
             if (cp.Child is not DockPanel dockPanel) continue;
             if (dockPanel.Children[1] is not SelectableTextBlock textblock) continue;
-            copyText += textblock.Text.Substring(i == less.Item1 ? less.Item2 : 0,
-                i == greater.Item1 ? greater.Item2 : textblock.Text.Length) + "\n";
+            if (textblock.Text == null) continue;
+            var start = i == less.Item1 ? less.Item2 : 0;
+            var end = i == greater.Item1 ? greater.Item2 : textblock.Text.Length;
+            copyText += textblock.Text.Substring(start, end - start) + "\n";
         }
 
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
