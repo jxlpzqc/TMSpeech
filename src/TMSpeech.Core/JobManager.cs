@@ -169,7 +169,7 @@ namespace TMSpeech.Core
             }
             catch (Exception ex)
             {
-                _recognizer.Stop();
+                _recognizer?.Stop();
                 NotificationManager.Instance.Notify($"语音源启动失败 {ex.Message}", "启动失败",
                     NotificationType.Error);
                 return;
@@ -209,7 +209,8 @@ namespace TMSpeech.Core
         {
             NotificationManager.Instance.Notify($"插件运行异常 ({e?.GetType().Module.Name})：{ex.Message}",
                 "插件异常", NotificationType.Error);
-            Stop();
+            // 只能在主线程stop。
+            // Stop();
         }
 
 
