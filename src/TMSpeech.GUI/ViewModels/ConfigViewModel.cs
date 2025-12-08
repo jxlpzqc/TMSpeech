@@ -63,6 +63,33 @@ namespace TMSpeech.GUI.ViewModels
             return ret;
         }
 
+        public static object? ChangeType(object? value, Type type)
+        {
+            // 特殊处理List<int>类型
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var elementType = type.GetGenericArguments()[0];
+                if (elementType == typeof(int))
+                {
+                    // 处理 List<int>
+                    if (value is System.Text.Json.JsonElement jsonElement)
+                    {
+                        var intList = new List<int>();
+                        foreach (var item in jsonElement.EnumerateArray())
+                        {
+                            intList.Add(item.GetInt32());
+                        }
+                        return intList;
+                    }
+                    else
+                    {
+                        throw new InvalidCastException($"Expected JsonElement for List<int> property!");
+                    }
+                }
+            }
+            return Convert.ChangeType(value, type);
+        }
+
         public virtual void Deserialize(IReadOnlyDictionary<string, object> dict)
         {
             this.GetType().GetProperties()
@@ -73,7 +100,15 @@ namespace TMSpeech.GUI.ViewModels
                     if (!dict.ContainsKey(PropertyToKey(p))) return;
                     var value = dict[PropertyToKey(p)];
                     var type = p.PropertyType;
-                    p.SetValue(this, Convert.ChangeType(value, type));
+
+                    try
+                    {
+                        p.SetValue(this, ChangeType(value, type));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"属性 {p.Name} 转换失败: {ex.Message}");
+                    }
                 });
         }
 
