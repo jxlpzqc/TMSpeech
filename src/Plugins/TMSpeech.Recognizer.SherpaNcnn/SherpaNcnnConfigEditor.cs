@@ -103,7 +103,7 @@ namespace TMSpeech.Recognizer.SherpaNcnn
             var task = Core.Services.Resource.ResourceManagerFactory.Instance.GetLocalModuleInfos();
             task.Wait();
             var models = task.Result
-                .Where(u => u.Type == Core.Services.Resource.ModuleInfoTypeEnums.SherpaNcnnModel); // 假设定义了这个枚举值
+                .Where(u => u.Type == Core.Services.Resource.ModuleInfoTypeEnums.SherpaNcnnModel);
 
             var options = new Dictionary<object, string>
             {
