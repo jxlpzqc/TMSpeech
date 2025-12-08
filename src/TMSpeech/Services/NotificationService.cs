@@ -8,6 +8,7 @@ using DesktopNotifications;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using TMSpeech.GUI.Desktop;
+using Avalonia.Threading;
 
 namespace TMSpeech.Services;
 
@@ -16,10 +17,13 @@ public class NotificationService : INotificationService
     public void Notify(string content, string? title, NotificationType type = NotificationType.Info)
     {
         var _notification = Program.NotificationManager;
-        if (_notification == null)
+        if (_notification == null || type >= NotificationType.Error)
         {
             // macos not supported 
-            MessageBoxManager.GetMessageBoxStandard(title, content).ShowAsync();
+            Dispatcher.UIThread.Post(async () =>
+            {
+                await MessageBoxManager.GetMessageBoxStandard(title, content).ShowAsync();
+            });
             return;
         }
 

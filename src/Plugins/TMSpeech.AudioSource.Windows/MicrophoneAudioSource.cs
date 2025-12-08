@@ -42,32 +42,71 @@ public class MicrophoneAudioSource : IAudioSource
 
     public void Start()
     {
-        var enumerator = new MMDeviceEnumerator();
-        var device = enumerator.GetDevice(_deviceID);
-        if (device == null)
+        try
         {
-            device = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            var enumerator = new MMDeviceEnumerator();
+            var device = enumerator.GetDevice(_deviceID);
+            if (device == null)
+            {
+                device = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            }
+
+            _waveIn = new WasapiCapture(device)
+            {
+                WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1)
+            };
+            _waveIn.DataAvailable += (sender, data) =>
+            {
+                try
+                {
+                    DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
+                }
+                catch (Exception ex)
+                {
+                    ExceptionOccured?.Invoke(this, new Exception("音频数据处理失败", ex));
+                }
+            };
+            _waveIn.RecordingStopped += (sender, args) =>
+            {
+                if (args.Exception != null)
+                {
+                    ExceptionOccured?.Invoke(this, new Exception("录音停止异常", args.Exception));
+                }
+            };
+            _waveIn.StartRecording();
+
+            StatusChanged?.Invoke(this, SourceStatus.Ready);
         }
-
-        _waveIn = new WasapiCapture(device)
+        catch (Exception ex)
         {
-            WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1)
-        };
-        _waveIn.DataAvailable += (sender, data) =>
-        {
-            DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
-        };
-        _waveIn.StartRecording();
-
-        StatusChanged?.Invoke(this, SourceStatus.Ready);
+            ExceptionOccured?.Invoke(this, new Exception("启动麦克风失败", ex));
+            throw;
+        }
     }
 
     public void Stop()
     {
-        _waveIn?.StopRecording();
-        _waveIn?.Dispose();
-        _waveIn = null;
+        try
+        {
+            _waveIn?.StopRecording();
+        }
+        catch (Exception ex)
+        {
+            // 停止录音失败，记录但继续清理
+            System.Diagnostics.Debug.WriteLine($"停止录音失败: {ex.Message}");
+        }
 
+        try
+        {
+            _waveIn?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            // 资源释放失败，记录但继续
+            System.Diagnostics.Debug.WriteLine($"释放音频资源失败: {ex.Message}");
+        }
+
+        _waveIn = null;
         StatusChanged?.Invoke(this, SourceStatus.Unavailable);
     }
 

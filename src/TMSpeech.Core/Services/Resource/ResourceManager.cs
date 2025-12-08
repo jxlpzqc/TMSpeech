@@ -124,7 +124,39 @@ public class ResourceManager
     public async Task RemoveResource(Resource resource)
     {
         if (!resource.CanRemove || resource.LocalDir == null) return;
-        Directory.Delete(resource.LocalDir, true);
+
+        try
+        {
+            Directory.Delete(resource.LocalDir, true);
+            Notification.NotificationManager.Instance.Notify(
+                $"资源 {resource.Name} 已成功移除。",
+                "移除成功",
+                Notification.NotificationType.Info);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"移除资源失败：没有权限删除文件。资源: {resource.Name}",
+                "移除失败",
+                Notification.NotificationType.Error);
+            Debug.WriteLine($"UnauthorizedAccessException removing resource: {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"移除资源失败：文件被占用或无法访问。资源: {resource.Name}。错误: {ex.Message}",
+                "移除失败",
+                Notification.NotificationType.Error);
+            Debug.WriteLine($"IOException removing resource: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"移除资源时发生未知错误: {ex.Message}",
+                "移除失败",
+                Notification.NotificationType.Error);
+            Debug.WriteLine($"Exception removing resource: {ex.Message}");
+        }
     }
 
     private class MarketPlace
@@ -138,11 +170,50 @@ public class ResourceManager
 
     private async Task<IList<Resource>> GetRemoteResources()
     {
-        var client = new HttpClient();
-        var json = await client.GetStringAsync("https://chengzi.tech/TMSpeechCommunity/marketplace.json");
-        var marketPlace = JsonSerializer.Deserialize<MarketPlace>(json);
-        var modules = marketPlace?.Modules;
-        return modules?.Select(u => new Resource { RemoteInfo = u }).ToList() ?? new List<Resource>();
+        try
+        {
+            var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+            var json = await client.GetStringAsync("https://chengzi.tech/TMSpeechCommunity/marketplace.json");
+            var marketPlace = JsonSerializer.Deserialize<MarketPlace>(json);
+            var modules = marketPlace?.Modules;
+            return modules?.Select(u => new Resource { RemoteInfo = u }).ToList() ?? new List<Resource>();
+        }
+        catch (HttpRequestException ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"无法连接到资源服务器，请检查网络连接。错误: {ex.Message}",
+                "网络错误",
+                Notification.NotificationType.Warning);
+            Debug.WriteLine($"HttpRequestException in GetRemoteResources: {ex.Message}");
+            return new List<Resource>();
+        }
+        catch (TaskCanceledException)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                "连接资源服务器超时，请稍后重试。",
+                "连接超时",
+                Notification.NotificationType.Warning);
+            return new List<Resource>();
+        }
+        catch (JsonException ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"资源列表数据格式错误: \n{ex.Message}",
+                "数据解析错误",
+                Notification.NotificationType.Warning);
+            Debug.WriteLine($"JsonException in GetRemoteResources: {ex.Message}");
+            return new List<Resource>();
+        }
+        catch (Exception ex)
+        {
+            Notification.NotificationManager.Instance.Notify(
+                $"获取远程资源列表时发生错误: \n{ex.Message}",
+                "资源加载错误",
+                Notification.NotificationType.Warning);
+            Debug.WriteLine($"Exception in GetRemoteResources: {ex.Message}");
+            return new List<Resource>();
+        }
     }
 
     public async Task<IList<Resource>> GetAllResources()
