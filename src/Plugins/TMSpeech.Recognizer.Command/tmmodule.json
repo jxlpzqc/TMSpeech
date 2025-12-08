@@ -1,0 +1,13 @@
+{
+  "id": "TMSpeech.Recognizer.Command",
+  "version": 1,
+  "displayVersion": "1.0.0",
+  "name": "命令行识别器",
+  "desc": "通过自定义命令行程序获取识别结果",
+  "author": "Built-in",
+  "type": "plugin",
+  "apiLevel": 1,
+  "assemblies": [
+    "TMSpeech.Recognizer.Command.dll"
+  ]
+}

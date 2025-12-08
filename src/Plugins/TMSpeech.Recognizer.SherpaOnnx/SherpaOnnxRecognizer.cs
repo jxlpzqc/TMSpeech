@@ -54,13 +54,13 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             stream?.AcceptWaveform(config.FeatConfig.SampleRate, buffer.ToArray());
         }
 
-        private OnlineRecognizer recognizer;
+        private OnlineRecognizer? recognizer;
 
-        private OnlineStream stream;
+        private OnlineStream? stream;
 
         private bool stop = false;
 
-        private Thread thread;
+        private Thread? thread;
 
         private OnlineRecognizerConfig config;
 
@@ -161,6 +161,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 catch (Exception e)
                 {
                     Trace.TraceError("{0:HH:mm:ss.fff} Exception {1}", DateTime.Now, e);
+                    stop = true;
                     ExceptionOccured?.Invoke(this, e);
                 }
                 finally
@@ -168,7 +169,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                     stop = true;
                     thread = null;
                 }
-            });
+            })
+            {
+                IsBackground = true
+            };
             thread.Start();
         }
 
@@ -176,7 +180,10 @@ namespace TMSpeech.Recognizer.SherpaOnnx
         {
             stream?.InputFinished();
             stop = true;
-            thread?.Join();
+            if (thread != null && !thread.Equals(Thread.CurrentThread))
+            {
+                thread.Join();
+            }
 
             stream?.Dispose();
             recognizer?.Dispose();

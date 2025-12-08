@@ -25,9 +25,16 @@ public class TrayMenu : NativeMenu
                 { Header = "解锁字幕", Command = ReactiveCommand.Create(UnlockCaption) });
         }
 
+        this.Items.Add(new NativeMenuItem { Header = "重置窗口位置", Command = ReactiveCommand.Create(ResetWindowLocation) });
         this.Items.Add(new NativeMenuItem { Header = "退出", Command = ReactiveCommand.Create(Exit) });
     }
 
+    private void ResetWindowLocation()
+    {
+        ConfigManagerFactory.Instance.DeleteAndApply<List<int>>(GeneralConfigTypes.MainWindowLocation);
+        _mainWindow = (App.Current as App).MainWindow;
+        _mainWindow.Position = new(100, 100);
+    }
 
     private void Exit()
     {

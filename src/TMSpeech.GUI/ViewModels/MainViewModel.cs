@@ -183,6 +183,37 @@ public class MainViewModel : ViewModelBase
             async () => { await Task.Run(() => { _jobManager.Stop(); }); },
             this.WhenAnyValue(x => x.StopButtonVisible));
 
+        // Subscribe to exceptions with proper UI notifications
+        this.PlayCommand.ThrownExceptions.Subscribe(async ex =>
+        {
+            await MessageBoxManager.GetMessageBoxStandard(
+                "启动失败",
+                $"无法启动语音识别。\n\n错误详情：{ex.Message}\n\n请检查音频设备和识别器配置。",
+                ButtonEnum.Ok,
+                Icon.Error
+            ).ShowAsync();
+        });
+
+        this.PauseCommand.ThrownExceptions.Subscribe(async ex =>
+        {
+            await MessageBoxManager.GetMessageBoxStandard(
+                "暂停失败",
+                $"无法暂停语音识别。\n\n错误详情：{ex.Message}",
+                ButtonEnum.Ok,
+                Icon.Warning
+            ).ShowAsync();
+        });
+
+        this.StopCommand.ThrownExceptions.Subscribe(async ex =>
+        {
+            await MessageBoxManager.GetMessageBoxStandard(
+                "停止失败",
+                $"无法停止语音识别。\n\n错误详情：{ex.Message}",
+                ButtonEnum.Ok,
+                Icon.Warning
+            ).ShowAsync();
+        });
+
         Observable.FromEventPattern<long>(x => _jobManager.RunningSecondsChanged += x,
                 x => _jobManager.RunningSecondsChanged -= x)
             .Select(x => x.EventArgs)
@@ -192,13 +223,11 @@ public class MainViewModel : ViewModelBase
             .Select(x => string.Format("{0:D2}:{1:D2}:{2:D2}", x / 60 / 60, (x / 60) % 60, x % 60))
             .ToPropertyEx(this, x => x.RunningTimeDisplay);
 
+        // Keep only valid text in the caption stream (no error messages)
         Observable.FromEventPattern<SpeechEventArgs>(
                 p => _jobManager.TextChanged += p,
                 p => _jobManager.TextChanged -= p)
             .Select(x => x.EventArgs.Text.Text)
-            .Merge(this.PlayCommand.ThrownExceptions.Select(e => $"启动失败！{e.Message}"))
-            .Merge(this.PauseCommand.ThrownExceptions.Select(e => $"暂停失败！{e.Message}"))
-            .Merge(this.StopCommand.ThrownExceptions.Select(e => $"停止失败！{e.Message}"))
             .Merge(Observable.Return("欢迎使用TMSpeech"))
             .ToPropertyEx(this, x => x.Text);
 

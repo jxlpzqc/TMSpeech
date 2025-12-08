@@ -181,13 +181,40 @@ class LocalConfigManagerImpl : ConfigManager
 
     protected override void Save()
     {
-        if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
-        var text = JsonSerializer.Serialize(_config, new JsonSerializerOptions
+        try
         {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = true
-        });
-        File.WriteAllText(ConfigFile, text);
+            if (!Directory.Exists(_userDataDir)) Directory.CreateDirectory(_userDataDir);
+            var text = JsonSerializer.Serialize(_config, new JsonSerializerOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            });
+            File.WriteAllText(ConfigFile, text);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Services.Notification.NotificationManager.Instance.Notify(
+                $"保存配置失败：没有权限访问配置文件。请检查文件权限。",
+                "配置保存失败",
+                Services.Notification.NotificationType.Error);
+            System.Diagnostics.Debug.WriteLine($"UnauthorizedAccessException saving config: {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            Services.Notification.NotificationManager.Instance.Notify(
+                $"保存配置失败：{ex.Message}。可能是磁盘空间不足或文件被占用。",
+                "配置保存失败",
+                Services.Notification.NotificationType.Error);
+            System.Diagnostics.Debug.WriteLine($"IOException saving config: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Services.Notification.NotificationManager.Instance.Notify(
+                $"保存配置时发生未知错误: \n{ex.Message}",
+                "配置保存失败",
+                Services.Notification.NotificationType.Error);
+            System.Diagnostics.Debug.WriteLine($"Exception saving config: {ex.Message}");
+        }
     }
 }
 

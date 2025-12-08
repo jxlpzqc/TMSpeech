@@ -55,21 +55,59 @@ namespace TMSpeech.AudioSource.Windows
 
         public void Start()
         {
-            capture = new WasapiLoopbackCapture();
-            capture.WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1);
-            capture.DataAvailable += (sender, data) =>
+            try
             {
-                DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
-            };
+                capture = new WasapiLoopbackCapture();
+                capture.WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1);
+                capture.DataAvailable += (sender, data) =>
+                {
+                    try
+                    {
+                        DataAvailable?.Invoke(sender, data.Buffer[..data.BytesRecorded]);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionOccured?.Invoke(this, new Exception("音频数据处理失败", ex));
+                    }
+                };
+                capture.RecordingStopped += (sender, args) =>
+                {
+                    if (args.Exception != null)
+                    {
+                        ExceptionOccured?.Invoke(this, new Exception("录音停止异常", args.Exception));
+                    }
+                };
 
-            capture.StartRecording();
-            StatusChanged?.Invoke(this, SourceStatus.Ready);
+                capture.StartRecording();
+                StatusChanged?.Invoke(this, SourceStatus.Ready);
+            }
+            catch (Exception ex)
+            {
+                ExceptionOccured?.Invoke(this, new Exception("启动系统内录失败", ex));
+                throw;
+            }
         }
 
         public void Stop()
         {
-            capture.StopRecording();
-            capture.Dispose();
+            try
+            {
+                capture?.StopRecording();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"停止录音失败: {ex.Message}");
+            }
+
+            try
+            {
+                capture?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"释放音频资源失败: {ex.Message}");
+            }
+
             capture = null;
             StatusChanged?.Invoke(this, SourceStatus.Unavailable);
         }

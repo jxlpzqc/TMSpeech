@@ -12,6 +12,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using ReactiveUI;
 using TMSpeech.Core;
 using TMSpeech.GUI.ViewModels;
@@ -47,17 +49,29 @@ public partial class App : Application
             _mainWindow = new MainWindow();
             desktop.MainWindow = _mainWindow;
 
-            // TODO better solution?
-            var savedLocationObj = ConfigManagerFactory.Instance.Get<JsonElement>(GeneralConfigTypes.MainWindowLocation);
-            if (savedLocationObj.ValueKind == JsonValueKind.Array)
+            try
             {
-                var savedLocation = savedLocationObj.Deserialize<int[]>();
-                if (savedLocation != null && savedLocation.Length == 4)
+                var savedLocationObj = ConfigManagerFactory.Instance.Get<JsonElement>(GeneralConfigTypes.MainWindowLocation);
+                if (savedLocationObj.ValueKind == JsonValueKind.Array)
                 {
-                    _mainWindow.Width = savedLocation[2];
-                    _mainWindow.Height = savedLocation[3];
-                    _mainWindow.Position = new(savedLocation[0], savedLocation[1]);
+                    var savedLocation = savedLocationObj.Deserialize<int[]>();
+                    if (savedLocation != null && savedLocation.Length == 4)
+                    {
+                        // Validate values
+                        if (savedLocation[2] > 0 && savedLocation[3] > 0)
+                        {
+                            _mainWindow.Width = savedLocation[2];
+                            _mainWindow.Height = savedLocation[3];
+                            _mainWindow.Position = new(savedLocation[0], savedLocation[1]);
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // Silently fall back to default window position - no need to notify user
+                // This is a minor issue that doesn't affect functionality
+                System.Diagnostics.Debug.WriteLine($"Failed to restore window position: {ex.Message}");
             }
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
@@ -70,12 +84,42 @@ public partial class App : Application
 
         if (!Design.IsDesignMode)
         {
-            Core.Plugins.PluginManagerFactory.GetInstance().LoadPlugins();
+            try
+            {
+                Core.Plugins.PluginManagerFactory.GetInstance().LoadPlugins();
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    await MessageBoxManager.GetMessageBoxStandard(
+                        "插件加载失败",
+                        $"无法加载插件，应用程序可能无法正常工作。\n\n错误详情：{ex.Message}",
+                        ButtonEnum.Ok,
+                        Icon.Error
+                    ).ShowAsync();
+                });
+            }
 
             // Run recognizer if config is set.
-            if (ConfigManagerFactory.Instance.Get<bool>(GeneralConfigTypes.StartOnLaunch))
+            try
             {
-                Dispatcher.UIThread.Post(() => { _mainWindow.ViewModel.PlayCommand.Execute(); });
+                if (ConfigManagerFactory.Instance.Get<bool>(GeneralConfigTypes.StartOnLaunch))
+                {
+                    Dispatcher.UIThread.Post(() => { _mainWindow.ViewModel.PlayCommand.Execute(); });
+                }
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    await MessageBoxManager.GetMessageBoxStandard(
+                        "自动启动失败",
+                        $"无法自动启动识别器。\n\n错误详情：{ex.Message}",
+                        ButtonEnum.Ok,
+                        Icon.Warning
+                    ).ShowAsync();
+                });
             }
         }
     }

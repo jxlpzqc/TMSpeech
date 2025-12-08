@@ -116,7 +116,20 @@ namespace TMSpeech.Core
             // Save the sentense to log
             if (logFile != null && logFile.Length > 0)
             {
-                File.AppendAllText(logFile, string.Format("{0:T}: {1}\n", DateTime.Now, args.Text.Text));
+                try
+                {
+                    File.AppendAllText(logFile, string.Format("{0:T}: {1}\n", DateTime.Now, args.Text.Text));
+                }
+                catch (Exception ex)
+                {
+                    NotificationManager.Instance.Notify(
+                        $"写入识别日志失败: {ex.Message}",
+                        "日志写入错误",
+                        NotificationType.Warning);
+                    System.Diagnostics.Debug.WriteLine($"Failed to write recognition log: {ex.Message}");
+                    // 清空 logFile 避免重复通知
+                    logFile = "";
+                }
             }
 
             _disableInThisSentence = false;
@@ -158,7 +171,7 @@ namespace TMSpeech.Core
             }
             catch (Exception ex)
             {
-                NotificationManager.Instance.Notify($"识别器启动失败：{ex.Message}", "启动失败",
+                NotificationManager.Instance.Notify($"识别器启动失败：\n{ex.Message}", "启动失败",
                     NotificationType.Error);
                 return;
             }
@@ -169,8 +182,8 @@ namespace TMSpeech.Core
             }
             catch (Exception ex)
             {
-                _recognizer.Stop();
-                NotificationManager.Instance.Notify($"语音源启动失败 {ex.Message}", "启动失败",
+                _recognizer?.Stop();
+                NotificationManager.Instance.Notify($"语音源启动失败：\n{ex.Message}", "启动失败",
                     NotificationType.Error);
                 return;
             }
@@ -207,9 +220,10 @@ namespace TMSpeech.Core
 
         private void OnPluginRunningExceptionOccurs(object? e, Exception ex)
         {
-            NotificationManager.Instance.Notify($"插件运行异常 ({e?.GetType().Module.Name})：{ex.Message}",
+            NotificationManager.Instance.Notify($"插件运行异常:\n ({e?.GetType().Module.Name})：{ex.Message}",
                 "插件异常", NotificationType.Error);
-            Stop();
+            // 只能在主线程stop。
+            // Stop();
         }
 
 
@@ -228,7 +242,7 @@ namespace TMSpeech.Core
             }
             catch (Exception ex)
             {
-                NotificationManager.Instance.Notify($"停止失败：{ex.Message}", "停止失败", NotificationType.Fatal);
+                NotificationManager.Instance.Notify($"停止失败：\n{ex.Message}", "停止失败", NotificationType.Fatal);
                 // TODO: exit or recover ?
                 return;
             }
