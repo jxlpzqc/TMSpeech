@@ -236,19 +236,53 @@ UI 自动刷新
 [UI 更新]
 ```
 
-## 技术栈总结
 
-| 层次 | 技术 | 用途 |
-|------|------|------|
-| UI 框架 | Avalonia 11 | 跨平台桌面应用界面 |
-| MVVM | ReactiveUI | 响应式编程和数据绑定 |
-| 音频采集 | NAudio (WASAPI) | Windows 音频捕获 |
-| 语音识别 | sherpa-onnx | 离线语音识别引擎 |
-| 插件系统 | AssemblyLoadContext | 动态程序集加载和隔离 |
-| 配置管理 | System.Text.Json | JSON 序列化/反序列化 |
-| 资源下载 | Downloader | 异步文件下载 |
-| 压缩解压 | SharpCompress | 处理插件/模型压缩包 |
-| 构建优化 | NetBeauty | 整理发布目录结构 |
+### 数据流向
+
+```
+音频设备 → IAudioSource.DataAvailable
+          → JobManager.OnAudioSourceOnDataAvailable
+          → IRecognizer.Feed()
+          → IRecognizer.TextChanged/SentenceDone
+          → JobManager → MainViewModel
+          → CaptionView/HistoryView
+```
+
+### 配置管理流程
+
+```
+DefaultConfig.GenerateConfig()
+→ ConfigManagerFactory.Init()
+→ LocalConfigManagerImpl.Load()
+→ ConfigViewModel (各 Section ViewModel)
+→ PluginConfigView (动态表单)
+→ ConfigManager.Apply()
+→ Save to JSON
+```
+
+### 插件加载流程
+
+```
+App.OnFrameworkInitializationCompleted()
+→ PluginManager.LoadPlugins()
+→ 扫描 plugins 目录
+→ 读取 tmmodule.json
+→ 使用 AssemblyLoadContext 加载 dll
+→ 实例化插件并调用 Init()
+→ 注册到 AudioSources/Recognizers/Translators
+```
+
+### 资源管理流程
+
+```
+ResourceManager.GetAllResources()
+→ 扫描本地已安装资源 (tmmodule.json)
+→ 从远程获取资源列表 (GitHub API)
+→ DownloadManager.StartJob()
+→ DoDownload() 下载文件
+→ DoExtract() 解压缩
+→ DoWriteFile() 写入 tmmodule.json
+```
 
 ## 扩展开发指南
 
