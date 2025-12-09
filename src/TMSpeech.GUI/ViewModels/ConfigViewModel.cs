@@ -302,7 +302,6 @@ namespace TMSpeech.GUI.ViewModels
         public IPluginConfigEditor? ConfigEditor { get; }
 
         [Reactive]
-        [ConfigJsonValue]
         public string PluginConfig { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
@@ -321,10 +320,8 @@ namespace TMSpeech.GUI.ViewModels
             {
                 { "audio.source", AudioSource },
             };
-            if (!string.IsNullOrEmpty(AudioSource))
-            {
-                ret.Add($"plugin.{AudioSource}.config", PluginConfig);
-            }
+            // 不在此处保存插件配置，由 PluginConfig 属性变化时单独触发保存
+            // 避免 AudioSource 切换时，将旧配置保存到新音频源的配置键
 
             return ret;
         }
@@ -375,6 +372,20 @@ namespace TMSpeech.GUI.ViewModels
                             AudioSourceConfigTypes.GetPluginConfigKey(AudioSource));
                     PluginConfig = config;
                 });
+
+            // 监听 PluginConfig 变化，手动保存到正确的配置键
+            this.WhenAnyValue(x => x.PluginConfig)
+                .Skip(1) // 跳过初始值
+                .Subscribe(config =>
+                {
+                    if (!string.IsNullOrEmpty(AudioSource))
+                    {
+                        ConfigManagerFactory.Instance.Apply(
+                            AudioSourceConfigTypes.GetPluginConfigKey(AudioSource),
+                            config
+                        );
+                    }
+                });
         }
     }
 
@@ -394,7 +405,6 @@ namespace TMSpeech.GUI.ViewModels
         public IPluginConfigEditor? ConfigEditor { get; }
 
         [Reactive]
-        [ConfigJsonValue]
         public string PluginConfig { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
@@ -413,10 +423,8 @@ namespace TMSpeech.GUI.ViewModels
             {
                 { RecognizerConfigTypes.Recognizer, Recognizer },
             };
-            if (!string.IsNullOrEmpty(Recognizer))
-            {
-                ret.Add(RecognizerConfigTypes.GetPluginConfigKey(Recognizer), PluginConfig);
-            }
+            // 不在此处保存插件配置，由 PluginConfig 属性变化时单独触发保存
+            // 避免 Recognizer 切换时，将旧配置保存到新识别器的配置键
 
             return ret;
         }
@@ -464,6 +472,20 @@ namespace TMSpeech.GUI.ViewModels
                     var config = ConfigManagerFactory.Instance.Get<string>(
                         RecognizerConfigTypes.GetPluginConfigKey(Recognizer));
                     PluginConfig = config;
+                });
+
+            // 监听 PluginConfig 变化，手动保存到正确的配置键
+            this.WhenAnyValue(x => x.PluginConfig)
+                .Skip(1) // 跳过初始值
+                .Subscribe(config =>
+                {
+                    if (!string.IsNullOrEmpty(Recognizer))
+                    {
+                        ConfigManagerFactory.Instance.Apply(
+                            RecognizerConfigTypes.GetPluginConfigKey(Recognizer),
+                            config
+                        );
+                    }
                 });
         }
     }
