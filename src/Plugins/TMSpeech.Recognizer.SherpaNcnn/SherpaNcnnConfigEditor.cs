@@ -21,25 +21,25 @@ namespace TMSpeech.Recognizer.SherpaNcnn
         public string Model { get; set; } = "";
 
         [JsonPropertyName("encoder_param")]
-        public string EncoderParam { get; set; } = "models\\encoder.param";
+        public string EncoderParam { get; set; } = "ncnn-model\\encoder.param";
 
         [JsonPropertyName("encoder_bin")]
-        public string EncoderBin { get; set; } = "models\\encoder.bin";
+        public string EncoderBin { get; set; } = "ncnn-model\\encoder.bin";
 
         [JsonPropertyName("decoder_param")]
-        public string DecoderParam { get; set; } = "models\\decoder.param";
+        public string DecoderParam { get; set; } = "ncnn-model\\decoder.param";
 
         [JsonPropertyName("decoder_bin")]
-        public string DecoderBin { get; set; } = "models\\decoder.bin";
+        public string DecoderBin { get; set; } = "ncnn-model\\decoder.bin";
 
         [JsonPropertyName("joiner_param")]
-        public string JoinerParam { get; set; } = "models\\joiner.param";
+        public string JoinerParam { get; set; } = "ncnn-model\\joiner.param";
 
         [JsonPropertyName("joiner_bin")]
-        public string JoinerBin { get; set; } = "models\\joiner.bin";
+        public string JoinerBin { get; set; } = "ncnn-model\\joiner.bin";
 
         [JsonPropertyName("tokens")]
-        public string Tokens { get; set; } = "models\\tokens.txt";
+        public string Tokens { get; set; } = "ncnn-model\\tokens.txt";
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ namespace TMSpeech.Recognizer.SherpaNcnn
     {
         public string GUID => "94C23641-CBE0-42B6-9654-82DA42D519F3";
         public string Name => "Sherpa-Ncnn离线识别器";
-        public string Description => "基于ncnn的识别器";
+        public string Description => "可以调用GPU的识别器";
         public string Version => "0.0.1";
         public string SupportVersion => "any";
         public string Author => "Built-in";
