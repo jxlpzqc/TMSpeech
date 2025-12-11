@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -198,15 +199,13 @@ public class CommandRecognizer : IRecognizer
         try
         {
             if (_process?.StandardOutput == null) return;
+            Debug.WriteLine($"启动外部命令进行识别，PID: {_process.Id}");
 
-            var buffer = new char[1];
             long newlineCount = 0;
-            while (_isRunning && _process.StandardOutput.Peek() > -1)
+            while (_isRunning && !_process.StandardOutput.EndOfStream)
             {
-                var readCount = _process.StandardOutput.Read(buffer, 0, 1);
-                if (readCount <= 0) continue;
-
-                var ch = buffer[0];
+                var ch = _process.StandardOutput.Read();
+                if (ch < 0) break;
 
                 lock (_lockObject)
                 {
@@ -245,7 +244,7 @@ public class CommandRecognizer : IRecognizer
                     {
                         newlineCount = 0;
                         // 普通字符，追加到当前行
-                        _currentLine.Append(ch);
+                        _currentLine.Append((char)ch);
                     }
                 }
             }
@@ -289,7 +288,7 @@ public class CommandRecognizer : IRecognizer
         catch (Exception ex)
         {
             // stderr 读取失败不影响主功能
-            System.Diagnostics.Debug.WriteLine($"stderr 读取失败: {ex.Message}");
+            Debug.WriteLine($"stderr 读取失败: {ex.Message}");
         }
     }
 }

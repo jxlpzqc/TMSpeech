@@ -77,7 +77,9 @@ namespace TMSpeech.Core
             if (_audioSource != null)
             {
                 _audioSource.LoadConfig(config);
+                _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;
                 _audioSource.DataAvailable += OnAudioSourceOnDataAvailable;
+                _audioSource.ExceptionOccured -= OnPluginRunningExceptionOccurs;
                 _audioSource.ExceptionOccured += OnPluginRunningExceptionOccurs;
             }
         }
@@ -105,8 +107,13 @@ namespace TMSpeech.Core
             if (_recognizer != null)
             {
                 _recognizer.LoadConfig(config);
+                // https://stackoverflow.com/a/1104269
+                // use -= first to prevent duplication.
+                _recognizer.TextChanged -= OnRecognizerOnTextChanged;
                 _recognizer.TextChanged += OnRecognizerOnTextChanged;
+                _recognizer.SentenceDone -= OnRecognizerOnSentenceDone;
                 _recognizer.SentenceDone += OnRecognizerOnSentenceDone;
+                _recognizer.ExceptionOccured -= OnPluginRunningExceptionOccurs;
                 _recognizer.ExceptionOccured += OnPluginRunningExceptionOccurs;
             }
         }
@@ -256,8 +263,6 @@ namespace TMSpeech.Core
             catch (Exception ex)
             {
                 NotificationManager.Instance.Notify($"停止失败：\n{ex.Message}", "停止失败", NotificationType.Fatal);
-                // TODO: exit or recover ?
-                return;
             }
 
             _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;

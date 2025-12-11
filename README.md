@@ -87,7 +87,7 @@
 1. 单个换行结尾的行是临时结果，只有多个换行结尾的行才会被存储到历史记录中，这种方式允许模型在后面纠正前面的识别结果。
 1. 基于该方式需要子进程独立获取语音源。在设置中切换语音源将不会生效。
 1. 程序接受多个参数时，使用空格分割，如果参数本身包含空格，比如带有空格的路径，则可能会出现问题，需要通过双引号转义。详见[这里](https://stackoverflow.com/questions/15061854/how-to-pass-multiple-arguments-in-processstartinfo)和[这里](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.arguments?view=net-10.0)
-1. 程序指定为批处理脚本（'.bat'）时，记得前面加上@隐藏命令显示
+1. 程序指定为批处理脚本（'.bat'）时，记得前面加上@隐藏命令显示，同时不要在结尾加入`pause`这种命令（无法检测命令的退出）。
 
     ```bat
     @python ./speech-recognition-from-microphone-with-endpoint-detection.py
