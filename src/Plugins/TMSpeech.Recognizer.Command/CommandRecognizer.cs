@@ -17,7 +17,7 @@ public class CommandRecognizer : IRecognizer
 {
     public string GUID => "A1B2C3D4-5E6F-7890-ABCD-EF1234567890";
     public string Name => "命令行识别器";
-    public string Description => "通过自定义命令行程序获取识别结果，支持 \\r 更新临时结果，\\n 表示句子完成";
+    public string Description => "通过自定义命令行程序获取识别结果，单个\\n更新临时结果，多个\\n表示句子完成";
     public string Version => "1.0.0";
     public string SupportVersion => "any";
     public string Author => "Built-in";
@@ -36,9 +36,12 @@ public class CommandRecognizer : IRecognizer
     private Thread? _readThread;
     private Thread? _errorReadThread;
     private bool _isRunning;
+    private String _prevLine = "";
     private readonly StringBuilder _currentLine = new();
     private readonly object _lockObject = new();
     private StreamWriter? _logWriter;
+
+    public void clearCurrentLine() { _prevLine = _currentLine.ToString(); _currentLine.Clear(); }
 
     public IPluginConfigEditor CreateConfigEditor() => new CommandRecognizerConfigEditor();
 
@@ -77,12 +80,12 @@ public class CommandRecognizer : IRecognizer
     {
         if (_isRunning)
         {
-            throw new InvalidOperationException("识别器已在运行中");
+            throw new InvalidOperationException("外部命令识别器：已在运行中?");
         }
 
         if (string.IsNullOrWhiteSpace(_config.Command))
         {
-            throw new InvalidOperationException("未配置命令");
+            throw new InvalidOperationException("外部命令识别器：未配置命令");
         }
 
         try
@@ -108,6 +111,7 @@ public class CommandRecognizer : IRecognizer
                 {
                     // 日志文件打开失败不影响主功能
                     System.Diagnostics.Debug.WriteLine($"无法打开日志文件: {ex.Message}");
+                    ExceptionOccured?.Invoke(this, new InvalidOperationException("无法打开日志文件: {ex.Message}\n将不会保存日志！"));
                 }
             }
 
@@ -136,6 +140,7 @@ public class CommandRecognizer : IRecognizer
             {
                 IsBackground = true
             };
+            _readThread.Name = "CommandRecognizer-StdoutReader";
             _readThread.Start();
 
             // 启动标准错误读取线程（如果配置了日志文件）
@@ -145,13 +150,14 @@ public class CommandRecognizer : IRecognizer
                 {
                     IsBackground = true
                 };
+                _errorReadThread.Name = "CommandRecognizer-StderrReader";
                 _errorReadThread.Start();
             }
         }
         catch (Exception ex)
         {
             _isRunning = false;
-            throw new InvalidOperationException($"启动命令失败: {ex.Message}", ex);
+            throw new InvalidOperationException($"外部命令识别器：启动命令失败: {ex.Message}", ex);
         }
     }
 
@@ -182,6 +188,7 @@ public class CommandRecognizer : IRecognizer
 
         lock (_lockObject)
         {
+            _prevLine = "";
             _currentLine.Clear();
         }
     }
@@ -193,7 +200,8 @@ public class CommandRecognizer : IRecognizer
             if (_process?.StandardOutput == null) return;
 
             var buffer = new char[1];
-            while (_isRunning && !_process.HasExited)
+            long newlineCount = 0;
+            while (_isRunning && _process.StandardOutput.Peek() > -1)
             {
                 var readCount = _process.StandardOutput.Read(buffer, 0, 1);
                 if (readCount <= 0) continue;
@@ -204,30 +212,38 @@ public class CommandRecognizer : IRecognizer
                 {
                     if (ch == '\r')
                     {
-                        // \r 表示用当前行替换之前的临时结果
-                        var text = _currentLine.ToString();
-                        _currentLine.Clear();
-
-                        if (!string.IsNullOrEmpty(text))
-                        {
-                            var textInfo = new TextInfo(text);
-                            TextChanged?.Invoke(this, new SpeechEventArgs { Text = textInfo });
-                        }
+                        continue;
                     }
                     else if (ch == '\n')
                     {
-                        // \n 表示一句话完成
-                        var text = _currentLine.ToString();
-                        _currentLine.Clear();
-
-                        if (!string.IsNullOrEmpty(text))
+                        newlineCount += 1;
+                        if (newlineCount == 1)
                         {
-                            var textInfo = new TextInfo(text);
-                            SentenceDone?.Invoke(this, new SpeechEventArgs { Text = textInfo });
+                            // 单个换行，表示用当前行替换之前的临时结果
+                            var text = _currentLine.ToString();
+                            clearCurrentLine();
+
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                var textInfo = new TextInfo(text);
+                                TextChanged?.Invoke(this, new SpeechEventArgs { Text = textInfo });
+                            }
+                        }
+                        else if (newlineCount == 2)
+                        {
+                            // 多个换行，表示一句话完成
+                            var text = _prevLine.ToString();
+
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                var textInfo = new TextInfo(text);
+                                SentenceDone?.Invoke(this, new SpeechEventArgs { Text = textInfo });
+                            }
                         }
                     }
                     else
                     {
+                        newlineCount = 0;
                         // 普通字符，追加到当前行
                         _currentLine.Append(ch);
                     }
@@ -240,6 +256,17 @@ public class CommandRecognizer : IRecognizer
             {
                 ExceptionOccured?.Invoke(this, ex);
             }
+        }
+        // 非外部设置的退出：
+        if (_isRunning)
+        {
+            _isRunning = false;
+            var checkLogMessage = "请设置日志文件路径以获取stderr的输出，查看报错信息。";
+            if (!string.IsNullOrWhiteSpace(_config.LogFile))
+            {
+                checkLogMessage = $"请查看stderr日志文件：{_config.LogFile}";
+            }
+            ExceptionOccured?.Invoke(this, new InvalidOperationException($"外部命令识别器：命令异常退出！\n{checkLogMessage}"));
         }
     }
 

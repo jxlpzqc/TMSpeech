@@ -41,7 +41,7 @@ public class CommandRecognizerConfigEditor : IPluginConfigEditor
         _formItems.Add(new PluginConfigFormItemFile
         (
             Key: "LogFile",
-            Name: "日志文件（stderr输出）",
+            Name: "日志保存（stderr）",
             Type: PluginConfigFormItemFileType.File
         ));
     }

@@ -173,6 +173,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             {
                 IsBackground = true
             };
+            thread.Name = "SherpaOnnxRecognizer";
             thread.Start();
         }
 

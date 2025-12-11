@@ -166,6 +166,7 @@ namespace TMSpeech.Recognizer.SherpaNcnn
                 }
             });
             thread.IsBackground = true;
+            thread.Name = "SherpaNcnnRecognizer";
             thread.Start();
         }
 

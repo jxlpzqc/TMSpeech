@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"D:\\TMSpeech\\src\\Plugins\\TMSpeech.Recognizer.Command\\bin\\Debug\\net6.0\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(dir /B \"D:\\TMSpeech\\src\\TMSpeech\\bin\\Debug\\net6.0-windows10.0.17763.0\\plugins\")",
+      "Bash(dir /B \"D:\\TMSpeech\\src\\TMSpeech\\bin\\Debug\\net6.0-windows10.0.17763.0\\plugins\\TMSpeech.Recognizer.Command\")"
+    ]
+  }
+}

@@ -32,6 +32,68 @@
 
 在[Release](https://github.com/jxlpzqc/TMSpeech/releases)页面中下载最新的release解压，运行`TMSpeech.GUI.exe`即可。在桌面创建快捷方式，使用起来更加方便。
 
+## 基于自定义外部命令的识别
+
+在设置中选用“命令行识别器”。它基于程序和参数，启动子进程，并将标准输出（stdout）作为字幕格式识别，将标准错误输出（stderr）作为日志文件记录（都使用UTF-8编码）。
+
+使用单个换行（'\n'）更新当前句子，使用多个换行（'\n\n'）表示当前行识别结束，样例输出如下：
+
+```
+一二
+一二三四
+一二三四五六七
+
+七六
+七六五四
+七六五四三二一
+
+```
+
+参考python代码如下：
+
+```diff
++ class MyPrinter:
++     def __init__(self):
++         self.prev_result = ""
++ 
++     def do_print(self, result):
++         if result and self.prev_result != result:
++             self.prev_result = result
++             print(result, end='\n', flush=True)
++ 
++     def on_endpoint(self):
++         print("\n", end="", flush=True)
++ 
++     printer = MyPrinter()
+    with sd.InputStream(channels=1, dtype="float32", samplerate=sample_rate, device=device) as s:
+        while True:
+            samples, _ = s.read(samples_per_read)  # a blocking read
+            samples = samples.reshape(-1)
+            stream.accept_waveform(sample_rate, samples)
+            while recognizer.is_ready(stream):
+                recognizer.decode_stream(stream)
+            is_endpoint = recognizer.is_endpoint(stream)
+            result = recognizer.get_result(stream)
+
++           printer.do_print(result)
+            if is_endpoint:
++               if result:
++                   printer.on_endpoint()
+                recognizer.reset(stream)
+```
+
+注意事项：
+
+1. 单个换行结尾的行是临时结果，只有多个换行结尾的行才会被存储到历史记录中，这种方式允许模型在后面纠正前面的识别结果。
+1. 基于该方式需要子进程独立获取语音源。在设置中切换语音源将不会生效。
+1. 程序接受多个参数时，使用空格分割，如果参数本身包含空格，比如带有空格的路径，则可能会出现问题，需要通过双引号转义。详见[这里](https://stackoverflow.com/questions/15061854/how-to-pass-multiple-arguments-in-processstartinfo)和[这里](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.arguments?view=net-10.0)
+1. 程序指定为批处理脚本（'.bat'）时，记得前面加上@隐藏命令显示
+
+    ```bat
+    @python ./speech-recognition-from-microphone-with-endpoint-detection.py
+    ```
+
+
 ## 我们需要你的反馈
 
 觉得很有用？但是还有不完美的地方？欢迎点击这里[创建Discussion](https://github.com/jxlpzqc/TMSpeech/discussions/new)、提出反馈！

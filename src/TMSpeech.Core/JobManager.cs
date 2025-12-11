@@ -160,7 +160,7 @@ namespace TMSpeech.Core
             if (_audioSource == null || _recognizer == null)
             {
                 Status = JobStatus.Stopped;
-                NotificationManager.Instance.Notify("语音源或识别器初始化失败", "启动失败", NotificationType.Error);
+                NotificationManager.Instance.Notify("语音源或识别器初始化失败", "语音源或识别器为空！", NotificationType.Error);
                 return;
             }
 
@@ -169,9 +169,15 @@ namespace TMSpeech.Core
             {
                 _recognizer.Start();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 NotificationManager.Instance.Notify($"识别器启动失败：\n{ex.Message}", "启动失败",
+                    NotificationType.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                NotificationManager.Instance.Notify($"识别器启动失败：\n{ex.Message}\n{ex.StackTrace}", "启动失败",
                     NotificationType.Error);
                 return;
             }
@@ -180,10 +186,17 @@ namespace TMSpeech.Core
             {
                 _audioSource.Start();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 _recognizer?.Stop();
                 NotificationManager.Instance.Notify($"语音源启动失败：\n{ex.Message}", "启动失败",
+                    NotificationType.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                _recognizer?.Stop();
+                NotificationManager.Instance.Notify($"语音源启动失败：\n{ex.Message}\n{ex.StackTrace}", "启动失败",
                     NotificationType.Error);
                 return;
             }
