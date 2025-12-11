@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore -r ${{ matrix.runtime }} --locked-mode
       - name: Publish
-        run: dotnet publish -r ${{ matrix.runtime }} -c Release -o ./publish ./src/TMSpeech/TMSpeech.csproj
+        run: dotnet publish -r ${{ matrix.runtime }} -c Release -o ./publish --self-contained true ./src/TMSpeech/TMSpeech.csproj
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
