@@ -65,9 +65,9 @@
       <Button IsVisible="{Binding PlayButtonVisible}" Command="{Binding PlayCommand}">
         <PathIcon Data="{StaticResource play_regular}"></PathIcon>
       </Button>
-      <Button IsVisible="{Binding PauseButtonVisible}" Command="{Binding PauseCommand}">
+      <!-- <Button IsVisible="{Binding PauseButtonVisible}" Command="{Binding PauseCommand}">
         <PathIcon Data="{StaticResource pause_regular}"></PathIcon>
-      </Button>
+      </Button> -->
       <Button IsVisible="{Binding StopButtonVisible}" Command="{Binding StopCommand}">
         <PathIcon Data="{StaticResource stop_regular}"></PathIcon>
       </Button>
