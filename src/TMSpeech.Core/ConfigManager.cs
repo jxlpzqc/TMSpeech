@@ -145,35 +145,15 @@ class LocalConfigManagerImpl : ConfigManager
         }
         catch (FileNotFoundException)
         {
+            // ok
         }
-
-        // Read default config and merge.
-        try
+        catch (Exception ex)
         {
-            var defaultConfig = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default_config.json");
-            if (File.Exists(defaultConfig))
-            {
-                var config = File.ReadAllText(defaultConfig);
-                var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
-                    new JsonSerializerOptions
-                    {
-                        Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
-                    });
-                if (value != null)
-                {
-                    // merge config with default config
-                    for (var i = 0; i < value.Count; i++)
-                    {
-                        if (!_config.ContainsKey(value.ElementAt(i).Key))
-                        {
-                            _config.Add(value.ElementAt(i).Key, value.ElementAt(i).Value);
-                        }
-                    }
-                }
-            }
-        }
-        catch (FileNotFoundException)
-        {
+            Services.Notification.NotificationManager.Instance.Notify(
+                $"配置加载失败：{ConfigFile}\n{ex.Message}\n{ex.StackTrace}",
+                "配置保存失败",
+                Services.Notification.NotificationType.Error);
+            System.Diagnostics.Debug.WriteLine($"配置加载失败：{ConfigFile}\n{ex.Message}\n{ex.StackTrace}");
         }
 
         OnConfigChange(new ConfigChangedEventArgs(null, ConfigChangedEventArgs.ChangeType.All));

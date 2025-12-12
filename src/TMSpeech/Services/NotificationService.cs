@@ -9,6 +9,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using TMSpeech.GUI.Desktop;
 using Avalonia.Threading;
+using TMSpeech.Core;
 
 namespace TMSpeech.Services;
 
@@ -27,6 +28,7 @@ public class NotificationService : INotificationService
             return;
         }
 
+        if (ConfigManagerFactory.Instance.Get<int>(NotificationConfigTypes.NotificationType) == NotificationConfigTypes.NotificationTypeEnum.None) return;
         var nf = new Notification
         {
             Title = title,

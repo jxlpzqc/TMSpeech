@@ -1,10 +1,11 @@
 ﻿using Avalonia.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using TMSpeech.Core;
+using TMSpeech.Core.Utils;
 
 namespace TMSpeech.GUI
 {
@@ -20,6 +21,42 @@ namespace TMSpeech.GUI
             ret["recognizer.source"] = "TMSpeech:Recognizer:SherpaNcnn!94C23641-CBE0-42B6-9654-82DA42D519F3";
             var fonts = FontManager.Current.SystemFonts.ToList();
             if (fonts.Any(x => x.Name == "黑体")) ret["appearance.FontFamily"] = "黑体";
+
+            // Read default config and merge.
+            var defaultConfig = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default_config.json");
+            try
+            {
+                if (File.Exists(defaultConfig))
+                {
+                    var config = File.ReadAllText(defaultConfig);
+                    var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
+                        new JsonSerializerOptions
+                        {
+                            Converters = { new SystemObjectNewtonsoftCompatibleConverter() }
+                        });
+                    if (value != null)
+                    {
+                        // merge config with default config
+                        for (var i = 0; i < value.Count; i++)
+                        {
+                            ret[value.ElementAt(i).Key] = value.ElementAt(i).Value;
+                        }
+                    }
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                // ok
+            }
+            catch (Exception ex)
+            {
+                TMSpeech.Core.Services.Notification.NotificationManager.Instance.Notify(
+                    $"配置加载失败：{defaultConfig}\n{ex.Message}\n{ex.StackTrace}",
+                    "配置保存失败",
+                    TMSpeech.Core.Services.Notification.NotificationType.Error);
+                System.Diagnostics.Debug.WriteLine($"配置加载失败：{defaultConfig}\n{ex.Message}\n{ex.StackTrace}");
+            }
+
             return ret;
         }
     }
