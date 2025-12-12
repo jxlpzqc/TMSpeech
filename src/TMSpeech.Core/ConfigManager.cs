@@ -153,7 +153,7 @@ class LocalConfigManagerImpl : ConfigManager
             var defaultConfig = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default_config.json");
             if (File.Exists(defaultConfig))
             {
-                var config = File.ReadAllText(ConfigFile);
+                var config = File.ReadAllText(defaultConfig);
                 var value = JsonSerializer.Deserialize<Dictionary<string, object>>(config,
                     new JsonSerializerOptions
                     {
