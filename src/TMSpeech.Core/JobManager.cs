@@ -67,6 +67,7 @@ namespace TMSpeech.Core
         private HashSet<string> _sensitiveWords;
         private bool _disableInThisSentence = false;
         private string logFile;
+        private string currentText = "";
 
         private void InitAudioSource()
         {
@@ -141,10 +142,12 @@ namespace TMSpeech.Core
 
             _disableInThisSentence = false;
             OnSentenceDone(args);
+            currentText = "";
         }
 
         private void OnRecognizerOnTextChanged(object? sender, SpeechEventArgs args)
         {
+            currentText = args.Text.Text;
             if (!_disableInThisSentence)
             {
                 var s = _sensitiveWords.FirstOrDefault(x => args.Text.Text.Contains(x));
@@ -263,6 +266,12 @@ namespace TMSpeech.Core
             catch (Exception ex)
             {
                 NotificationManager.Instance.Notify($"停止失败：\n{ex.Message}", "停止失败", NotificationType.Fatal);
+            }
+
+            if (currentText != null && currentText.Length > 0)
+            {
+                OnRecognizerOnSentenceDone(_recognizer, new SpeechEventArgs{Text=new TextInfo(currentText)});
+                currentText = "";
             }
 
             _audioSource.DataAvailable -= OnAudioSourceOnDataAvailable;
