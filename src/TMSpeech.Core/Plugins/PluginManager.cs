@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using TMSpeech.Core.Services.Notification;
 using TMSpeech.Core.Services.Resource;
 
 namespace TMSpeech.Core.Plugins
@@ -87,14 +88,7 @@ namespace TMSpeech.Core.Plugins
             RegistErrorHandlers();
             Assembly assembly;
             var _context = new PluginLoadContext(pluginFile);
-            try
-            {
-                assembly = _context.LoadFromAssemblyPath(pluginFile);
-            }
-            catch (BadImageFormatException)
-            {
-                return;
-            }
+            assembly = _context.LoadFromAssemblyPath(pluginFile);
 
             var types = assembly.GetTypes().Where(t => t.GetInterfaces().Contains(typeof(IPlugin)));
             var assemblyHash = assembly.GetHashCode();
@@ -210,19 +204,22 @@ namespace TMSpeech.Core.Plugins
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine($"Error deserialize module info: {e}");
+                        Debug.WriteLine($"解析插件描述JSON文件失败：{jsonFileName}\n{e.Message}\n{e.StackTrace}");
+                        NotificationManager.Instance.Notify($"解析插件描述JSON文件失败：{jsonFileName}\n{e.Message}\n{e.StackTrace}", "错误", NotificationType.Error);
                         continue;
                     }
 
                     foreach (var assembly in moduleInfo.Assemblies)
                     {
+                        var assemblyPath = Path.Combine(dir, assembly);
                         try
                         {
-                            LoadPlugin(Path.Combine(dir, assembly), moduleInfo);
+                            LoadPlugin(assemblyPath, moduleInfo);
                         }
                         catch (Exception e)
                         {
-                            Debug.WriteLine($"Error loading plugin {assembly}: {e}");
+                            Debug.WriteLine($"加载插件代码失败：{assemblyPath}\n{e.Message}\n{e.StackTrace}");
+                            NotificationManager.Instance.Notify($"加载插件代码失败：{assemblyPath}\n{e.Message}\n{e.StackTrace}", "错误", NotificationType.Error);
                         }
                     }
                 }
