@@ -30,6 +30,8 @@ public partial class HistoryWindow : ReactiveWindow<MainViewModel>
             ViewModel.HistoryTexts.CollectionChanged += OnHistoryTextsOnCollectionChanged;
             Disposable.Create(() => { ViewModel.HistoryTexts.CollectionChanged -= OnHistoryTextsOnCollectionChanged; })
                 .DisposeWith(d);
+
+            Dispatcher.UIThread.Post(() => { this.scrollViewer.ScrollToEnd(); });
         });
     }
 }

@@ -3,7 +3,7 @@
     "version": 1,
     "desc": "",
     "displayVersion": "0.1",
-    "name": "SherpaNcnn Ê¶±ðÆ÷",
+    "name": "SherpaNcnn è¯†åˆ«å™¨",
     "apiLevel": 1,
     "assemblies": [
         "TMSpeech.Recognizer.SherpaNcnn.dll"
