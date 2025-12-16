@@ -10,9 +10,7 @@
 - 开会时更放心地走神，突然被喊到的时候不会那么不知所措，只需要看一看识别的历史记录。（本项目的名字来源于此）
 - 会议实时转录，自动生成会议纪要，并保存到文件。默认会将识别结果按日期保存到“我的文档”的`TMSpeechLogs`文件夹中
 
-基于[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目二次开发。实测在我的AMD 5800u的笔记本上CPU占用不到5%。
-
-再次感谢[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目的语音识别框架和模型。
+基于[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/)项目的语音识别框架和模型二次开发。实测在我的AMD 5800u的笔记本上CPU占用不到5%。
 
 ## 展示
 
@@ -20,7 +18,7 @@
 
 ![正常识别窗口](imgs/main.png)
 
-历史记录页面（双击可复制）：
+历史记录页面（可右键或者Ctrl-C复制）：
 
 ![历史记录页面](imgs/history.png)
 
@@ -28,9 +26,13 @@
 
 ![设置页面](imgs/settings.png)
 
+切换为命令行识别器：
+
+![设置页面](imgs/setting-change-recognizer.png)
+
 ## 使用
 
-在[Release](https://github.com/jxlpzqc/TMSpeech/releases)页面中下载最新的release解压，运行`TMSpeech.GUI.exe`即可。在桌面创建快捷方式，使用起来更加方便。
+在[Release](https://github.com/jxlpzqc/TMSpeech/releases)页面中下载最新的release解压，运行`TMSpeech.exe`即可。在桌面创建快捷方式，使用起来更加方便。出现问题后可以运行重置配置的bat脚本，删除现有配置文件。
 
 ## 基于自定义外部命令的识别
 
