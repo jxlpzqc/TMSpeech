@@ -35,7 +35,7 @@ public class ProcessAudioSource : IAudioSource
         }
     }
 
-    public bool Available => OperatingSystem.IsWindows();
+    public bool Available => OperatingSystem.IsWindows() && Environment.OSVersion.Version >= new Version(10, 0, 20348);
 
     private ProcessWasapiCapture? _waveIn;
 
