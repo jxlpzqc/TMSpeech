@@ -95,6 +95,54 @@
     @python ./speech-recognition-from-microphone-with-endpoint-detection.py
     ```
 
+### 使用 Fun-ASR-Nano
+
+Fun-ASR-Nano 是离线自回归模型，不能直接替换内置 C# 流式识别器。仓库中的
+`external_recognizer/simulate-streaming-funasr-nano.py` 会复用现有的多设备录音和
+Silero VAD：检测到完整语音段后调用 Nano，并按命令行识别器协议输出最终字幕。
+
+先在仓库根目录安装支持 Nano API 的 sherpa-onnx：
+
+```powershell
+python -m pip install --upgrade PyAudioWPatch sherpa_onnx==1.13.4 scipy
+```
+
+下载 [Fun-ASR-Nano INT8 模型](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-funasr-nano-int8-2025-12-30.tar.bz2)
+（压缩包约 842 MB）和 [Silero VAD](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx)，按下面的默认目录放置：
+
+```text
+external_recognizer/
+├── silero_vad.onnx
+└── sherpa-onnx-funasr-nano-int8-2025-12-30/
+    ├── encoder_adaptor.int8.onnx
+    ├── llm.int8.onnx
+    ├── embedding.int8.onnx
+    └── Qwen3-0.6B/
+```
+
+可以先在命令行用 CPU 启动：
+
+```powershell
+python .\external_recognizer\simulate-streaming-funasr-nano.py --provider cpu --num-threads 4
+```
+
+确认运行正常后，在 TMSpeech 设置中选择“命令行识别器”，填写：
+
+```text
+命令路径：C:\Path\to\python.exe
+命令参数：simulate-streaming-funasr-nano.py --provider cpu --num-threads 4
+工作目录：C:\Path\to\TMSpeech\external_recognizer
+```
+
+需要热词时可以追加 `--hotwords "TMSpeech,FunASR"`。`--language` 默认留空；可用值和
+识别范围以下载的 checkpoint 说明为准。`--provider cuda` 会把模型请求转给 CUDA，
+但需要安装带 CUDA execution provider 的 sherpa-onnx 构建，普通 CPU wheel 不会因此
+自动获得 GPU 支持。
+
+这个脚本只解码 VAD 已完成的语音段，不会每 200 ms 重跑一次自回归模型。因此字幕会在
+说完并出现短暂停顿后一次性提交；这是为了避免 Nano 在 CPU 上持续重复推理。可以通过
+`--min-silence-duration` 和 `--max-speech-duration` 调整分段延迟与最长句长。
+
 
 ## 我们需要你的反馈
 

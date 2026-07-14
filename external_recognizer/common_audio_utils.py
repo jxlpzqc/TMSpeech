@@ -23,8 +23,8 @@ try:
     import numpy as np
 except ImportError:
     print("正在安装需要的python包:\n", file=sys.stderr)
-    print("尝试执行：  pip install PyAudioWPatch sherpa_onnx==1.12.19 scipy\n", file=sys.stderr)
-    ret = os.system(f"{sys.executable} -m pip install PyAudioWPatch sherpa_onnx==1.12.19 scipy")
+    print("尝试执行：  pip install PyAudioWPatch sherpa_onnx==1.13.4 scipy\n", file=sys.stderr)
+    ret = os.system(f"{sys.executable} -m pip install PyAudioWPatch sherpa_onnx==1.13.4 scipy")
     if ret == 0:
         import pyaudiowpatch as pyaudio
         import sherpa_onnx
@@ -330,6 +330,7 @@ class MyPrinter:
 
     def on_endpoint(self):
         print("\n", end="", flush=True)
+        self.prev_result = ""
 
 
 def select_input_device(devices, p_audio):
