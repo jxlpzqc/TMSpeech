@@ -126,6 +126,11 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
                 if (!string.IsNullOrEmpty(text))
                 {
+                    if (_userConfig.LowercaseEnglishText)
+                    {
+                        text = text.ToLowerInvariant();
+                    }
+
                     var item = new TextInfo(text);
                     // Console.WriteLine($"{is_endpoint}: {text}");
                     TextChanged?.Invoke(this, new SpeechEventArgs()

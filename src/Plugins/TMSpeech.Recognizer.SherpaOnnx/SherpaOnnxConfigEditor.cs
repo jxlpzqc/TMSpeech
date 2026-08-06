@@ -26,6 +26,9 @@ namespace TMSpeech.Recognizer.SherpaOnnx
 
         [JsonPropertyName("tokens")]
         public string Tokens { get; set; } = "models\\tokens.txt";
+
+        [JsonPropertyName("lowercaseEnglishText")]
+        public bool LowercaseEnglishText { get; set; } = false;
     }
 
     public class SherpaOnnxConfigEditor : IPluginConfigEditor
@@ -44,6 +47,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             if (key == "decoder") _config.Decoder = (string)value;
             if (key == "joiner") _config.Joiner = (string)value;
             if (key == "tokens") _config.Tokens = (string)value;
+            if (key == "lowercaseEnglishText") _config.LowercaseEnglishText = (bool)value;
         }
 
         public object GetValue(string key)
@@ -53,6 +57,7 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             if (key == "decoder") return _config.Decoder;
             if (key == "joiner") return _config.Joiner;
             if (key == "tokens") return _config.Tokens;
+            if (key == "lowercaseEnglishText") return _config.LowercaseEnglishText;
             return "";
         }
 
@@ -73,7 +78,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
             {
                 return new PluginConfigFormItem[]
                 {
-                    new PluginConfigFormItemOption("model", "模型", options)
+                    new PluginConfigFormItemOption("model", "模型", options),
+                    new PluginConfigFormCheckBox("lowercaseEnglishText", "英文转小写")
                 };
             }
 
@@ -83,7 +89,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 new PluginConfigFormItemFile("encoder", "编码器"),
                 new PluginConfigFormItemFile("decoder", "解码器"),
                 new PluginConfigFormItemFile("joiner", "连接器"),
-                new PluginConfigFormItemFile("tokens", "词表")
+                new PluginConfigFormItemFile("tokens", "词表"),
+                new PluginConfigFormCheckBox("lowercaseEnglishText", "英文转小写")
             };
         }
 
@@ -99,7 +106,8 @@ namespace TMSpeech.Recognizer.SherpaOnnx
                 { "encoder", _config.Encoder },
                 { "decoder", _config.Decoder },
                 { "joiner", _config.Joiner },
-                { "tokens", _config.Tokens }
+                { "tokens", _config.Tokens },
+                { "lowercaseEnglishText", _config.LowercaseEnglishText }
             };
         }
 
